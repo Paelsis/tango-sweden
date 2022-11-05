@@ -54,8 +54,8 @@ const Home = () => {
                     Denmark                    
                 </Button>    
                 &nbsp;
-                <Button variant="outlined" type="button" style={styles.button}  onClick={()=>handleNavigate('/helsingborg')}>
-                    Helsingborg                    
+                <Button variant="outlined" type="button" style={styles.button}  onClick={()=>handleNavigate('/stockholm')}>
+                    Stockholm                    
                 </Button>    
              </div>
         </div>

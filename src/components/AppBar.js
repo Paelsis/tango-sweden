@@ -1,7 +1,9 @@
 import React, {useState, useEffect, useContext} from 'react';
+import { useSharedState } from '../store';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
+import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
@@ -10,16 +12,16 @@ import HomeIcon from '@mui/icons-material/Home';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Divider from '@mui/material/Divider';
-import MenuList from '@mui/material/MenuList';
-import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import { useNavigate } from 'react-router-dom';
 import { getAuth, signOut, onAuthStateChanged} from 'firebase/auth';
 import {AuthContext} from "../login/FirebaseAuth"
+import serverFetch from '../services/serverFetch'
 
-
-export default function ButtonAppBar() {
+export default () => {
+  const [userSettings, setUserSettings] = useSharedState()
   const [email, setEmail] = useState(undefined)
+  //const [userSettings, setUserSettings] = useGlobalState('USER_SETTINGS')
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   const navigate = useNavigate()
@@ -31,8 +33,23 @@ export default function ButtonAppBar() {
     setAnchorEl(null);
   };
 
+  const handleResult = result => {
+    //alert(JSON.stringify(result?result:'No result'))
+    if (result !== undefined) {
+      if (result.calendarName) {
+        setUserSettings({...userSettings, ...result})
+      } else {
+        setUserSettings({calendarName:'sweden'})
+      }
+    }   
+  }
+
   useEffect(()=>onAuthStateChanged(auth, user => {
-      setEmail(user?user.email:undefined)
+      setEmail(user?user.email:undefined);
+      const irl = '/getUser?email=' +  user.email
+      if (user.email) {
+        serverFetch(irl, '', '', result=>handleResult(result))
+      }  
   }), [])
 
   const handleNavigate = route => {
@@ -61,7 +78,9 @@ export default function ButtonAppBar() {
         'aria-labelledby': 'basic-button',
       }}
     >
-      <MenuItem onClick={()=>handleNavigate('/malmo')}>Malmö/Lund</MenuItem>
+      <MenuItem onClick={()=>handleNavigate('/calendars')}>All calendars</MenuItem>
+      <MenuItem onClick={()=>handleNavigate('/calendar/stockholm')}>Stockholm</MenuItem>
+      <MenuItem onClick={()=>handleNavigate('/calendar/malmo')}>Malmö/Lund</MenuItem>
       <MenuItem onClick={()=>handleNavigate('/denmark')}>Denmark</MenuItem>
       <MenuItem onClick={()=>handleNavigate('/helsingborg')}>Helsingborg</MenuItem>
       <MenuItem onClick={()=>handleNavigate('/halmstad')}>Halmstad</MenuItem>
@@ -70,7 +89,8 @@ export default function ButtonAppBar() {
       <Divider />
       {email?<MenuItem onClick={()=>handleSignout()}>Signout</MenuItem>
       :<MenuItem onClick={()=>handleSignin()}>Signin</MenuItem>}
-      {email?<MenuItem onClick={()=>navigate('/admin')}>Add Event</MenuItem>:null}
+      {email?<MenuItem onClick={()=>navigate('/settings')}>Settings</MenuItem>:null}
+      {email?<MenuItem onClick={()=>navigate('/add')}>Add Event</MenuItem>:null}
     </Menu>
 
     <Box sx={{ flexGrow: 2}}>
@@ -94,7 +114,7 @@ export default function ButtonAppBar() {
           <Typography variant="h5" component="div" sx={{ flexGrow: 1 }}  onClick={()=>handleNavigate('/home')}>
           </Typography>
           <Typography variant="h5" component="div" sx={{ flexGrow: 4 }}  onClick={()=>handleNavigate('/home')}>
-            {email?'Signed in as:' +  email:undefined}
+            {email?userSettings?'Signed in to ' + userSettings.calendarName:'Signed in as' +  email:undefined}
           </Typography>
           <IconButton
             size="large"
@@ -118,5 +138,3 @@ export default function ButtonAppBar() {
   );
 }
 
-/*
-*/

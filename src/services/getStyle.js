@@ -8,7 +8,7 @@ import maraton from '../images/maraton_banner.jpg';
   const stylesByCompany = [
     {
       searchValue:'CAMARIN',
-      style:{background: 'linear-gradient(to bottom right, #BB0000, #222233'},
+      style:{color:'white', background: 'linear-gradient(to bottom right, #BB0000, #222233'},
     },
     {
       searchValue:'MARCELA',
@@ -20,7 +20,7 @@ import maraton from '../images/maraton_banner.jpg';
     },
     {
       searchValue:'URBANA',
-      style:{color:'#FFD8B1', background:'linear-gradient(to bottom right, #212121, blue'},
+      style:{color:'#ffd8B1', background:'linear-gradient(to bottom right, #212121, blue'},
     },
     {
       searchValue:'HOMERO',

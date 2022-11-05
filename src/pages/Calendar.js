@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react'
+import { useParams } from 'react-router-dom';
 import { Calendar, momentLocalizer } from 'react-big-calendar'
 import moment from 'moment-with-locales-es6'
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -11,6 +12,8 @@ import ShowTable from "../components/ShowTable"
 import Button from '@mui/material/Button';
 import { transferAnitasCalendar } from '../services/transferAnitasCalendar'
 import { layoutGenerator } from 'react-break';
+import { PropaneSharp } from '@mui/icons-material';
+
 
 const DeviceDetector = () => (
   <div>I am rendered on: {isMobile ? "Mobile" : "Desktop"}</div>
@@ -23,8 +26,10 @@ const layout = layoutGenerator({
   desktop: 992,
 });
 
+/*
 const calendarId_TS=process.env.REACT_APP_CALENDAR_ID_TS
 const apiKey_TS=process.env.REACT_APP_CALENDAR_API_KEY_TS
+*/
 
 const calendarId_TK=process.env.REACT_APP_CALENDAR_ID_TK
 const apiKey_TK=process.env.REACT_APP_CALENDAR_API_KEY_TK
@@ -59,24 +64,22 @@ const ListData = ({list}) => {
   )
 }
 
-function CalendarMalmoLund() {
-  const [events_TS, setEvents_TS] = useState([])
+export default props => {
+  const params = useParams()
+  const calendarName=params?params.calendarName?params.calendarName:'malmo':'malmo'
   const [events_TK, setEvents_TK] = useState([])
   const [events_TAB, setEvents_TAB] = useState([])
   const [open, setOpen] = useState(false)
-  const [description, setDescription] = useState('')
-  const [location, setLocation] = useState('')
   const [event, setEvent] = useState({})
 
-  const OnMobile = layout.is('mobile');
+  //const OnMobile = layout.is('mobile');
   const OnAtMostPhablet = layout.isAtMost('phablet');
   const OnAtLeastTablet = layout.isAtLeast('tablet');
-  const OnDesktop = layout.is('desktop');
+  //const OnDesktop = layout.is('desktop');
 
   useEffect(()=>{
     const timeMin = moment().startOf('day')
     const timeMax = moment().endOf('month').add(3,'months').add(7, 'days')
-
     moment.locale('sv');
     /*
     getEvents(
@@ -89,28 +92,30 @@ function CalendarMalmoLund() {
       events => setEvents_TS(events.filter(ev=>ev.description.toUpperCase().indexOf('TANGOKOMPANIET') < 0)),
     )
     */
-    getEvents(
-      calendarId_TK,
-      apiKey_TK,
-      timeMin.format('YYYY-MM-DD') + 'T00:00:00Z', 
-      timeMax.format('YYYY-MM-DD') + 'T23:59:00Z',
-      'SV',
-      'TANGOKOMPANIET',
-      events => setEvents_TK(events),
-    )
-
-    const irl = '/getEvents'
-
+    if (calendarName.toLowerCase() === 'malmo') {
+      getEvents(
+        calendarId_TK,
+        apiKey_TK,
+        timeMin.format('YYYY-MM-DD') + 'T00:00:00Z', 
+        timeMax.format('YYYY-MM-DD') + 'T23:59:00Z',
+        'SV',
+        'TANGOKOMPANIET',
+        events => setEvents_TK(events),
+      )
+    } else {
+      setEvents_TK([])
+    }
+    
     getEventsTable(
-      irl,
+      '/getEvents?calendarName=' + calendarName,
       events => setEvents_TAB(events),
       timeMin.format('YYYY-MM-DD') + 'T00:00:00Z', 
       timeMax.format('YYYY-MM-DD') + 'T23:59:00Z',
       'SV'
     )
-  }, [])
+  }, [calendarName])
 
-  const handleEvent = ev=>{setDescription(ev.description); setLocation(ev.location); setEvent(ev); setOpen(true)}
+  const handleEvent = ev=>{setEvent(ev); setOpen(true)}
   const events = [...events_TK, ...events_TAB].sort((a,b)=>a.start.localeCompare(b.start))
   return (
     <div className="App">
@@ -146,4 +151,3 @@ function CalendarMalmoLund() {
   );
 }
 
-export default CalendarMalmoLund;

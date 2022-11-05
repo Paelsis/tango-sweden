@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react';
+import { useSharedState } from '../store';
 import  {Component } from 'react'
 import FormTemplate from '../components/FormTemplate';
 import Button from '@mui/material/Button';
@@ -10,6 +11,8 @@ import { AirlineSeatReclineExtra, Description } from '@mui/icons-material';
 import { getAuth, onAuthStateChanged} from 'firebase/auth';
 import { useNavigate } from "react-router-dom";
 import serverPost from '../services/serverPost'
+import AddEvent from '../components/AddEvent'
+
 
 
 const styles={
@@ -45,7 +48,6 @@ const fields = [
         type:'company',
         label:'Company (ex:Camarin)',
         name:'company',
-        required:true,
     },
     {
         type:'checkbox',
@@ -101,15 +103,17 @@ const fields = [
 ]
 
   
-export default (state) => {
-   const navigate = useNavigate() 
-   const location = useLocation();
-   const event = location.state?location.state:undefined
-   const originalStartDateTime=location.state?location.state.startDateTime:undefined
-   const handleReply = reply => {
+export default props => {
+    const [userSettings, setUserSettings] = useSharedState()
+    const [copy, setCopy] = useState()
+    const navigate = useNavigate() 
+    const location = useLocation();
+    const event = location.state?location.state:undefined
+    const originalStartDateTime=location.state?location.state.startDateTime:undefined
+    const handleReply = reply => {
         reply.status==='OK'?navigate('/malmo'):reply.message?alert(reply.message):alert('ERROR with no reply message')     
-   }
-   const handleSubmit = (e, value) => {
+    }
+    const handleSubmit = (e, value) => {
         const irl = '/updateEvent'
         const hideLocationAndTime = value['hideLocationAndTime']?1:0
         e.preventDefault();
@@ -117,34 +121,53 @@ export default (state) => {
             alert('WARNING: End of the event must be set later than start of the event. Please check dates and times.')
             return
         }
-        serverPost(irl, '', '', {...value, originalStartDateTime, hideLocationAndTime}, handleReply)
-   }    
+        serverPost(irl, '', '', {...value, ...userSettings, originalStartDateTime, hideLocationAndTime}, handleReply)
+    }    
 
-   const adjustEvent = event => {
+    const handleCopy = value => {
+            setCopy({...value, id:undefined})
+    }    
+
+    const handleCancel = () => setCopy(undefined)
+
+    const adjustEvent = event => {
         return {...event,
             startTime:event.startDateTime.substring(11, 16), 
             endTime:event.endDateTime.substring(11,16), 
             startDateTime:event.startDateTime.substr(0,16),
             endDateTime:event.endDateTime.substr(0,16),
         }
-   }
-        
-   return (
+    }
+            
+    return (
         <div style={styles.container}>
-        {event?
-            <>
-                <FormTemplate 
-                    fields={fields} 
-                    init={adjustEvent(event)} 
-                    handleSubmit={handleSubmit}
-                    submitTooltipTitle={'Update calendar'}
-                    submitButtonText={'UPDATE'}
-                    update={true}
+            <h3>Calendar name: {userSettings.calendarName}</h3>
+            {copy?
+                <>
+                <h3>Change in the copy below and save</h3>
+                <AddEvent 
+                    {...props}
+                    init={copy} 
+                    handleCancel={handleCancel}
                 />
             </>
-        :
-            <h4>Cannot update with no event</h4>
-        }        
+            :event?
+                <>
+                    <FormTemplate 
+                        fields={fields} 
+                        init={adjustEvent(event)} 
+                        handleCopy={handleCopy}
+                        handleSubmit={handleSubmit}
+                        submitButtonLabel={'Update'}
+                        submitTooltipTitle={'Update calendar'}
+                        submitButtonText={'UPDATE'}
+                        submitButtonColor='grey'
+                        update={true}
+                    />
+                </>
+            :
+                <h4>Click on Update button of any event in the calendar</h4>
+            }        
         </div>
-    )
+   )
 }

@@ -19,7 +19,7 @@ const findParameter = (s, val) => {
 }  
 
 function createEvent(props)  {
-  const {start, end, title, description, location, email, company, hideLocationAndTime} = props
+  const {start, end, title, description, location, email, company, hideLocationAndTime, color, backgroundColorLight, backgroundColorDark} = props
   const mstart=moment(start)
   const mend=moment(end).add(start.length <= 10?-1:0, 'days')
   const timeStart = mstart.format('LT');
@@ -32,7 +32,8 @@ function createEvent(props)  {
   const duration = moment.duration(mend.diff(mstart));
   const durationHours = duration.asHours()
   const opacity = moment() < mend?1.0:0.4
-  const style = getStyle(company, title, description, opacity)
+  const background = "linear-gradient(to bottom right, " + backgroundColorLight + ", " + backgroundColorDark + ")"
+  const style = company?getStyle(company, title, description, opacity):{...getStyle(company, title, description, opacity), color, background}
 
   // var numberOfMinutes = duration.asMinutes()
   return ({
@@ -69,8 +70,9 @@ function createEvent(props)  {
 
 function cityForEvent (title, location) {
   if ((title.toLowerCase().indexOf('malmö') !== -1) ||
+      (title.toLowerCase().indexOf('malmo') !== -1) ||
       (title.toLowerCase().indexOf('lund') !== -1)) {
-      return undefined 
+      return 'malmo'
   } else {        
       return location?(location.toLowerCase().indexOf('malmö') !== -1)?'Malmö'
              :(location.toLowerCase().indexOf('lund') !== -1)?'Lund'
@@ -116,12 +118,15 @@ export function getEventsTable (irl, callback, timeMin, timeMax, language) {
   let event = {}
   const events = []
   serverFetch(irl, '', '', list => {
-    list.forEach(it => {
-      const location = it.location?it.location.replace(/Tangokompaniet, |, 212 11 |, 224 64|, 223 63|, Sverige|Stiftelsen Michael Hansens Kollegium, /g, ' ').replace('Fredriksbergsgatan','Fredriksbergsg.'):'No location given'
+    if (!!list) {
+      list.forEach(it => {
+        const location = it.location?it.location.replace(/Tangokompaniet, |, 212 11 |, 224 64|, 223 63|, Sverige|Stiftelsen Michael Hansens Kollegium, /g, ' ').replace('Fredriksbergsgatan','Fredriksbergsg.'):'No location given'
 
-      event = createEvent({...it, location})
-      events.push(event)
-    })
+        event = createEvent({...it, location})
+        events.push(event)
+      })
+    } 
+
     // alert(JSON.stringify(events))
     callback(events)
   })
