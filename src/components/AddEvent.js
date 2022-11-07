@@ -70,10 +70,10 @@ const fields = [
     },
     {
         type:'company',
-        label:'Company (ex:Camarin)',
+        label:'Company (Only used by Malmö/Lund for default color values)',
         name:'company',
-        tooltip: 'If Company is unset, the colors of the manu page Settings will be activated'
-    },
+        tooltip:'If this value is set then the colors defined in the Settings page are disabled'
+    },    
     {
         type:'textarea',
         label:'Description',

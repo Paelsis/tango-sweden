@@ -87,10 +87,12 @@ export default () => {
       <MenuItem onClick={()=>handleNavigate('/gothenburg')}>Gothenburg</MenuItem>
       <MenuItem><ListItemText inset></ListItemText></MenuItem>
       <Divider />
+
       {email?<MenuItem onClick={()=>handleSignout()}>Signout</MenuItem>
       :<MenuItem onClick={()=>handleSignin()}>Signin</MenuItem>}
       {email?<MenuItem onClick={()=>navigate('/settings')}>Settings</MenuItem>:null}
       {email?<MenuItem onClick={()=>navigate('/add')}>Add Event</MenuItem>:null}
+      <MenuItem onClick={()=>handleNavigate('/usage')}>Usage</MenuItem>
     </Menu>
 
     <Box sx={{ flexGrow: 2}}>
@@ -113,8 +115,8 @@ export default () => {
           </IconButton>
           <Typography variant="h5" component="div" sx={{ flexGrow: 1 }}  onClick={()=>handleNavigate('/home')}>
           </Typography>
-          <Typography variant="h5" component="div" sx={{ flexGrow: 4 }}  onClick={()=>handleNavigate('/home')}>
-            {email?userSettings?'Signed in to ' + userSettings.calendarName:'Signed in as' +  email:undefined}
+          <Typography variant="h8" component="div" sx={{ flexGrow: 4 }}  onClick={()=>handleNavigate('/home')}>
+            {email?'Signed in ' + userSettings.calendarName + ' / ' + email:null}
           </Typography>
           <IconButton
             size="large"
@@ -134,6 +136,7 @@ export default () => {
         </Toolbar>
       </AppBar>
     </Box>
+    {email?<small>{JSON.stringify(userSettings)}</small>:null}
     </div>
   );
 }

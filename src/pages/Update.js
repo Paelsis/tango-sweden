@@ -46,9 +46,10 @@ const fields = [
     },
     {
         type:'company',
-        label:'Company (ex:Camarin)',
+        label:'Company (Only used by Malmö/Lund for default color values)',
         name:'company',
-    },
+        tooltip:'If this value is set then the colors defined in the Settings page are disabled'
+    },    
     {
         type:'checkbox',
         label:'Hide location and time in popup window',
@@ -111,7 +112,7 @@ export default props => {
     const event = location.state?location.state:undefined
     const originalStartDateTime=location.state?location.state.startDateTime:undefined
     const handleReply = reply => {
-        reply.status==='OK'?navigate('/malmo'):reply.message?alert(reply.message):alert('ERROR with no reply message')     
+        reply.status==='OK'?navigate('/calendar/' + userSettings.calendarName):reply.message?alert(reply.message):alert('ERROR with no reply message')     
     }
     const handleSubmit = (e, value) => {
         const irl = '/updateEvent'
@@ -121,7 +122,9 @@ export default props => {
             alert('WARNING: End of the event must be set later than start of the event. Please check dates and times.')
             return
         }
-        serverPost(irl, '', '', {...value, ...userSettings, originalStartDateTime, hideLocationAndTime}, handleReply)
+        const data = {...value, ...userSettings, originalStartDateTime, hideLocationAndTime}
+        // alert('data:' + JSON.stringify(data))
+        serverPost(irl, '', '', data, handleReply)
     }    
 
     const handleCopy = value => {

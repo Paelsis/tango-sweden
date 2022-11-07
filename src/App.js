@@ -1,9 +1,11 @@
 import React, {useState} from "react"
+import { useSharedState, SharedStateProvider} from './store';
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Calendar from "./pages/Calendar";
 import AllCalendars from "./pages/AllCalendars";
 import Home from "./pages/Home";
 import Settings from "./pages/Settings";
+import Usage from "./pages/Usage";
 import Privacy from "./pages/Privacy";
 import Service from "./pages/Service";
 import Add from "./pages/Add";
@@ -14,7 +16,6 @@ import FirebaseAuth from './login/FirebaseAuth'
 import FirebaseSignin from './login/FirebaseSignin';
 import FirebaseResetPassword from './login/FirebaseResetPassword';
 import Button from '@mui/material/Button';
-import { SharedStateProvider } from './store';
 
 import "./App.css"
 
@@ -53,16 +54,13 @@ const RedirectToMultiple = props => {
 }
 
 const StringifyJSON = json => <h4>{JSON.stringify(json)}</h4>
-//<h1>{StringifyJSON(userSettings)}</h1>
 
 export default function App() {
-        const [userSettings, setUserSettings] = useState({})
         return (
         <BrowserRouter> 
            <SharedStateProvider>
            <FirebaseAuth>
-
-           <AppBar setUserSettings={setUserSettings} />
+           <AppBar />
             <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="home" element={<Home />} />
@@ -79,12 +77,13 @@ export default function App() {
                 <Route path="tangorama" element={<RedirectTo url='https://www.tangorama.se/kalendar' />} />
                 <Route path="halmstad" element={<RedirectTo url='http://www.tangoexperimental.com/sv-SE' />} />
                 <Route path="gothenburg" element={<RedirectTo url={"https://teamup.com/ks863ac26a05ed5d28"} />} />
-                <Route path="settings" element={<Settings userSettings={userSettings} setUserSettings={setUserSettings} />} />
+                <Route path="settings" element={<Settings />} />
+                <Route path="usage" element={<Usage />} />
                 <Route path="privacy" element={<Privacy/>} />
                 <Route path="service" element={<Service />} />
-                <Route path="add" element={<Add userSettings={userSettings} />} />
-                <Route path="update" element={<Update userSettings={userSettings} />} />
-                <Route path="signin" element={<FirebaseSignin setUserSettings={setUserSettings} />} />
+                <Route path="add" element={<Add />} />
+                <Route path="update" element={<Update />} />
+                <Route path="signin" element={<FirebaseSignin  />} />
                 <Route path="resetPassword" element={<FirebaseResetPassword />} />
                 <Route
                     path="*"

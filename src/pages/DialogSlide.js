@@ -13,7 +13,7 @@ import { useNavigate } from "react-router-dom";
 import AddEvent from '../components/AddEvent'
 
 export default function DialogSlide(props) {
-  const {open, setOpen, event, city} = props
+  const {open, setOpen, event} = props
   const  [email, setEmail] = useState(undefined)
   const  [copy, setCopy] = useState(undefined)
   const navigate = useNavigate();
@@ -21,7 +21,6 @@ export default function DialogSlide(props) {
   const eventId = event.eventId?event.eventId:'Missing'
   const handleReply = reply => {
     reply.status === 'OK'?window.location.reload():alert(JSON.stringify(reply.message?reply.message:reply))
-    
   }  
   const irl = '/cancelEvent'
   const handleUpdate = (e, ev) => {e.preventDefault(); navigate('/update', {state:{
@@ -33,19 +32,19 @@ export default function DialogSlide(props) {
     location:ev.location, 
     startDateTime:ev.start, 
     endDateTime:ev.end}
-    , city})}
+    })}
   const handleDeleteSingle = () =>  {
-    let text = "Press OK to delete this event.";
+    let text = "Press OK to delete this event (eventId=" + eventId + ")";
     // eslint-disable-next-line no-restricted-globals
     if (confirm(text) === true) {
-      serverPost(irl, '', '', {eventId:event.eventId, email, startDateTime:event.start, city}, handleReply)
+      serverPost(irl, '', '', {eventId, email, startDateTime:event.start}, handleReply)
     } 
   }  
   const handleDeleteAll = () => {
-    let text = "Press OK to delete all rows for this event.";
+    let reply = "Press OK to delete all occurrances of this event (eventId=" + eventId + ")";
     // eslint-disable-next-line no-restricted-globals
-    if (confirm(text) === true) {
-      serverPost(irl, '', '', {eventId:event.eventId, email}, handleReply)
+    if (confirm(reply) === true) {
+      serverPost(irl, '', '', {eventId, email}, handleReply)
     } 
   }
   const handleCopy = (e, event) => {

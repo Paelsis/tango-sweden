@@ -2,8 +2,8 @@ import React, { createContext, useState, useContext } from 'react';
 
 const initialState = {
     calendarName:'sweden',
-    color:'red',
-    backgroundColorLight:'lightBlue',
+    color:'yellow',
+    backgroundColorLight:'blue',
     backgroundColorDark:'darkBlue',
 };
 
