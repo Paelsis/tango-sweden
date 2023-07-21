@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import { useSharedState } from '../store';
 import { useNavigate } from 'react-router-dom';
-import FormTemplate from './FormTemplate';
+import FormTemplate from './OLD_FormTemplate';
 import Button from '@mui/material/Button';
 import moment from 'moment'
 import IconButton from '@mui/material/IconButton';
@@ -11,6 +11,7 @@ import RemoveCircleIcon from '@mui/icons-material/RemoveCircleOutline';
 import Tooltip from '@mui/material/Tooltip';
 import serverPost from '../services/serverPost'
 import { getAuth, onAuthStateChanged} from 'firebase/auth';
+
 
 const styles={
     container:{
@@ -69,19 +70,6 @@ const fields = [
         required:true,
     },
     {
-        type:'company',
-        label:'Company (Only used by Malmö/Lund for default color values)',
-        name:'company',
-        tooltip:'If this value is set then the colors defined in the Settings page are disabled'
-    },    
-    {
-        type:'textarea',
-        label:'Description',
-        name:'description',
-        required:true,
-        html:true,
-    },
-    {
         type:'checkbox',
         label:'Hide location and time in popup window',
         name:'hideLocationAndTime',
@@ -125,6 +113,28 @@ const fields = [
         tooltip: 'Event enddate is filled in when not same as startdate'
     },
     {
+        type:'textarea',
+        label:'Description',
+        name:'description',
+        required:true,
+        hiddenIf:'facebookEventId',
+    },
+    {
+        type:'textarea',
+        label:'Description',
+        name:'description',
+        required:false,
+        notHiddenIf:'facebookEventId',
+    },
+    {
+        type:'text',
+        style:{width:120},
+        width:20,
+        label:'Facebook event id',
+        tooltip:'The facebook event id (A long digit number)',
+        name:'facebookEventId',
+    },
+    {
         type:'checkbox',
         label:'Repeat',
         name:'repeat',
@@ -160,6 +170,25 @@ const fields = [
         max:52,
         tooltip: 'Repeat the event a number of times (1 means single event)'
     },
+    {
+        type:'checkbox',
+        label:'Use default settings',
+        tooltip:'Check this box to fill in company if you are from Malmö/Lund and wants defalut settings for colors etc.',
+        name:'defaultSettings',
+    },
+    {
+        type:'text',
+        label:'Company (Shall be filled with company for Malmö/Lund (Ex: CARMARIN, ARRIBA, MARCELA, URBANA, HOMERO, CASA BLANCA, ...)',
+        name:'company',
+        tooltip:'If this value is set then the colors defined in the Settings page are overruled and the default colors for Malmö/Lund are used',
+        notHiddenIf: 'defaultSettings'
+    },    
+    {
+        type:'checkbox',
+        label:'Use registration button',
+        name:'useRegistrationButton',
+        tooltip:'If you want a registration button and save registrations for the event',
+    },    
 ]
 
 /*
@@ -182,12 +211,12 @@ const offset = {
 const CandidateTable = ({list, deleteRow, clearAll, handleAddToCalendar, style}) =>
     list.length >0?
     <div>
-        <h3 style={{margin:10}}>Dates for this event</h3>
+        <h3 style={{margin:10}}>Candidates for this event</h3>
         <table style={{border:'1px solid lightGrey', ...style, margin:10}} >
             <tbody>
                 {list.map((row, idx) => 
                     <tr>
-                        <td>{moment(row.startDateTime).format('ll')}</td>
+                        <td>{moment(row.startDateTime).format('ll H:mm')}</td>
                         <Tooltip title='Remove single entry from list'>
                             <RemoveCircleIcon onClick={()=>deleteRow(idx)} />
                         </Tooltip>
@@ -195,8 +224,8 @@ const CandidateTable = ({list, deleteRow, clearAll, handleAddToCalendar, style})
                 )}      
             <tr>
                 <td colSpan={1} style={{textAlign:'center'}}>
-                    <Tooltip title='Add the list of candidates to calendar'>
-                    <Button variant="outlined" className="button" style={style} onClick={handleAddToCalendar}>Add to calendar</Button>
+                    <Tooltip title='Push candidates to calendar'>
+                    <Button variant="outlined" className="button" style={style} onClick={handleAddToCalendar}>Push to calendar</Button>
                     </Tooltip>
                 </td>
                 <td colSpan={1} style={{textAlign:'center'}}>
@@ -213,7 +242,7 @@ const CandidateTable = ({list, deleteRow, clearAll, handleAddToCalendar, style})
 
 
 export default props => {
-    const [userSettings, setUserSettings] = useSharedState()
+    const [userSettings,] = useSharedState()
     const [email, setEmail] = useState(undefined)
     const [color, setColor] = useState('black')
     const navigate = useNavigate()
@@ -223,26 +252,28 @@ export default props => {
         setEmail(user.email)
         moment.locale('sv', {week:{dow : 1}})
     }))
-    const calendarName = userSettings?userSettings.calendarName:'malmo'
     const [list, setList] = useState([])
     const irl = '/addEvents'
     const deleteRow = index => setList(list.filter((it, idx)=>idx !== index))  
     const handleReply = reply => {
         setColor('black');
-        reply.status==='OK'?navigate('/calendar/' + calendarName):alert(reply.message?reply.message:JSON.stringify(reply))
+        reply.status==='OK'?navigate('/calendar/' + userSettings.region):alert(reply.message?reply.message:JSON.stringify(reply))
     }
     const handleAddToCalendar = () => {setColor('yellow'); serverPost(irl, '', '', list, handleReply);}
 
     const changeToDbEntry = form => ({
             title:form.title, 
-            calendarName,
-            description:form.description,
+            description:form.description?form.description:'No description yet ...',
             company:form.company,
             startDateTime:form.startDate + 'T' + (form.startTime?form.startTime:'00:00'),
             endDateTime:(form.endDate?form.endDate:form.startDate) + 'T' + (form.endTime?form.endTime:'23:59'),
             location:form.location,
             email,
-            ...userSettings,
+            city:userSettings.city, 
+            region:userSettings.region, 
+            color:userSettings.color,
+            backgroundColorLight:userSettings.backgroundColorLight,
+            backgroundColorDark:userSettings.backgroundColorDark,
     })
 
     const adjustForm = originalForm => {
@@ -286,7 +317,7 @@ export default props => {
     }
     return(
         <div>
-            <h3 style={{textAlign:'center'}}>Calendar name: {calendarName} </h3>    
+            <h3 style={{textAlign:'center'}}>City: {userSettings.city} Region:{userSettings.region}</h3>    
 
             <div style={{...styles.container, color}}>
             <FormTemplate 
@@ -294,13 +325,12 @@ export default props => {
                 handleCancel={props.handleCancel}
                 fields={fields} 
                 handleSubmit={handleSubmit}
-                submitTooltipTitle={'Add to candidate list'}
-                submitButtonText={'Add to list'}
+                submitButtonTooltip={'Add to list of candidates before sending final list to calender'}
+                submitButtonLabel={'Add to list'}
                 submitButtonColor={'grey'}
             />
             <CandidateTable style={{color:color, borderColor:color}} list={list} deleteRow={deleteRow} handleAddToCalendar={handleAddToCalendar} clearAll={()=>setList([])} />
             </div>           
-            
         </div>
     )
         

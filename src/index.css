@@ -21,3 +21,7 @@ button {
   border-width:2px;
   border-radius:8px;
 }
+
+.MuiTooltip-popper {
+  z-index: 9999999 !important;
+}

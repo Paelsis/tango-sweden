@@ -3,7 +3,7 @@ import { useSharedState } from '../store';
 import { Navigate, useNavigate } from 'react-router-dom';
 import firebaseApp from '../services/firebaseApp'
 import { getAuth, onAuthStateChanged} from 'firebase/auth';
-import FormTemplate from '../components/FormTemplate';
+import FormTemplate from '../components/OLD_FormTemplate';
 import serverFetch from '../services/serverFetch'
 import Add from '../components/AddEvent'
 import serverPost from "../services/serverPost";
@@ -46,19 +46,26 @@ const styles = {
   
 
   const fields = [
-  {
+    {
+      type:'text',
+      label:'City:',
+      name:'city',
+      required:true,
+      tooltip:'Events with same city is show in same calendar for that city',
+    },
+    {
+      type:'text',
+      label:'Region:',
+      name:'region',
+      required:true,
+      tooltip:'Events with same region is show in same calendar for that region',
+    },
+    {
         type:'text',
         label:'User name',
         name:'name',
         required:'true', 
         tooltip:'First and last name of the logged in user'
-  },
-  {
-      type:'text',
-      label:'Calendar name (Stockholm, Malmo, Gothemburg, Helsingborg, Halmstad, ...)',
-      name:'calendarName',
-      required:true,
-      tooltip:'Events with same calendarName is show in same calendar'
     },
     {
         type:'text',
@@ -90,14 +97,37 @@ export default props => {
     const navigate=useNavigate();
     const auth = getAuth()
 
-    useEffect(()=>onAuthStateChanged(auth, user => {
-        setEmail(user.email)
-    }), [])
-
-    const handleReply = (result, value) => {
+    const handleResult = (email, result) => {
+      if (result !== undefined) {
+        if (result.calendarName) {
+          // alert('Settings:' + JSON.stringify(result) + ' email:' + email)
+          setUserSettings(result)
+        } else {
+          alert('WARNING: No user found')
+          setUserSettings({...userSettings, city:'U-N-K-N-O-W-N CITY', region:'U-N-K-N-O-W-N REGION'})
+        }
+      }   
+    }
+  
+    useEffect(()=>{
+      onAuthStateChanged(auth, user => {
+        if (user.email) {
+          setEmail(user.email);
+          const irl = '/getUser?email=' +  user.email
+          serverFetch(irl, '', '', result=>handleResult(user.email, result))
+        } else {
+          alert('Cannot fetch user from database')
+        } 
+      })
+    }, [])
+  
+  
+    const handleReplySubmit = (result) => {
       setSubmitButtonColor('green')
       if (result.status === 'OK') {
-        setUserSettings({...userSettings, ...value})
+        const rec = result.rows.find(it=>it.email === email)
+        // alert('RESULT value :' +  JSON.stringify(rec) + ' email:' + email)
+        setUserSettings(rec)
         setTimeout(() => {setSubmitButtonColor('grey'); setSubmitButtonVariant('outlined')}, 1000);
       } else {
         setSubmitButtonColor('red') 
@@ -112,15 +142,19 @@ export default props => {
         setSubmitButtonColor('lightGreen')
         setSubmitButtonVariant('contained')
         if (!!email) {
-          // alert('user:', user)
-          const record = {...value, email}
+          const record = {...value, email, creaTimestamp:undefined, updTimestamp:undefined, authLevel:undefined}
           const data = {tableName:'tbl_user', record, fetchRows:true}
-          //alert('handleSubmit:' + JSON.stringify(data))
-          serverPost('/replaceRow', '', '', data, result=>handleReply(result, value))
+          // alert('handleSubmit data:' + JSON.stringify(data))
+          serverPost('/replaceRow', '', '', data, result=>handleReplySubmit(result))
         } else {
           alert('Error: Dont save data since system cannot find any valid login email address')
         }         
     }
+
+    const color = userSettings.color
+    const background = 'linear-gradient(to bottom right, ' + userSettings.backgroundColorLight + ' ,' + userSettings.backgroundColorDark + ')'
+
+    const filterFields = fields.filter(it=>it.authLevel?userSettings.authLevel>=it.authLevel:true)
 
     return(  
       <div style={{...styles.container}}>
@@ -128,13 +162,18 @@ export default props => {
           <>
             <FormTemplate 
                 init={userSettings}
-                fields={fields} 
+                fields={filterFields} 
                 handleSubmit={handleSubmit}
                 submitTooltipTitle={'Add to candidate list'}
                 submitButtonText={'Add to list'}
                 submitButtonColor={submitButtonColor}
                 submitButtonVariant={submitButtonVariant}
             />
+            <div>
+              <div style={{position:'absolute', width:200, height:100, textAlign:'center', color, background}}>
+                Show colors
+              </div>  
+            </div>
           </>           
         :
             <h1>

@@ -1,9 +1,10 @@
 import React, {useEffect, useState} from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSharedState} from '../store';
 import Button from '@mui/material/Button';
 import serverFetch from '../services/serverFetch'
+import {labelSwedish} from '../services/functions'
 import Image from '../images/tangosweden.jpg';
-import { LunchDining } from '@mui/icons-material';
 
 
 const styles = {
@@ -30,6 +31,9 @@ const styles = {
     },
     button:{
         borderWidth:'2px',
+        marginTop:10,
+        marginLeft:5,
+        marginRight:5,
         color:'#FFFFA7',
         borderColor:'#FFFF87',
         backgroundColor:'transparent'
@@ -39,6 +43,7 @@ const styles = {
 
 //AllCalendars
 export default () => {
+    const [userSettings] = useSharedState()
     const [list, setList] = useState([])
     const navigate = useNavigate()
     const handleNavigate = lnk => {
@@ -47,45 +52,34 @@ export default () => {
 
     useEffect(()=>{
         const irl = '/getCalendarNames'
-        serverFetch(irl, '', '', result=>setList(result))
+        serverFetch(irl, '', '', lst=>setList(lst))
     }, [])
-
-    const LabelSwedishChars = name => {
-        switch (name.toLowerCase()) {
-            case 'goteborg':return 'Göteborg'
-            case 'malmo':return 'Malmö/Lund'
-            default: return name.toLowerCase()
-        }
-    }
-        
 
 
     return(
         <div style={styles.container}>
             <img style={styles.img} src={Image} onClick={()=>handleNavigate('/malmo')}/>
             <div style={styles.buttonContainer}>
+                <h2>Our calendars</h2>
                 {list.map(it=>
                     <>
                         <Button variant="outlined" type="button" style={styles.button}  onClick={()=>handleNavigate('/calendar/' + it.calendarName)}>
-                            {LabelSwedishChars(it.calendarName)}
+                            {labelSwedish(it.calendarName)}
                         </Button>    
                         &nbsp;
                     </>
                 )}
-                    
-                <p/>
-                &nbsp;
+                <h2>External calendars</h2>
                 <Button variant="outlined" type="button" style={styles.button}  onClick={()=>handleNavigate('/denmark')}>
-                    Denmark                    
+                    Danmark                    
                 </Button>    
+                &nbsp;
                 <Button variant="outlined" type="button" style={styles.button}  onClick={()=>handleNavigate('/gothenburg')}>
-                    Gothenburg                    
+                    Göteborg                    
                 </Button>    
+                &nbsp;
                 <Button variant="outlined" type="button" style={styles.button}  onClick={()=>handleNavigate('/halmstad')}>
                     Halmstad                    
-                </Button>    
-                <Button variant="outlined" type="button" style={styles.button}  onClick={()=>handleNavigate('/helsingborg')}>
-                    Helsingborg                    
                 </Button>    
                 &nbsp;
              </div>

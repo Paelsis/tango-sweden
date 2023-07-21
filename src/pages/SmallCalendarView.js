@@ -1,9 +1,9 @@
 import React, {Component} from 'react';
+import {AVA_STATUS} from '../services/const.js'
 
 //import moment from 'moment';
 import moment from 'moment-with-locales-es6'
-
-
+import Button from '@mui/material/Button';
 
 const language = 'SV'
 
@@ -112,10 +112,7 @@ class SmallCalendarView extends Component {
         let weekdayEnd = mend.format('dddd')
         weekday = weekday.toUpperCase().charAt(0) + weekday.slice(1,3)
         weekdayEnd = weekdayEnd.toUpperCase().charAt(0) + weekdayEnd.slice(1,3)
-        const dateRange=event.sameDate?
-            null
-        :
-            weekday + ' ' + mstart.format('D/M') + (mstart.format('D/M') !== mend.format('D/M')?(' - ' +  weekdayEnd + ' ' + mend.format('D/M')):'')
+        const dateRange=event.dateRange
         const timeRange = moment() <= mend?event.timeRange:(TEXTS.ENDED[language] + ' ' + mend.format('LT'))
         const opacity = moment() <= mend?1.0:0.3
         const useRegistrationButton = event.useRegistrationButton
@@ -133,9 +130,27 @@ class SmallCalendarView extends Component {
                 <td style={styleTd}>  
                     <small>{timeRange}</small>
                 </td>
-                <td colspan={useRegistrationButton?1:2} style={styleTd}>  
+                <td colspan={useRegistrationButton==1?1:2} style={styleTd}>  
                     <small>{event.title}</small>
                 </td>
+                {useRegistrationButton?
+                    <td style={styleTd} onClick={e=>this.handleRegistration(e, event)}>  
+                        {event.avaStatus=== AVA_STATUS.CC?
+                            'Fully Booked'
+                        :
+                            <Button 
+                                variant='outlined'
+                                key={event.productId} 
+                                className="button" 
+                                style={{backgroundColor:'transparent', color:styleTd.color, borderColor:styleTd.color, padding:1, fontSize:'small'}}
+                            >
+                                Registration
+                            </Button>
+                        }
+                    </td>
+                :null}    
+
+
             </tr>
         )
     }    

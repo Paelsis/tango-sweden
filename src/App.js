@@ -1,4 +1,4 @@
-import React, {useState} from "react"
+import React, {useEffect, useState} from "react"
 import { useSharedState, SharedStateProvider} from './store';
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Calendar from "./pages/Calendar";
@@ -10,12 +10,14 @@ import Privacy from "./pages/Privacy";
 import Service from "./pages/Service";
 import Add from "./pages/Add";
 import Update from "./pages/Update";
-import PendingData from './pages/PendingData'
+import SetupUser from './pages/SetupUser'
 import AppBar from './components/AppBar'
+import RedirectToMultiple from './pages/RedirectToMultiple'
 import FirebaseAuth from './login/FirebaseAuth'
 import FirebaseSignin from './login/FirebaseSignin';
 import FirebaseResetPassword from './login/FirebaseResetPassword';
-import Button from '@mui/material/Button';
+import serverFetch from './services/serverFetch'
+import {COLORS} from './services/const'
 
 import "./App.css"
 
@@ -28,7 +30,7 @@ const styles = {
     notFound:{
         width:'100%', 
         textAlign:'center', 
-        color:'232323'
+        color:COLORS.BLACK
     }
 
 }
@@ -38,20 +40,6 @@ const RedirectTo = props =>  {
     return null;
 }
 
-const RedirectToMultiple = props => {
-
-    return(
-        <>
-            <div style={{width:'100%', textAlign:'center'}}>
-                {Object.entries(props).map(it =>
-                    <p>
-                        <Button style={styles.button('#232323')} variant="outlined"  type="submit" onClick={()=>window.location.replace(it[1])}>Redirect to {it[0]}</Button>
-                    </p>
-                )}
-            </div>
-        </>
-    )
-}
 
 const StringifyJSON = json => <h4>{JSON.stringify(json)}</h4>
 
@@ -67,12 +55,21 @@ export default function App() {
                 <Route path="calendar" element={<Navigate to={'/calendar/malmo'} />} />
                 <Route path="malmo" element={<Navigate to={'/calendar/malmo'} />} />
                 <Route path="lund" element={<Navigate to={'/calendar/malmo'} />} />
-                <Route path="stockholm" element={<Navigate to={'/calendar/stockholm'}/>} />
+                <Route path="calendar" element={<Navigate to={'/calendar/malmo'} />} />
+                <Route path="helsingborg" element={<Navigate to={'/calendar/helsingnborg'} />} />
+                <Route path="stockholmPages" element={<RedirectToMultiple 
+                        Tangohelheten='https://www.tangohelheten.se/kalender' 
+                        Tantonorte='http://www.tangonorte.com/events.php' 
+                        Tango08='https://www.facebook.com/pg/Tango08Stockholm/events/'
+                        Stockholmtango='https://stockholmtango.com/praktika/'
+                        Argentango='http://argentango.se/milonga.php'
+                        Tangoverkstaden='https://tangoverkstan.se/kalender'
+                    />}
+                />
                 <Route path="gothenburgNew" element={<Navigate to={'/calendar/gothenburgNew'} />} />
                 <Route path="/calendar/:calendarName" element={<Calendar />} />
                 <Route path="calendars" element={<AllCalendars />} />
-                <Route path="denmark" element={<RedirectTo url='http://www.tango.dk/milongas-practicas-events/' />} />
-                <Route path="helsingborg" element={<RedirectToMultiple Tangorama='https://www.tangorama.se/kalendar' Fortuna='https://www.tangofortuna.com/' />} />
+                <Route path="denmark" element={<RedirectTo url='https://www.brownbearsw.com/cal/tangodk_mil_kbh' />} />
                 <Route path="fortuna" element={<RedirectTo url='https://www.tangofortuna.com/' />} />
                 <Route path="tangorama" element={<RedirectTo url='https://www.tangorama.se/kalendar' />} />
                 <Route path="halmstad" element={<RedirectTo url='http://www.tangoexperimental.com/sv-SE' />} />
@@ -84,6 +81,7 @@ export default function App() {
                 <Route path="add" element={<Add />} />
                 <Route path="update" element={<Update />} />
                 <Route path="signin" element={<FirebaseSignin  />} />
+                <Route path="setupUser" element={<SetupUser  />} />
                 <Route path="resetPassword" element={<FirebaseResetPassword />} />
                 <Route
                     path="*"

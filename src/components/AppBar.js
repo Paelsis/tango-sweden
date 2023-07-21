@@ -18,6 +18,8 @@ import { getAuth, signOut, onAuthStateChanged} from 'firebase/auth';
 import {AuthContext} from "../login/FirebaseAuth"
 import serverFetch from '../services/serverFetch'
 
+const ADMINISTRATORS=['per.eskilson@gmail.com', 'admin@tangosweden.se']
+
 export default () => {
   const [userSettings, setUserSettings] = useSharedState()
   const [email, setEmail] = useState(undefined)
@@ -34,23 +36,26 @@ export default () => {
   };
 
   const handleResult = result => {
-    //alert(JSON.stringify(result?result:'No result'))
+    //alert('AppBar 0:' + JSON.stringify(result?result:'No result'))
     if (result !== undefined) {
-      if (result.calendarName) {
-        setUserSettings({...userSettings, ...result})
+      if (result.city) {
+        // alert('AppBar 1' + JSON.stringify(result))
+        setUserSettings(result)
       } else {
-        setUserSettings({calendarName:'sweden'})
+        setUserSettings({...userSettings, city:'unknown', region:'skane'})
       }
     }   
   }
 
-  useEffect(()=>onAuthStateChanged(auth, user => {
+  useEffect(()=>{
+    onAuthStateChanged(auth, user => {
       setEmail(user?user.email:undefined);
       const irl = '/getUser?email=' +  user.email
       if (user.email) {
         serverFetch(irl, '', '', result=>handleResult(result))
       }  
-  }), [])
+    })
+  }, [])
 
   const handleNavigate = route => {
     navigate(route)
@@ -78,20 +83,14 @@ export default () => {
         'aria-labelledby': 'basic-button',
       }}
     >
-      <MenuItem onClick={()=>handleNavigate('/calendars')}>All calendars</MenuItem>
-      <MenuItem onClick={()=>handleNavigate('/calendar/stockholm')}>Stockholm</MenuItem>
-      <MenuItem onClick={()=>handleNavigate('/calendar/malmo')}>Malmö/Lund</MenuItem>
-      <MenuItem onClick={()=>handleNavigate('/denmark')}>Denmark</MenuItem>
-      <MenuItem onClick={()=>handleNavigate('/helsingborg')}>Helsingborg</MenuItem>
-      <MenuItem onClick={()=>handleNavigate('/halmstad')}>Halmstad</MenuItem>
-      <MenuItem onClick={()=>handleNavigate('/gothenburg')}>Gothenburg</MenuItem>
-      <MenuItem><ListItemText inset></ListItemText></MenuItem>
+      <MenuItem onClick={()=>handleNavigate('/calendars')}>Alla kalendrar</MenuItem>
       <Divider />
-
+      <MenuItem><ListItemText inset></ListItemText></MenuItem>
       {email?<MenuItem onClick={()=>handleSignout()}>Signout</MenuItem>
       :<MenuItem onClick={()=>handleSignin()}>Signin</MenuItem>}
       {email?<MenuItem onClick={()=>navigate('/settings')}>Settings</MenuItem>:null}
       {email?<MenuItem onClick={()=>navigate('/add')}>Add Event</MenuItem>:null}
+      {(email&& (userSettings.authLevel >=8))?<MenuItem onClick={()=>navigate('/setupUser')}>Setup users</MenuItem>:null}
       <MenuItem onClick={()=>handleNavigate('/usage')}>Usage</MenuItem>
     </Menu>
 
@@ -116,7 +115,7 @@ export default () => {
           <Typography variant="h5" component="div" sx={{ flexGrow: 1 }}  onClick={()=>handleNavigate('/home')}>
           </Typography>
           <Typography variant="h8" component="div" sx={{ flexGrow: 4 }}  onClick={()=>handleNavigate('/home')}>
-            {email?'Signed in ' + userSettings.calendarName + ' / ' + email:null}
+            {email?'Signed in ' + userSettings.city + ' ' +  userSettings.region + ' ' + email:null}
           </Typography>
           <IconButton
             size="large"
@@ -136,7 +135,7 @@ export default () => {
         </Toolbar>
       </AppBar>
     </Box>
-    {email?<small>{JSON.stringify(userSettings)}</small>:null}
+    {email?ADMINISTRATORS.includes(email)?<small>{JSON.stringify(userSettings)}</small>:null:null}
     </div>
   );
 }

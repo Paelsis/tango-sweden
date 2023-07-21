@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import { useSharedState } from '../store';
 import  {Component } from 'react'
-import FormTemplate from '../components/FormTemplate';
+import FormTemplate from '../components/OLD_FormTemplate';
 import Button from '@mui/material/Button';
 import {useLocation} from 'react-router-dom'
 import moment from 'moment-with-locales-es6'
@@ -45,22 +45,10 @@ const fields = [
         required:true,
     },
     {
-        type:'company',
-        label:'Company (Only used by Malmö/Lund for default color values)',
-        name:'company',
-        tooltip:'If this value is set then the colors defined in the Settings page are disabled'
-    },    
-    {
         type:'checkbox',
         label:'Hide location and time in popup window',
         name:'hideLocationAndTime',
         tooltip:'Hide the location and time in popup window'
-    },
-    {
-        type:'textarea',
-        label:'Description',
-        name:'description',
-        required:true,
     },
     {
         type:'text',
@@ -101,11 +89,56 @@ const fields = [
         notHiddenIf:'changeAll',
         tooltip:'Change end time on all events'
     },
+    {
+        type:'textarea',
+        label:'Description',
+        name:'description',
+        required:true,
+        hiddenIf:'facebookEventId',
+    },
+    {
+        type:'textarea',
+        label:'Description',
+        name:'description',
+        required:false,
+        notHiddenIf:'facebookEventId',
+    },
+    {
+        type:'text',
+        label:'Facebook event id',
+        tooltip:'The facebook event id (A long digit number)',
+        name:'facebookEventId',
+    },
+    {
+        type:'checkbox',
+        label:'Change colors to latest settings',
+        name:'adjustColors',
+        tooltip:'Change colors of the latest updated ones in settings'
+    },
+    {
+        type:'checkbox',
+        label:'Use default settings',
+        tooltip:'Check this box to fill in company if you are from Malmö/Lund and wants defalut settings for colors etc.',
+        name:'defaultSettings',
+    },
+    {
+        type:'company',
+        label:'Company (Shall be filled with company for Malmö/Lund (Ex: CARMARIN, ARRIBA, MARCELA, URBANA, HOMERO, CASA BLANCA, ...)',
+        name:'company',
+        tooltip:'If this value is set then the colors defined in the Settings page are overruled and the default colors for Malmö/Lund are used',
+        notHiddenIf: 'defaultSettings'
+    },    
+    {
+        type:'checkbox',
+        label:'Use registration button',
+        name:'useRegistrationButton',
+        tooltip:'If you want a registration button and save registrations for the event',
+    },    
 ]
 
   
 export default props => {
-    const [userSettings, setUserSettings] = useSharedState()
+    const [userSettings, ] = useSharedState()
     const [copy, setCopy] = useState()
     const navigate = useNavigate() 
     const location = useLocation();
@@ -116,14 +149,17 @@ export default props => {
     }
     const handleSubmit = (e, value) => {
         const irl = '/updateEvent'
-        const hideLocationAndTime = value['hideLocationAndTime']?1:0
+
         e.preventDefault();
         if (moment(value.startDateTime) > moment(value.endDateTime)) {
             alert('WARNING: End of the event must be set later than start of the event. Please check dates and times.')
             return
         }
-        const data = {...value, ...userSettings, originalStartDateTime, hideLocationAndTime}
-        // alert('data:' + JSON.stringify(data))
+        const settings = value.adjustColors===true?userSettings:{}
+        const data = {...value, ...settings, originalStartDateTime}
+
+        // alert('handleSubmit:' + JSON.stringify(data))
+        
         serverPost(irl, '', '', data, handleReply)
     }    
 
@@ -162,7 +198,7 @@ export default props => {
                         handleCopy={handleCopy}
                         handleSubmit={handleSubmit}
                         submitButtonLabel={'Update'}
-                        submitTooltipTitle={'Update calendar'}
+                        submitButtonTooltip={'Update calendar wiht new data'}
                         submitButtonText={'UPDATE'}
                         submitButtonColor='grey'
                         update={true}

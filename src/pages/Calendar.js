@@ -1,10 +1,10 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useCallback} from 'react'
 import { useParams } from 'react-router-dom';
 import { Calendar, momentLocalizer } from 'react-big-calendar'
 import moment from 'moment-with-locales-es6'
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import '../style.css';
-import {getEvents, getEventsTable} from '../services/getEvents'
+import {getEventsFromGoogleCal, getEventsFromTable} from '../services/getEvents'
 import DialogSlide from './DialogSlide'
 import SmallCalendarView from './SmallCalendarView'
 import { isMobile} from "react-device-detect"
@@ -13,7 +13,8 @@ import Button from '@mui/material/Button';
 import { transferAnitasCalendar } from '../services/transferAnitasCalendar'
 import { layoutGenerator } from 'react-break';
 import { PropaneSharp } from '@mui/icons-material';
-
+import { yellow } from '@mui/material/colors';
+import {COLORS} from '../services/const'
 
 const DeviceDetector = () => (
   <div>I am rendered on: {isMobile ? "Mobile" : "Desktop"}</div>
@@ -66,7 +67,7 @@ const ListData = ({list}) => {
 
 export default props => {
   const params = useParams()
-  const calendarName=params?params.calendarName?params.calendarName:'malmo':'malmo'
+  const calendarName=params?params.calendarName?params.calendarName:'skane':'skane'
   const [events_TK, setEvents_TK] = useState([])
   const [events_TAB, setEvents_TAB] = useState([])
   const [open, setOpen] = useState(false)
@@ -79,7 +80,8 @@ export default props => {
 
   useEffect(()=>{
     const timeMin = moment().startOf('day')
-    const timeMax = moment().endOf('month').add(3,'months').add(7, 'days')
+    const timeMax = moment().endOf('month').add(6,'months').add(7, 'days')
+    const calendarNameLower = calendarName.toLowerCase()
     moment.locale('sv');
     /*
     getEvents(
@@ -92,8 +94,8 @@ export default props => {
       events => setEvents_TS(events.filter(ev=>ev.description.toUpperCase().indexOf('TANGOKOMPANIET') < 0)),
     )
     */
-    if (calendarName.toLowerCase() === 'malmo') {
-      getEvents(
+    if (calendarNameLower === 'malmo' || calendarNameLower === 'skane') {
+      getEventsFromGoogleCal(
         calendarId_TK,
         apiKey_TK,
         timeMin.format('YYYY-MM-DD') + 'T00:00:00Z', 
@@ -106,7 +108,7 @@ export default props => {
       setEvents_TK([])
     }
     
-    getEventsTable(
+    getEventsFromTable(
       '/getEvents?calendarName=' + calendarName,
       events => setEvents_TAB(events),
       timeMin.format('YYYY-MM-DD') + 'T00:00:00Z', 
@@ -115,39 +117,68 @@ export default props => {
     )
   }, [calendarName])
 
+  const dayPropGetter = useCallback(
+    (date) => ({
+      ...(moment(date) === 2 && {
+        className: 'tuesday',
+      }),
+      ...(moment(date).isSame(moment(), "day") && {
+        style: {
+          backgroundColor: COLORS.YELLOW,
+          color: 'white',
+        },
+      }),
+    }),
+    []
+  )
+
   const handleEvent = ev=>{setEvent(ev); setOpen(true)}
   const events = [...events_TK, ...events_TAB].sort((a,b)=>a.start.localeCompare(b.start))
   return (
-    <div className="App">
-          <OnAtMostPhablet>
-            <SmallCalendarView 
-                      events={events} 
-                      handleEvent={handleEvent} 
-            />
-          </OnAtMostPhablet>
-          <OnAtLeastTablet>
-            <Calendar 
-              class='element'
-              localizer={localizer}
-              events={events}
-              startAccessor="start"
-              endAccessor="end"
-              onSelectEvent={handleEvent}
-              eventPropGetter={(ev, start, end, isSelected) => (
-                {style:ev.style})} 
-              views={['month']}
-              style={{ height: '90vh' }}
-            />
-          </OnAtLeastTablet>  
+    <>
+    {events?events.length?
+      <div className="App">
+            <OnAtMostPhablet>
+              <SmallCalendarView 
+                        events={events} 
+                        handleEvent={handleEvent} 
+              />
+            </OnAtMostPhablet>
+            <OnAtLeastTablet>
+              <Calendar 
+                class='element'
+                localizer={localizer}
+                events={events}
+                startAccessor="start"
+                endAccessor="end"
+                onSelectEvent={handleEvent}
+                dayPropGetter={dayPropGetter}
+                eventPropGetter={(ev, start, end, isSelected) => (
+                  {style:ev.style})} 
+                views={['month']}
+                style={{ height: '90vh', background:COLORS.LIGHT_YELLOW}}
+              />
+            </OnAtLeastTablet>  
 
-        <DialogSlide
-          open={open}
-          setOpen={setOpen}
-          event={event}
-          aria-labelledby="alert-dialog-title"
-          aria-describedby="alert-dialog-description"
-        />    
-    </div>
+          <DialogSlide
+            open={open}
+            setOpen={setOpen}
+            event={event}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+          />    
+      </div>
+    :
+      <div style={{width:'100%', height:'100vh', background:'black'}}>
+      <div style={{position:'absolute', width:'100%', textAlign:'center', top:'40vh', color:COLORS.YELLOW, background:'transparent'}}>
+      <h3>No Events</h3>
+      </div>            
+      </div>              
+    :  
+      null
+    }              
+    </>
+
   );
 }
 

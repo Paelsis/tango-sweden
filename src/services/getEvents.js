@@ -19,28 +19,29 @@ const findParameter = (s, val) => {
 }  
 
 function createEvent(props)  {
-  const {start, end, title, description, location, email, company, hideLocationAndTime, color, backgroundColorLight, backgroundColorDark} = props
+  const {start, end, title, description, location, email, company, color, backgroundColorLight, backgroundColorDark} = props
   const mstart=moment(start)
   const mend=moment(end).add(start.length <= 10?-1:0, 'days')
+  const duration = moment.duration(mend.diff(mstart));
+  const durationHours = duration.asHours()
+  const dateShift =  moment(start).dayOfYear() - moment(end).dayOfYear() !== 0
+  const dateRange=(mstart.format('ddd D/M') + ((dateShift && durationHours > 11)?(' - ' +  mend.format('ddd D/M')):''))
   const timeStart = mstart.format('LT');
   const timeEnd = mend.format('LT');
   const timeUnset =  (timeStart==="00:00" && timeEnd ==="00:00") 
   const allDay = start.length < 10 || (timeStart==="00:00" && timeEnd ==="23:59") || (timeStart==="00:00" && timeEnd ==="00:00") 
   const maxPar = Number(findParameter(description, 'MAX_PAR'))
   const maxInd = Number(findParameter(description, 'MAX_IND'))
-  const dateShift =  moment(start).dayOfYear() - moment(end).dayOfYear() !== 0
-  const duration = moment.duration(mend.diff(mstart));
-  const durationHours = duration.asHours()
   const opacity = moment() < mend?1.0:0.4
   const background = "linear-gradient(to bottom right, " + backgroundColorLight + ", " + backgroundColorDark + ")"
   const style = company?getStyle(company, title, description, opacity):{...getStyle(company, title, description, opacity), color, background}
+
+  // alert('hours=' + durationHours)
 
   // var numberOfMinutes = duration.asMinutes()
   return ({
         ...props,
         email,    
-        start,
-        end,
         mstart,
         mend,
         maxInd,
@@ -49,7 +50,7 @@ function createEvent(props)  {
         timeUnset, 
         isToday:moment().isSame(moment(start), 'day')?true:false,
         isWeekend:moment(start).isoWeekday() >=6,
-        hideLocationAndTime,
+        dateRange,
         durationHours, 
         calendar:moment(start).calendar(),
         location:location?location:'No given location',
@@ -59,12 +60,12 @@ function createEvent(props)  {
         dayOfYearEnd: moment(end).dayOfYear(),
 
         timeRange: allDay?'Full day':(mstart.format('LT') + '-' + mend.format('LT')),
-        timeRangeWithDay: dateShift?(mstart.format('ddd LT') + '-' + mend.format('ddd LT')):(mstart.format('LT') + '-' + mend.format('LT')),
+        timeRangeWithDay: (dateShift && durationHours > 11)?(mstart.format('ddd LT') + '-' + mend.format('ddd LT'))
+          :(mstart.format('LT') + '-' + mend.format('LT')),
         style,
 
         /* Registration props */
         maxRegistrants : Number(maxInd?maxInd:maxPar?(maxPar*2):500),
-        useRegistrationButton: description?(description.indexOf('MAX_IND')!==-1 || description.indexOf('MAX_PAR')!==-1):false,
     })
 }
 
@@ -84,7 +85,7 @@ function cityForEvent (title, location) {
 }    
 
 // export means that this function will be available to any module that imports this module
-export function getEvents (calendarId, apiKey, timeMin, timeMax, language, company, callback) {
+export function getEventsFromGoogleCal (calendarId, apiKey, timeMin, timeMax, language, company, callback) {
   const url = `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?key=${apiKey}&timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=${true}&orderBy=startTime`
   request
     .get(url)
@@ -104,7 +105,7 @@ export function getEvents (calendarId, apiKey, timeMin, timeMax, language, compa
           const location = it.location?it.location.replace(/Tangokompaniet, |, 212 11 |, 224 64|, 223 63|, Sverige|Stiftelsen Michael Hansens Kollegium, /g, ' ').replace('Fredriksbergsgatan','Fredriksbergsg.'):'Plats ej angiven'
           const eventId = it.id
 
-          event = createEvent({start, end, company, title, description, location, eventId, email:'daniel@tangokompaniet.com', hideLocationAndTime:false})
+          event = createEvent({start, end, company, title, description, location, eventId, email:'daniel@tangokompaniet.com', hideLocationAndTime:false, useRegistrationButton:false})
 
           events.push(event)
         })
@@ -113,7 +114,7 @@ export function getEvents (calendarId, apiKey, timeMin, timeMax, language, compa
     })
 }
 
-export function getEventsTable (irl, callback, timeMin, timeMax, language) {
+export function getEventsFromTable (irl, callback, timeMin, timeMax, language) {
   moment.locale(CULTURE(language))
   let event = {}
   const events = []

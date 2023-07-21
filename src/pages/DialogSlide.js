@@ -11,6 +11,7 @@ import { getAuth, onAuthStateChanged} from 'firebase/auth';
 import serverPost from '../services/serverPost'
 import { useNavigate } from "react-router-dom";
 import AddEvent from '../components/AddEvent'
+import reactBreak from 'react-break';
 
 export default function DialogSlide(props) {
   const {open, setOpen, event} = props
@@ -23,16 +24,24 @@ export default function DialogSlide(props) {
     reply.status === 'OK'?window.location.reload():alert(JSON.stringify(reply.message?reply.message:reply))
   }  
   const irl = '/cancelEvent'
-  const handleUpdate = (e, ev) => {e.preventDefault(); navigate('/update', {state:{
-    eventId:ev.eventId, 
-    title:ev.title, 
-    company:ev.company, 
-    description:ev.description, 
-    hideLocationAndTime:ev.hideLocationAndTime, 
-    location:ev.location, 
-    startDateTime:ev.start, 
-    endDateTime:ev.end}
-    })}
+  const handleUpdate = (e, ev) => {
+    e.preventDefault(); 
+    // alert('Update:' + JSON.stringify(ev))
+    navigate('/update', {
+      state: {
+        eventId:ev.eventId, 
+        facebookEventId:ev.facebookEventId,
+        title:ev.title, 
+        company:ev.company, 
+        description:ev.description, 
+        location:ev.location, 
+        startDateTime:ev.start, 
+        endDateTime:ev.end,
+        hideLocationAndTime:ev.hideLocationAndTime==1?1:0, 
+        useRegistrationButton:ev.useRegistrationButton==1?1:0,
+      }
+    })
+  }
   const handleDeleteSingle = () =>  {
     let text = "Press OK to delete this event (eventId=" + eventId + ")";
     // eslint-disable-next-line no-restricted-globals
@@ -52,14 +61,15 @@ export default function DialogSlide(props) {
     setCopy(event)
   }
 
-  const handleCancel = () => {
-    setCopy(undefined)
+  const handleRegistration = (event) => {
+    alert('Registration - eventId:' + event.eventId)
   }
 
   const auth = getAuth()
   useEffect(()=>onAuthStateChanged(auth, user => {
         setEmail(user.email)
   }), [])
+  const linkToFacebook=event.facebookEventId?"https://www.facebook.com/events/" + event.facebookEventId:undefined
   return (
     <div style={{maxWidth:'100%'}}>
         <Dialog
@@ -75,25 +85,34 @@ export default function DialogSlide(props) {
           }
           <DialogContent>
             <DialogContentText id="alert-dialog-description">
+              {linkToFacebook?<a href={linkToFacebook}>Link to event in Facebook</a>:null}
+              <p/>
               <div style={{maxWidth:'99vw', fontWeight:900}} dangerouslySetInnerHTML={{__html: event.description}} onClick={handleClose} />
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            {email===event.email || email === 'anita@tangosweden.se' || email === 'admin@tangosweden.se' || process.env.NODE_ENV === 'development'? 
-              <>
-                <Button onClick={e=>handleUpdate(e, event)} autoFocus>
+            {email===event.email || email === 'anita@tangosweden.se' || email === 'admin@tangosweden.se'? 
+               <>
+                <Button variant='outlined' onClick={e=>handleUpdate(e, event)} autoFocus>
                   Update
                 </Button>
-                <Button onClick={handleDeleteSingle} autoFocus>
+                <Button variant='outlined' onClick={handleDeleteSingle} autoFocus>
                   Delete single
                 </Button>
-                <Button onClick={handleDeleteAll} autoFocus>
+                <Button variant='outlined' onClick={handleDeleteAll} autoFocus>
                   Delete all
                 </Button>
                 </>
             :null
             }   
-            <Button onClick={handleClose} autoFocus>
+            {event.useRegistrationButton?
+                <Button variant="outlined" onClick={()=>handleRegistration(event)} autoFokus>
+                  Registration
+                </Button>
+            :
+              null
+            }       
+            <Button variant="outlined" onClick={handleClose} autoFocus>
               Close
             </Button>
           </DialogActions>

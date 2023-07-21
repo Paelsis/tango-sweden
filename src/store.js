@@ -1,10 +1,12 @@
 import React, { createContext, useState, useContext } from 'react';
 
 const initialState = {
-    calendarName:'sweden',
-    color:'yellow',
-    backgroundColorLight:'blue',
-    backgroundColorDark:'darkBlue',
+    name:'INITIAL STATE',
+    city:'malmo',
+    region:'skane',
+    color:'white  ',
+    backgroundColorLight:'lightGrey',
+    backgroundColorDark:'grey',
 };
 
 const useMyState = () => useState(initialState);
@@ -18,6 +20,8 @@ export const useSharedState = () => {
 };
 
 export const SharedStateProvider = ({ children }) => (
-  <MyContext.Provider value={useMyState()}>{children}</MyContext.Provider>
+  <MyContext.Provider value={useMyState()}>
+    {children}
+  </MyContext.Provider>
 );
 
