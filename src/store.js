@@ -1,12 +1,12 @@
 import React, { createContext, useState, useContext } from 'react';
 
 const initialState = {
-    name:'INITIAL STATE',
-    city:'malmo',
-    region:'skane',
+    name:'unkown name',
+    city:'unknown city',
+    region:'unknown country',
     color:'white  ',
-    backgroundColorLight:'lightGrey',
-    backgroundColorDark:'grey',
+    backgroundColorLight:'grey',
+    backgroundColorDark:'black',
 };
 
 const useMyState = () => useState(initialState);

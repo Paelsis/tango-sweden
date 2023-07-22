@@ -2,7 +2,9 @@ import React, {useCallback, useContext, useEffect, useState} from "react"
 import { Navigate, useNavigate } from 'react-router-dom';
 import firebaseApp from '../services/firebaseApp'
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged} from 'firebase/auth';
+import { useSharedState } from '../store';
 import Button from '@mui/material/Button';
+import serverFetch from '../services/serverFetch'
 
 const styles = {
   container:{
@@ -43,7 +45,22 @@ const FirebaseSignin = () => {
   const [buttonColor, setButtonColor] = useState('green')
   const [credentials, setCredentials] = useState(undefined)
   const [uid, setUid] = useState(undefined)
+  const [userSettings, setUserSettings] = useSharedState()
+
   const auth = getAuth()
+
+  const handleFetchReply = result => {
+    //alert('AppBar 0:' + JSON.stringify(result?result:'No result'))
+    if (result !== undefined) {
+      if (result.city) {
+        // alert('AppBar 1' + JSON.stringify(result))
+        setUserSettings(result)
+      } else {
+        setUserSettings({...userSettings, city:'unknown', region:'skane'})
+      }
+    }   
+  }
+
   const handleSignin = e => {
     e.preventDefault()
     setButtonColor('yellow')
@@ -53,6 +70,8 @@ const FirebaseSignin = () => {
       const uid = userCredential.user.uid;
       setUid(uid)
       setButtonColor('green')
+      const irl = '/getUser?email=' +  credentials.email
+      serverFetch(irl, '', '', result=>handleFetchReply(result))
     })
     .catch(error => {
       const errorCode = error.code;

@@ -3,7 +3,7 @@ import { useSharedState } from '../store';
 import { Navigate, useNavigate } from 'react-router-dom';
 import firebaseApp from '../services/firebaseApp'
 import { getAuth, onAuthStateChanged} from 'firebase/auth';
-import FormTemplate from '../components/OLD_FormTemplate';
+import FormTemplate from '../components/FormTemplate';
 import serverFetch from '../services/serverFetch'
 import Add from '../components/AddEvent'
 import serverPost from "../services/serverPost";
@@ -87,60 +87,61 @@ const styles = {
     },
 ]
 
+const DEFAULT_BUTTON_STYLE = {color:'black', borderColor:'black'}
+const CLICKED_BUTTON_STYLE = {color:'green', borderColor:'green'}
+const SAVED_BUTTON_STYLE = {color:'green', borderColor:'green'}
+const ERROR_BUTTON_STYLE = {color:'red', borderColor:'red'}
 
+// Settings.js
 export default props => {
-    const [userSettings, setUserSettings] = useSharedState();
     const [email, setEmail] = useState(undefined)
     const [submitButtonColor, setSubmitButtonColor] = useState('grey')
     const [submitButtonVariant, setSubmitButtonVariant] = useState('outlined')
-
+    const [userSettings, setUserSettings] = useSharedState();
+    const [buttonStyle, setButtonStyle] = useState(DEFAULT_BUTTON_STYLE)
     const navigate=useNavigate();
     const auth = getAuth()
 
-    const handleResult = (email, result) => {
-      if (result !== undefined) {
-        if (result.calendarName) {
-          // alert('Settings:' + JSON.stringify(result) + ' email:' + email)
+    const handleResult = reply => {
+      // alert('Settings:' + JSON.stringify(reply.result?reply.result:'No result'))
+      if (!!reply.result) {
           setUserSettings(result)
-        } else {
-          alert('WARNING: No user found')
-          setUserSettings({...userSettings, city:'U-N-K-N-O-W-N CITY', region:'U-N-K-N-O-W-N REGION'})
-        }
-      }   
+      } 
     }
-  
+    
     useEffect(()=>{
       onAuthStateChanged(auth, user => {
         if (user.email) {
           setEmail(user.email);
           const irl = '/getUser?email=' +  user.email
-          serverFetch(irl, '', '', result=>handleResult(user.email, result))
+          serverFetch(irl, '', '', reply=>handleResult(reply))
         } else {
-          alert('Cannot fetch user from database')
-        } 
+          alert('No email fond when calling onAuthStateChange')
+        }
       })
     }, [])
-  
+    
   
     const handleReplySubmit = (result) => {
-      setSubmitButtonColor('green')
       if (result.status === 'OK') {
         const rec = result.rows.find(it=>it.email === email)
         // alert('RESULT value :' +  JSON.stringify(rec) + ' email:' + email)
-        setUserSettings(rec)
+        setButtonStyle(SAVED_BUTTON_STYLE)
+        if (rec.namn) {
+          setUserSettings(rec)
+        }  
         setTimeout(() => {setSubmitButtonColor('grey'); setSubmitButtonVariant('outlined')}, 1000);
       } else {
-        setSubmitButtonColor('red') 
+        setButtonStyle(ERROR_BUTTON_STYLE) 
         setTimeout(() => {setSubmitButtonColor('grey'); setSubmitButtonVariant('contained')}, 2000);
       }
     }
 
 
-    const handleSubmit = (e, value) => {
+    const handleSave = (e, value) => {
 
         e.preventDefault()
-        setSubmitButtonColor('lightGreen')
-        setSubmitButtonVariant('contained')
+        setButtonStyle(CLICKED_BUTTON_STYLE)
         if (!!email) {
           const record = {...value, email, creaTimestamp:undefined, updTimestamp:undefined, authLevel:undefined}
           const data = {tableName:'tbl_user', record, fetchRows:true}
@@ -155,19 +156,24 @@ export default props => {
     const background = 'linear-gradient(to bottom right, ' + userSettings.backgroundColorLight + ' ,' + userSettings.backgroundColorDark + ')'
 
     const filterFields = fields.filter(it=>it.authLevel?userSettings.authLevel>=it.authLevel:true)
+    const buttons=[
+      {
+          style:buttonStyle,
+          type:'button',
+          label:'Save',
+          handleClick:e=>handleSave(e, userSettings)
+      },    
+  ]
 
     return(  
       <div style={{...styles.container}}>
         {email?
           <>
             <FormTemplate 
-                init={userSettings}
                 fields={filterFields} 
-                handleSubmit={handleSubmit}
-                submitTooltipTitle={'Add to candidate list'}
-                submitButtonText={'Add to list'}
-                submitButtonColor={submitButtonColor}
-                submitButtonVariant={submitButtonVariant}
+                value={userSettings}
+                setValue={setUserSettings}
+                buttons={buttons}
             />
             <div>
               <div style={{position:'absolute', width:200, height:100, textAlign:'center', color, background}}>
@@ -179,7 +185,7 @@ export default props => {
             <h1>
                 No access
             </h1>
-        }    
+    }    
     </div>
   )  
 }

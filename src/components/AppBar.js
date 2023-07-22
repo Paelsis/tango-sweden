@@ -14,12 +14,13 @@ import MenuItem from '@mui/material/MenuItem';
 import Divider from '@mui/material/Divider';
 import ListItemText from '@mui/material/ListItemText';
 import { useNavigate } from 'react-router-dom';
-import { getAuth, signOut, onAuthStateChanged} from 'firebase/auth';
+import { getAuth, signOut, onAuthStateChanged } from 'firebase/auth';
 import {AuthContext} from "../login/FirebaseAuth"
 import serverFetch from '../services/serverFetch'
 
 const ADMINISTRATORS=['per.eskilson@gmail.com', 'admin@tangosweden.se']
 
+// AppBar.js
 export default () => {
   const [userSettings, setUserSettings] = useSharedState()
   const [email, setEmail] = useState(undefined)
@@ -38,22 +39,17 @@ export default () => {
   const handleResult = result => {
     //alert('AppBar 0:' + JSON.stringify(result?result:'No result'))
     if (result !== undefined) {
-      if (result.city) {
-        // alert('AppBar 1' + JSON.stringify(result))
         setUserSettings(result)
-      } else {
-        setUserSettings({...userSettings, city:'unknown', region:'skane'})
-      }
-    }   
+    } 
   }
-
+  
   useEffect(()=>{
     onAuthStateChanged(auth, user => {
       setEmail(user?user.email:undefined);
       const irl = '/getUser?email=' +  user.email
       if (user.email) {
         serverFetch(irl, '', '', result=>handleResult(result))
-      }  
+      } 
     })
   }, [])
 
@@ -135,8 +131,8 @@ export default () => {
         </Toolbar>
       </AppBar>
     </Box>
-    {email?ADMINISTRATORS.includes(email)?<small>{JSON.stringify(userSettings)}</small>:null:null}
     </div>
   );
 }
 
+/* {email?ADMINISTRATORS.includes(email)?<small>{JSON.stringify(userSettings)}</small>:null:null} */

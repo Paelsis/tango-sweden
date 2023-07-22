@@ -3,8 +3,6 @@ import Button, { buttonClasses } from '@mui/material/Button';
 import FormField from './FormField';
 import getTypeFromColumnType from '../services/getTypeFromColumnType'
 
-
-
 const TEXTS={
     BUTTON:'Send registration'
 }
