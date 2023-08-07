@@ -39,6 +39,7 @@ export default () => {
   const handleResult = result => {
     //alert('AppBar 0:' + JSON.stringify(result?result:'No result'))
     if (result !== undefined) {
+        /* alert(JSON.stringify(result)) */
         setUserSettings(result)
     } 
   }

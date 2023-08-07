@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import { useSharedState } from '../store';
 import { useNavigate } from 'react-router-dom';
-import FormTemplate from './OLD_FormTemplate';
+import FormTemplate from './FormTemplate0';
 import Button from '@mui/material/Button';
 import moment from 'moment'
 import IconButton from '@mui/material/IconButton';
@@ -21,6 +21,14 @@ const styles={
         justifyContent: 'center',
     }    
   }
+
+const BUTTON_STYLE = {
+    DEFAULT:{color:'black', borderColor:'black'},
+    CLICKED:{color:'yellow', borderColor:'yellow'},
+    SAVED:{color:'green', borderColor:'green'},
+    ERROR:{color:'red', borderColor:'red'},
+}
+  
 
 const DeleteButton = ({onClick}) =>
     <IconButton
@@ -208,11 +216,11 @@ const offset = {
     YEARS:'years'
 } 
 
-const CandidateTable = ({list, deleteRow, clearAll, handleAddToCalendar, style}) =>
+const CandidateTable = ({list, deleteRow, clearAll, handleAddToCalendar, buttonStyle}) =>
     list.length >0?
     <div>
         <h3 style={{margin:10}}>Candidates for this event</h3>
-        <table style={{border:'1px solid lightGrey', ...style, margin:10}} >
+        <table style={{border:'1px solid lightGrey', margin:10}} >
             <tbody>
                 {list.map((row, idx) => 
                     <tr>
@@ -225,7 +233,7 @@ const CandidateTable = ({list, deleteRow, clearAll, handleAddToCalendar, style})
             <tr>
                 <td colSpan={1} style={{textAlign:'center'}}>
                     <Tooltip title='Push candidates to calendar'>
-                    <Button variant="outlined" className="button" style={style} onClick={handleAddToCalendar}>Push to calendar</Button>
+                    <Button variant="outlined" className="button" style={buttonStyle} onClick={handleAddToCalendar}>Push to calendar</Button>
                     </Tooltip>
                 </td>
                 <td colSpan={1} style={{textAlign:'center'}}>
@@ -245,8 +253,10 @@ export default props => {
     const [userSettings,] = useSharedState()
     const [email, setEmail] = useState(undefined)
     const [color, setColor] = useState('black')
+    const [buttonStyle, setButtonStyle] = useState(BUTTON_STYLE.DEFAULT)
     const navigate = useNavigate()
     const auth = getAuth()
+
 
     useEffect(()=>onAuthStateChanged(auth, user => {
         setEmail(user.email)
@@ -256,10 +266,15 @@ export default props => {
     const irl = '/addEvents'
     const deleteRow = index => setList(list.filter((it, idx)=>idx !== index))  
     const handleReply = reply => {
-        setColor('black');
-        reply.status==='OK'?navigate('/calendar/' + userSettings.region):alert(reply.message?reply.message:JSON.stringify(reply))
+            if (reply.status==='OK') {
+                setButtonStyle(BUTTON_STYLE.SAVED)
+                setTimeout(() => navigate('/calendar/' + userSettings.region), 1000)
+            } else {
+                setButtonStyle(BUTTON_STYLE.ERROR)
+                alert(reply.message?('Error message:' + reply.message):JSON.stringify(reply))
+            }
     }
-    const handleAddToCalendar = () => {setColor('yellow'); serverPost(irl, '', '', list, handleReply);}
+    const handleAddToCalendar = () => {setButtonStyle(BUTTON_STYLE.CLICKED); serverPost(irl, '', '', list, handleReply);}
 
     const changeToDbEntry = form => ({
             title:form.title, 
@@ -269,11 +284,7 @@ export default props => {
             endDateTime:(form.endDate?form.endDate:form.startDate) + 'T' + (form.endTime?form.endTime:'23:59'),
             location:form.location,
             email,
-            city:userSettings.city, 
-            region:userSettings.region, 
-            color:userSettings.color,
-            backgroundColorLight:userSettings.backgroundColorLight,
-            backgroundColorDark:userSettings.backgroundColorDark,
+            ...userSettings,
     })
 
     const adjustForm = originalForm => {
@@ -327,9 +338,9 @@ export default props => {
                 handleSubmit={handleSubmit}
                 submitButtonTooltip={'Add to list of candidates before sending final list to calender'}
                 submitButtonLabel={'Add to list'}
-                submitButtonColor={'grey'}
+                submitButtonColor={buttonStyle.color}
             />
-            <CandidateTable style={{color:color, borderColor:color}} list={list} deleteRow={deleteRow} handleAddToCalendar={handleAddToCalendar} clearAll={()=>setList([])} />
+            <CandidateTable buttonStyle={buttonStyle} list={list} deleteRow={deleteRow} handleAddToCalendar={handleAddToCalendar} clearAll={()=>setList([])} />
             </div>           
         </div>
     )

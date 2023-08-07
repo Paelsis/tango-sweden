@@ -3,8 +3,9 @@ import { useSharedState} from '../store';
 import Image from '../images/tangosweden.jpg';
 import { useNavigate } from 'react-router-dom';
 import Button from '@mui/material/Button';
-import serverFetch from '../services/serverFetch'
+import serverFetch, {serverFetchReply} from '../services/serverFetch'
 import {COLORS} from '../services/const'
+
 
 const styles = {
     container:{
@@ -37,7 +38,7 @@ const styles = {
         borderColor:COLORS.YELLOW,
         backgroundColor:'transparent'
     },
-    buttonSkane:{
+    buttonRegion:{
         borderWidth:'2px',
         marginTop:10,
         marginLeft:5,
@@ -78,69 +79,43 @@ const styles = {
 const Home = () => {
     const [userSettings] = useSharedState()
     const [list, setList] = useState([])
+    const [cities, setCities] = useState([])
+    const [regions, setRegions] = useState([])
     const navigate = useNavigate()
     const handleNavigate = lnk => {
         navigate(lnk)
     }
     useEffect(()=>{
         const irl = '/getCalendarNames'
-        serverFetch(irl, '', '', lst=>setList(lst))
+        serverFetchReply(irl, '', '', reply=>{setCities(reply.cities); setRegions(reply.regions)})
     }, [])
     return(
         <div style={styles.container}>
-            <img style={styles.img} src={Image} onClick={()=>handleNavigate('/calendar/skane')}/>
+            <img style={styles.img} src={Image} onClick={()=>handleNavigate('/calendar/skåne')}/>
             <div style={styles.buttonContainer}>
                 <p/>
-                <Button variant="outlined" type="button" style={styles.buttonSkane}  onClick={()=>handleNavigate('/calendar/skane')}>
-                    Skåne                    
-                </Button>    
+                {regions.map(it=>
+                    <Button variant="outlined" type="button" style={styles.buttonRegion}  onClick={()=>handleNavigate('/calendar/' + it.region)}>
+                        {it.region}                    
+                    </Button>    
+                )}    
                 <Button variant="outlined" type="button" style={styles.buttonDenmark}  onClick={()=>handleNavigate('/denmark')}>
-                    Denmark                    
+                    Danmark                    
                 </Button>    
-                <Button variant="outlined" type="button" style={styles.button}  onClick={()=>handleNavigate('/malmo')}>
+                <Button variant="outlined" type="button" style={styles.button}  onClick={()=>handleNavigate('/calendar/malmö')}>
                     Malmö/Lund                    
                 </Button>    
-                {list.find(it=>it.calendarName.toLowerCase()==='helsingborg')?
-                    <Button variant="outlined" type="button" style={styles.button}  onClick={()=>handleNavigate('/calendar/helsingborg')}>
-                        Helsingborg                    
+                {cities.filter(it => !it.city.toLowerCase().includes('malmö')).map(it=>
+                    <Button variant="outlined" type="button" style={styles.button}  onClick={()=>handleNavigate('/calendar/' + it.city)}>
+                        {it.city}                    
                     </Button>    
-                :
-                    null
-                }
-                {list.find(it=>it.calendarName.toLowerCase()==='ystad')?
-                    <Button variant="outlined" type="button" style={styles.button}  onClick={()=>handleNavigate('/calendar/ystad')}>
-                        Ystad                    
-                    </Button>
-                :
-                    null
-                }    
+                )}    
                 <Button variant="outlined" type="button" style={styles.button}  onClick={()=>handleNavigate('/halmstad')}>
                     Halmstad                    
                 </Button>    
                 <Button variant="outlined" type="button" style={styles.button}  onClick={()=>handleNavigate('/gothenburg')}>
                     Göteborg                    
                 </Button>    
-                {list.find(it=>it.calendarName.toLowerCase()==='stockholm')?
-                    <Button variant="outlined" type="button" style={styles.button}  onClick={()=>handleNavigate('/calendar/stockholm')}>
-                        Stockholm                    
-                    </Button> 
-                :
-                    null
-                }  
-                {list.find(it=>it.calendarName.toLowerCase()==='jamtland')?
-                    <Button variant="outlined" type="button" style={styles.button}  onClick={()=>handleNavigate('/calendar/jamtland')}>
-                        Jämtland                    
-                    </Button> 
-                :
-                    null
-                }  
-                {list.find(it=>it.calendarName.toLowerCase()==='norr')?
-                    <Button variant="outlined" type="button" style={styles.buttonNorr}  onClick={()=>handleNavigate('/calendar/jamtland')}>
-                        Norr                    
-                    </Button> 
-                :
-                    null
-                }  
              </div>
         </div>
     )

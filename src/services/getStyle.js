@@ -24,7 +24,7 @@ import maraton from '../images/maraton_banner.jpg';
     },
     {
       searchValue:'HOMERO',
-      style:{color:'red', height:'100%', background: 'linear-gradient(-45deg, #ffee62 0%, #ffffdd 100%', fontWeight:700,  border:'4px solid red'}
+      style:{color:'red', height:'100%', background: 'linear-gradient(-45deg, #ffee62 0%, #ffffdd 100%', fontWeight:700,  border:'4px solid red', fontSize:20}
     },
     {
       searchValue:'CASA BLANCA',

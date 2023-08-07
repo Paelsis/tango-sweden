@@ -56,7 +56,7 @@ const FirebaseSignin = () => {
         // alert('AppBar 1' + JSON.stringify(result))
         setUserSettings(result)
       } else {
-        setUserSettings({...userSettings, city:'unknown', region:'skane'})
+        setUserSettings({...userSettings, city:'unknown', region:'skåne'})
       }
     }   
   }

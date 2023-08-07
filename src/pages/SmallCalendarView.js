@@ -63,10 +63,10 @@ let styles = {
         cellpadding:30,
     },
     tr: (durationHours, isToday) => ({
-        height:durationHours > 24?30?isToday:30:20,
+        height:durationHours > 48?40:durationHours>11?30:isToday?30:20,
         verticalAlign:'center',
-        fontSize:durationHours > 24?20:isToday?'large':'normal',
-        fontWeight:durationHours > 24?700:isToday?500:400,
+        fontSize:durationHours > 48?24:durationHours>24?20:durationHours>11?20:isToday?'large':'normal',
+        fontWeight:durationHours > 48?700:durationHours > 11?600:isToday?500:400,
     }),
 };
 
@@ -114,27 +114,37 @@ class SmallCalendarView extends Component {
         weekdayEnd = weekdayEnd.toUpperCase().charAt(0) + weekdayEnd.slice(1,3)
         const dateRange=event.dateRange
         const timeRange = moment() <= mend?event.timeRange:(TEXTS.ENDED[language] + ' ' + mend.format('LT'))
+        const dateTimeRange = mstart.format('ddd D MMM H:mm') + ' - ' +  mend.format('ddd D MMM H:mm')
         const opacity = moment() <= mend?1.0:0.3
         const useRegistrationButton = event.useRegistrationButton
-        const styleTd = event.style
-        const styleDate = {...styleTd}
+        const endsOtherDay=(mstart.calendar('l') !== mend.calendar('l')) && (mend.diff(mstart, 'hours') > 11)
+        
         return(
+
             <tr 
                 key={'Row' + event.productId} 
                 style={styles.tr(event.durationHours, event.isToday)}
                 onClick={()=>handleEvent(event)}
             > 
-                <td style={styleDate} >  
-                    <small>{dateRange}</small>
-                </td>
-                <td style={styleTd}>  
-                    <small>{timeRange}</small>
-                </td>
-                <td colspan={useRegistrationButton==1?1:2} style={styleTd}>  
-                    <small>{event.title}</small>
-                </td>
+                {endsOtherDay?
+                    <td colSpan={3} style={event.style}>  
+                        {event.title}<br/>{dateTimeRange}
+                    </td>
+                :
+                    <>
+                        <td style={event.style} >  
+                            <small>{dateRange}</small>
+                        </td>
+                        <td style={event.style}>  
+                            <small>{timeRange}</small>
+                        </td>
+                        <td colspan={useRegistrationButton==1?1:2} style={event.style}>  
+                            <small>{event.title}</small>
+                        </td>
+                    </>
+                }
                 {useRegistrationButton?
-                    <td style={styleTd} onClick={e=>this.handleRegistration(e, event)}>  
+                    <td style={event.style} onClick={e=>this.handleRegistration(e, event)}>  
                         {event.avaStatus=== AVA_STATUS.CC?
                             'Fully Booked'
                         :
@@ -142,7 +152,7 @@ class SmallCalendarView extends Component {
                                 variant='outlined'
                                 key={event.productId} 
                                 className="button" 
-                                style={{backgroundColor:'transparent', color:styleTd.color, borderColor:styleTd.color, padding:1, fontSize:'small'}}
+                                style={{backgroundColor:'transparent', color:event.style.color, borderColor:event.style.color, padding:1, fontSize:'small'}}
                             >
                                 Registration
                             </Button>

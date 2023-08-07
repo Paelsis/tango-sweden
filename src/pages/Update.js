@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import { useSharedState } from '../store';
 import  {Component } from 'react'
-import FormTemplate from '../components/OLD_FormTemplate';
+import FormTemplate from '../components/FormTemplate0';
 import Button from '@mui/material/Button';
 import {useLocation} from 'react-router-dom'
 import moment from 'moment-with-locales-es6'
@@ -145,7 +145,7 @@ export default props => {
     const event = location.state?location.state:undefined
     const originalStartDateTime=location.state?location.state.startDateTime:undefined
     const handleReply = reply => {
-        reply.status==='OK'?navigate('/calendar/' + userSettings.calendarName):reply.message?alert(reply.message):alert('ERROR with no reply message')     
+        reply.status==='OK'?navigate('/calendar/' + userSettings.region):reply.message?alert(reply.message):alert('ERROR with no reply message')     
     }
     const handleSubmit = (e, value) => {
         const irl = '/updateEvent'

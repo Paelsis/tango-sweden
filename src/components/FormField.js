@@ -14,11 +14,34 @@ const styles  = {
     }    
 }
 
+const FormField1 = props => {
+    const {fld, key, value, setValue, handleKeyPress} = props
+    const radioValues = fld.radioValues?fld.radioValues.map(it=>it.trim()):[]
+    const selectValues = fld.selectValues?fld.selectValues.map(it=>it.trim()):[]
+    const label = fld.label?fld.label:'No label'
+    const handleChange = e => {
+        setValue({...value, [e.target.name]:e.target.type==='checkbox'?e.target.checked?1:0:e.target.value})
+    }    
+    const required = fld.required?true:false 
+    const disabled = fld.disabledFunc?fld.disabledFunc(value):false
+    const labelStyle={fontWeight:700, ...props.labelStyle?props.labelStyle:{}}
+    const supStyle = {color:'red', fontWeight:700, ...props.subStyle?props.subStyle:{}}
+    const valueStyle = props.valueStyle?props.valueStyle:{}
+
+    return(
+    <p>
+        <h1 style={supStyle}>Before</h1>
+        {JSON.stringify(props)}    
+        <h1>After</h1>
+        <p/>
+    </p>
+    )
+}
 
 // FormField 
 const FormField = props => {
     const {fld, key, value, setValue, handleKeyPress} = props
-    const radioValues = fld.radioValues?fld.radioValues.map(it=>it.trim()):[]
+    const radioValues = fld.radioValues
     const selectValues = fld.selectValues?fld.selectValues.map(it=>it.trim()):[]
     const label = fld.label?fld.label:'No label'
     const handleChange = e => {
@@ -29,15 +52,15 @@ const FormField = props => {
         setValue({...value, [e.target.name]:e.target.value});
     }    
     const required = fld.required?true:false 
-    const disabled = fld.disabledFunc?fld.disabledFunc(value):false
-    const labelStyle={fontWeight:700, ...props.labelStyle?props.labelStyle:{}}
+    const disabled = fld.disabled?fld.disabled:fld.disabledFunc?fld.disabledFunc(value):false
+    const labelStyle={fontWeight:700, ...props.labelStyle?props.labelStyle:{}, opacity:disabled?0.4:1.0}
     const supStyle = {color:'red', fontWeight:700, ...props.subStyle?props.subStyle:{}}
     const valueStyle = props.valueStyle?props.valueStyle:{}
 
         switch (fld.type) {
             case 'checkbox':
                     return(
-                        <p>
+                        <p>  
                             <label style={labelStyle}>
                             <input 
                                 key={key}
@@ -88,16 +111,16 @@ const FormField = props => {
                         {radioValues.map((val, idx) =>
                             <label>
                                 <input 
-                                    key={val + idx}
+                                    key={(val.value?val.value:val) + idx}
                                     type={fld.type}
-                                    value={val} 
+                                    value={val.value?val.value:val} 
                                     name={fld.name} 
                                     required={required}
                                     disabled={disabled}
-                                    checked={value[fld.name] === val}
+                                    checked={value[fld.name] === (val.value?val.value:val)}
                                     onChange={handleChange}
                                 />
-                                &nbsp;<span>{val}</span>&nbsp;
+                                &nbsp;<span>{val.label?val.label:val}</span>&nbsp;
                             </label>
                         )}
                     </p> 
@@ -226,29 +249,6 @@ const FormField = props => {
         }   
 }    
 
-const FormField1 = props => {
-    const {fld, key, value, setValue, handleKeyPress} = props
-    const radioValues = fld.radioValues?fld.radioValues.map(it=>it.trim()):[]
-    const selectValues = fld.selectValues?fld.selectValues.map(it=>it.trim()):[]
-    const label = fld.label?fld.label:'No label'
-    const handleChange = e => {
-        setValue({...value, [e.target.name]:e.target.type==='checkbox'?e.target.checked?1:0:e.target.value})
-    }    
-    const required = fld.required?true:false 
-    const disabled = fld.disabledFunc?fld.disabledFunc(value):false
-    const labelStyle={fontWeight:700, ...props.labelStyle?props.labelStyle:{}}
-    const supStyle = {color:'red', fontWeight:700, ...props.subStyle?props.subStyle:{}}
-    const valueStyle = props.valueStyle?props.valueStyle:{}
-
-    return(
-    <p>
-        <h1 style={supStyle}>Before</h1>
-        {JSON.stringify(props)}    
-        <h1>After</h1>
-        <p/>
-    </p>
-    )
-}
 
 export default FormField
 
@@ -259,5 +259,4 @@ export const RenderField1 = ({fld, value, setValue}) => {
         <input {...fld} type={fld.type} size={40} value={value[fld.name]?value[fld.name]:''} name={fld.name} style={style} required={fld.required} onChange={handleChange} />
     )
 }
-
 */

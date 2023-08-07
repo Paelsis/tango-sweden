@@ -15,6 +15,7 @@ import { layoutGenerator } from 'react-break';
 import { PropaneSharp } from '@mui/icons-material';
 import { yellow } from '@mui/material/colors';
 import {COLORS} from '../services/const'
+import {replaceSwedishChars} from '../services/functions'
 
 const DeviceDetector = () => (
   <div>I am rendered on: {isMobile ? "Mobile" : "Desktop"}</div>
@@ -67,7 +68,7 @@ const ListData = ({list}) => {
 
 export default props => {
   const params = useParams()
-  const calendarName=params?params.calendarName?params.calendarName:'skane':'skane'
+  const calendarName=params?params.calendarName?params.calendarName.toLowerCase():'skåne':'skåne'
   const [events_TK, setEvents_TK] = useState([])
   const [events_TAB, setEvents_TAB] = useState([])
   const [open, setOpen] = useState(false)
@@ -81,7 +82,6 @@ export default props => {
   useEffect(()=>{
     const timeMin = moment().startOf('day')
     const timeMax = moment().endOf('month').add(6,'months').add(7, 'days')
-    const calendarNameLower = calendarName.toLowerCase()
     moment.locale('sv');
     /*
     getEvents(
@@ -94,7 +94,7 @@ export default props => {
       events => setEvents_TS(events.filter(ev=>ev.description.toUpperCase().indexOf('TANGOKOMPANIET') < 0)),
     )
     */
-    if (calendarNameLower === 'malmo' || calendarNameLower === 'skane') {
+    if (calendarName === 'malmö' || calendarName === 'skåne') {
       getEventsFromGoogleCal(
         calendarId_TK,
         apiKey_TK,

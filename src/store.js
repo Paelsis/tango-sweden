@@ -4,7 +4,7 @@ const initialState = {
     name:'unkown name',
     city:'unknown city',
     region:'unknown country',
-    color:'white  ',
+    color:'white',
     backgroundColorLight:'grey',
     backgroundColorDark:'black',
 };

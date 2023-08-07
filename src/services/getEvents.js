@@ -2,6 +2,7 @@ import request from 'superagent'
 import moment from 'moment-with-locales-es6'
 import getStyle from './getStyle'
 import serverFetch from './serverFetch'
+import {replaceChar} from '../services/functions'
 
 const CULTURE = (language) => language===LANGUAGE_SV?'sv':language===LANGUAGE_ES?'es':'en'
 const LANGUAGE_SV='SV'
@@ -19,7 +20,7 @@ const findParameter = (s, val) => {
 }  
 
 function createEvent(props)  {
-  const {start, end, title, description, location, email, company, color, backgroundColorLight, backgroundColorDark} = props
+  const {start, end, title, description, location, email, company, color, backgroundColorLight, backgroundColorDark, border, borderWidth, borderColor} = props
   const mstart=moment(start)
   const mend=moment(end).add(start.length <= 10?-1:0, 'days')
   const duration = moment.duration(mend.diff(mstart));
@@ -34,7 +35,10 @@ function createEvent(props)  {
   const maxInd = Number(findParameter(description, 'MAX_IND'))
   const opacity = moment() < mend?1.0:0.4
   const background = "linear-gradient(to bottom right, " + backgroundColorLight + ", " + backgroundColorDark + ")"
-  const style = company?getStyle(company, title, description, opacity):{...getStyle(company, title, description, opacity), color, background}
+  const style = company?
+      getStyle(company, title, description, opacity)
+    :
+      {...getStyle(company, title, description, opacity), color, background, border, borderWidth, borderColor}
 
   // alert('hours=' + durationHours)
 
@@ -71,9 +75,9 @@ function createEvent(props)  {
 
 function cityForEvent (title, location) {
   if ((title.toLowerCase().indexOf('malmö') !== -1) ||
-      (title.toLowerCase().indexOf('malmo') !== -1) ||
+      (title.toLowerCase().indexOf('malmö') !== -1) ||
       (title.toLowerCase().indexOf('lund') !== -1)) {
-      return 'malmo'
+      return 'malmö'
   } else {        
       return location?(location.toLowerCase().indexOf('malmö') !== -1)?'Malmö'
              :(location.toLowerCase().indexOf('lund') !== -1)?'Lund'
@@ -98,6 +102,7 @@ export function getEventsFromGoogleCal (calendarId, apiKey, timeMin, timeMax, la
         // because as with any external API, we can't be sure if the data will be what we expect
         moment.locale(CULTURE(language))
         JSON.parse(resp.text).items.forEach(it => {
+          //alert(JSON.stringify(it))
           const start = it.start.dateTime?it.start.dateTime:it.start.date
           const end = it.end.dateTime?it.end.dateTime:it.end.date
           const title = it.summary?it.summary:'No Title'
@@ -122,8 +127,9 @@ export function getEventsFromTable (irl, callback, timeMin, timeMax, language) {
     if (!!list) {
       list.forEach(it => {
         const location = it.location?it.location.replace(/Tangokompaniet, |, 212 11 |, 224 64|, 223 63|, Sverige|Stiftelsen Michael Hansens Kollegium, /g, ' ').replace('Fredriksbergsgatan','Fredriksbergsg.'):'No location given'
-
-        event = createEvent({...it, location})
+        const start = replaceChar(it.start, 'T', 10); // Fill in T between date and time in start (to get sorting work with Google Cal start)
+        // alert(start)
+        event = createEvent({...it, location, start})
         events.push(event)
       })
     } 

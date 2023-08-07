@@ -11,7 +11,7 @@ import serverPost from "../services/serverPost";
 const styles = {
     container:{
       position:'relative',
-      top:100,
+      top:0,
       display:'flex',
       alignItems:'center',
       flexDirection:'column',
@@ -19,7 +19,6 @@ const styles = {
       color:'green',
       fontSize:24,
       fontWeight:200,
-      height:'50vh',
     },
     button: color=>({
       color,
@@ -54,9 +53,16 @@ const styles = {
       tooltip:'Events with same city is show in same calendar for that city',
     },
     {
-      type:'text',
+      type:'radio',
       label:'Region:',
       name:'region',
+      radioValues:
+        [
+            'Skåne',
+            'Väst',
+            'Mitt',
+            'Norr'
+        ],
       required:true,
       tooltip:'Events with same region is show in same calendar for that region',
     },
@@ -85,27 +91,41 @@ const styles = {
         tooltip: 'Dark background color when shifting from dark to light, Ex 1:darkBlue Ex 2:#F6A3BB',
         name:'backgroundColorDark',
     },
+    {
+      type:'radio',
+      label:'Border thickness',
+      radioValues:['0px', '1px', '2px', '3px', '4px'],
+      tooltip: 'Thickness of border',
+      name:'borderWidth',
+    },
+    {
+      type:'text',
+      label:'Border color',
+      tooltip: 'Color of border',
+      //disabled:true,
+      name:'borderColor',
+  },
 ]
 
-const DEFAULT_BUTTON_STYLE = {color:'black', borderColor:'black'}
-const CLICKED_BUTTON_STYLE = {color:'green', borderColor:'green'}
-const SAVED_BUTTON_STYLE = {color:'green', borderColor:'green'}
-const ERROR_BUTTON_STYLE = {color:'red', borderColor:'red'}
+const BUTTON_STYLE = {
+  DEFAULT:{color:'black', borderColor:'black', },
+  CLICKED:{color:'yellow', borderColor:'yellow'},
+  SAVED:{color:'green', borderColor:'green'},
+  ERROR:{color:'red', borderColor:'red'},
+}
+
 
 // Settings.js
 export default props => {
     const [email, setEmail] = useState(undefined)
-    const [submitButtonColor, setSubmitButtonColor] = useState('grey')
-    const [submitButtonVariant, setSubmitButtonVariant] = useState('outlined')
     const [userSettings, setUserSettings] = useSharedState();
-    const [buttonStyle, setButtonStyle] = useState(DEFAULT_BUTTON_STYLE)
-    const navigate=useNavigate();
+    const [buttonStyle, setButtonStyle] = useState(BUTTON_STYLE.DEFAULT)
     const auth = getAuth()
 
     const handleResult = reply => {
       // alert('Settings:' + JSON.stringify(reply.result?reply.result:'No result'))
       if (!!reply.result) {
-          setUserSettings(result)
+          setUserSettings(reply.result)
       } 
     }
     
@@ -126,14 +146,14 @@ export default props => {
       if (result.status === 'OK') {
         const rec = result.rows.find(it=>it.email === email)
         // alert('RESULT value :' +  JSON.stringify(rec) + ' email:' + email)
-        setButtonStyle(SAVED_BUTTON_STYLE)
+        setButtonStyle(BUTTON_STYLE.SAVED)
         if (rec.namn) {
           setUserSettings(rec)
         }  
-        setTimeout(() => {setSubmitButtonColor('grey'); setSubmitButtonVariant('outlined')}, 1000);
+        setTimeout(() => setButtonStyle(BUTTON_STYLE.DEFAULT), 2000);
       } else {
-        setButtonStyle(ERROR_BUTTON_STYLE) 
-        setTimeout(() => {setSubmitButtonColor('grey'); setSubmitButtonVariant('contained')}, 2000);
+        setButtonStyle(BUTTON_STYLE.ERROR) 
+        setTimeout(() => setButtonStyle(BUTTON_STYLE.DEFAULT), 5000);
       }
     }
 
@@ -141,7 +161,7 @@ export default props => {
     const handleSave = (e, value) => {
 
         e.preventDefault()
-        setButtonStyle(CLICKED_BUTTON_STYLE)
+        setButtonStyle(BUTTON_STYLE.CLICKED)
         if (!!email) {
           const record = {...value, email, creaTimestamp:undefined, updTimestamp:undefined, authLevel:undefined}
           const data = {tableName:'tbl_user', record, fetchRows:true}
@@ -154,13 +174,15 @@ export default props => {
 
     const color = userSettings.color
     const background = 'linear-gradient(to bottom right, ' + userSettings.backgroundColorLight + ' ,' + userSettings.backgroundColorDark + ')'
-
+    
+    const borderWidth = userSettings.borderWidth
+    const borderColor = userSettings.borderColor
     const filterFields = fields.filter(it=>it.authLevel?userSettings.authLevel>=it.authLevel:true)
     const buttons=[
       {
-          style:buttonStyle,
           type:'button',
           label:'Save',
+          style:buttonStyle,
           handleClick:e=>handleSave(e, userSettings)
       },    
   ]
@@ -176,7 +198,7 @@ export default props => {
                 buttons={buttons}
             />
             <div>
-              <div style={{position:'absolute', width:200, height:100, textAlign:'center', color, background}}>
+              <div style={{position:'absolute', width:200, height:100, textAlign:'center', color, background, borderStyle:'solid', borderWidth, borderColor}}>
                 Show colors
               </div>  
             </div>

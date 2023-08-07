@@ -52,11 +52,7 @@ export default function App() {
             <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="home" element={<Home />} />
-                <Route path="calendar" element={<Navigate to={'/calendar/malmo'} />} />
-                <Route path="malmo" element={<Navigate to={'/calendar/malmo'} />} />
-                <Route path="lund" element={<Navigate to={'/calendar/malmo'} />} />
-                <Route path="calendar" element={<Navigate to={'/calendar/malmo'} />} />
-                <Route path="helsingborg" element={<Navigate to={'/calendar/helsingnborg'} />} />
+                <Route path="/calendar/:calendarName" element={<Calendar />} />
                 <Route path="stockholmPages" element={<RedirectToMultiple 
                         Tangohelheten='https://www.tangohelheten.se/kalender' 
                         Tantonorte='http://www.tangonorte.com/events.php' 
@@ -67,7 +63,6 @@ export default function App() {
                     />}
                 />
                 <Route path="gothenburgNew" element={<Navigate to={'/calendar/gothenburgNew'} />} />
-                <Route path="/calendar/:calendarName" element={<Calendar />} />
                 <Route path="calendars" element={<AllCalendars />} />
                 <Route path="denmark" element={<RedirectTo url='https://www.brownbearsw.com/cal/tangodk_mil_kbh' />} />
                 <Route path="fortuna" element={<RedirectTo url='https://www.tangofortuna.com/' />} />

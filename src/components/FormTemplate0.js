@@ -65,9 +65,9 @@ export default props => {
                         return(
                             <p>
                                 <Tooltip title={fld['tooltip']?fld['tooltip']:''}>
-                                    <>
+                                    <label style={fld.styleLabel}>
                                         {label}&nbsp;
-                                    </>
+                                    </label>
                                 </Tooltip>
                                 <input size={200} type={fld.type} checked={value[fld.name]?true:false} name={fld.name} style={fld.style}  required={fld.required} onChange={handleChange} />
                             </p> 
@@ -76,9 +76,9 @@ export default props => {
                         return(
                             <p>
                                 <Tooltip title={fld['tooltip']?fld['tooltip']:''}>
-                                    <>
+                                    <label style={fld.styleLabel}>
                                         {label}&nbsp;{fld.required?<sup style={{color:'red'}}>*</sup>:null}
-                                    </>
+                                    </label>
                                  </Tooltip>   
                                 <br/>
                                 {fld.names.map(name =>
@@ -92,9 +92,9 @@ export default props => {
                         return(
                             <p>
                                 <Tooltip title={fld['tooltip']?fld['tooltip']:''}>
-                                    <>
+                                <label style={fld.styleLabel}>
                                         {label}&nbsp;{fld.required!==null?<sup style={{color:'red'}}>*</sup>:null}<br/>
-                                    </>
+                                    </label>
                                 </Tooltip>
                                 {radioValues?radioValues.map(val =>
                                     <>
@@ -107,7 +107,9 @@ export default props => {
                 case 'textarea':
                         return(
                             <p>
-                            {label}&nbsp;{fld.required?<sup style={{color:'red'}}>*</sup>:null}&nbsp;<br/>
+                            <label style={fld.styleLabel}>
+                                {label}&nbsp;{fld.required?<sup style={{color:'red'}}>*</sup>:null}&nbsp;<br/>
+                            </label>
                             {isAndroid && value[fld.name] !== 'TEST'?
                                 update?
                                     <div style={{maxWidth:'99vw'}}dangerouslySetInnerHTML={{__html: value[fld.name]}} onClick={() => alert('Cannot be modified on Android mobile units. Make change of this description field on computer.')} />
@@ -123,9 +125,9 @@ export default props => {
                             return(
                                     <p>
                                             <Tooltip title={fld['tooltip']?fld['tooltip']:''}>
-                                                <>
+                                                <label style={fld.styleLabel}>
                                                     {label}&nbsp;{fld.required?<sup style={{color:'red'}}>*</sup>:null}&nbsp;<br/>
-                                                </>    
+                                                </label>    
                                             </Tooltip>
                                             <textarea rows={5} cols={40} name={fld.name} value={value[fld.name]} required={fld.required} onChange={handleChange}/>
                                     </p>
@@ -135,9 +137,9 @@ export default props => {
                         return(
                             <p>
                                     <Tooltip title={fld['tooltip']?fld['tooltip']:''}>
-                                        <>
+                                        <label style={fld.styleLabel}>
                                             {label}
-                                        </>
+                                        </label>
                                     </Tooltip>
                                     &nbsp;
                                     {fld.required?<sup style={{color:'red'}}>*</sup>:null}&nbsp;<br/>
