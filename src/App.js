@@ -10,6 +10,7 @@ import Privacy from "./pages/Privacy";
 import Service from "./pages/Service";
 import Add from "./pages/Add";
 import Update from "./pages/Update";
+import Copy from "./pages/Copy";
 import SetupUser from './pages/SetupUser'
 import AppBar from './components/AppBar'
 import RedirectToMultiple from './pages/RedirectToMultiple'
@@ -18,6 +19,7 @@ import FirebaseSignin from './login/FirebaseSignin';
 import FirebaseResetPassword from './login/FirebaseResetPassword';
 import serverFetch from './services/serverFetch'
 import {COLORS} from './services/const'
+import 'bulma/css/bulma.min.css';
 
 import "./App.css"
 
@@ -75,6 +77,7 @@ export default function App() {
                 <Route path="service" element={<Service />} />
                 <Route path="add" element={<Add />} />
                 <Route path="update" element={<Update />} />
+                <Route path="copy" element={<Copy />} />
                 <Route path="signin" element={<FirebaseSignin  />} />
                 <Route path="setupUser" element={<SetupUser  />} />
                 <Route path="resetPassword" element={<FirebaseResetPassword />} />

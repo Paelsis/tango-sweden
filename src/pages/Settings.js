@@ -1,12 +1,13 @@
 import React, {useEffect, useRef, useState} from "react"
 import { useSharedState } from '../store';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom'
 import firebaseApp from '../services/firebaseApp'
-import { getAuth, onAuthStateChanged} from 'firebase/auth';
-import FormTemplate from '../components/FormTemplate';
+import { getAuth, onAuthStateChanged} from 'firebase/auth'
+import FormTemplate from '../components/FormTemplate'
 import serverFetch from '../services/serverFetch'
 import Add from '../components/AddEvent'
-import serverPost from "../services/serverPost";
+import serverPost from "../services/serverPost"
+import Square from "../components/Square"
 
 const styles = {
     container:{
@@ -92,6 +93,12 @@ const styles = {
         name:'backgroundColorDark',
     },
     {
+      type:'text',
+      label:'Background image (Use url of image)',
+      tooltip: 'You can use a url to an image stored on internet type https://www.kasandbox.org/programming-images/avatars/marcimus-purple.png',
+      name:'backgroundImage',
+    },
+    { 
       type:'radio',
       label:'Border thickness',
       radioValues:['0px', '1px', '2px', '3px', '4px'],
@@ -104,8 +111,9 @@ const styles = {
       tooltip: 'Color of border',
       //disabled:true,
       name:'borderColor',
-  },
+    },
 ]
+
 
 const BUTTON_STYLE = {
   DEFAULT:{color:'black', borderColor:'black', },
@@ -140,9 +148,9 @@ export default props => {
         }
       })
     }, [])
-    
+   
   
-    const handleReplySubmit = (result) => {
+    const handleReplySubmit = result => {
       if (result.status === 'OK') {
         const rec = result.rows.find(it=>it.email === email)
         // alert('RESULT value :' +  JSON.stringify(rec) + ' email:' + email)
@@ -163,7 +171,8 @@ export default props => {
         e.preventDefault()
         setButtonStyle(BUTTON_STYLE.CLICKED)
         if (!!email) {
-          const record = {...value, email, creaTimestamp:undefined, updTimestamp:undefined, authLevel:undefined}
+          const backgroundImage = value.backgroundImage?value.backgroundImage:null
+          const record = {...value, email, backgroundImage, creaTimestamp:undefined, updTimestamp:undefined, authLevel:undefined}
           const data = {tableName:'tbl_user', record, fetchRows:true}
           // alert('handleSubmit data:' + JSON.stringify(data))
           serverPost('/replaceRow', '', '', data, result=>handleReplySubmit(result))
@@ -174,7 +183,6 @@ export default props => {
 
     const color = userSettings.color
     const background = 'linear-gradient(to bottom right, ' + userSettings.backgroundColorLight + ' ,' + userSettings.backgroundColorDark + ')'
-    
     const borderWidth = userSettings.borderWidth
     const borderColor = userSettings.borderColor
     const filterFields = fields.filter(it=>it.authLevel?userSettings.authLevel>=it.authLevel:true)
@@ -185,7 +193,11 @@ export default props => {
           style:buttonStyle,
           handleClick:e=>handleSave(e, userSettings)
       },    
-  ]
+    ]
+    const style = userSettings.backgroundImage?
+      {position:'absolute', width:200, height:100, textAlign:'center', color, backgroundSize:'50% 100%', backgroundImage:`url(${userSettings.backgroundImage})`, backgroundColor:userSettings.backgroundColorLight,  borderStyle:'solid', borderWidth, borderColor}
+    :
+      {position:'absolute', width:200, height:100, textAlign:'center', color, background, borderStyle:'solid', borderWidth, borderColor}
 
     return(  
       <div style={{...styles.container}}>
@@ -198,9 +210,7 @@ export default props => {
                 buttons={buttons}
             />
             <div>
-              <div style={{position:'absolute', width:200, height:100, textAlign:'center', color, background, borderStyle:'solid', borderWidth, borderColor}}>
-                Show colors
-              </div>  
+              <Square settings={userSettings} />
             </div>
           </>           
         :

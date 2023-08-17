@@ -27,12 +27,12 @@ const styles={
     }    
   }
 
-export default (props) => {
+export default props => {
     const [value, setValue] = useState(props.children)
     const handleChange = e => setValue(e.target.value)
     return(
         props.email?
-            <div style={{...styles.container}}>
+            <div style={styles.container}>
             <textarea 
                 cols={30}
                 rows={4}
@@ -45,7 +45,7 @@ export default (props) => {
             </div>           
 
         :
-            <div style={{fontWeight:800}} dangerouslySetInnerHTML={{__html: props.children}} />
+            <div style={{fontWeight:600}} dangerouslySetInnerHTML={{__html: props.children}} />
     )
         
 }

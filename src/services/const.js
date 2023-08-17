@@ -1,3 +1,5 @@
+import casaBlanca from '../images/VitaHuset.jpg';
+
 export const AVA_STATUS = {
     AV:'AV', // Avaiable space
     CC:'CC', // Completely closed
@@ -48,4 +50,15 @@ export const COLORS = {
   WHITE:'white',
   BLUE:'blue',
   LIGHTBLUE:'lightBlue'
+}
+
+export const backgroundImages = {
+  casaBlanca:`url(${casaBlanca})`
+}  
+
+export const BUTTON_STYLE = {
+  DEFAULT:{color:'black', borderColor:'black'},
+  CLICKED:{color:'yellow', borderColor:'yellow'},
+  SAVED:{color:'green', borderColor:'green'},
+  ERROR:{color:'red', borderColor:'red'},
 }

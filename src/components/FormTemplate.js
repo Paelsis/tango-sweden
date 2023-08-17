@@ -16,13 +16,10 @@ const getField = column => {
 // FormTemplate.js
 export default props => {
     const {fields, buttons, value, setValue} = props
-    const componentRef=useRef()
     const handleKeyPress = e => {
         if (e.key === 'Enter' && !!props.handlePressEnter) {
             props.handlePressEnter()
-        } else {
-            props.setList([])
-        }
+        } 
     }
 
     const inputRef = useRef(null);

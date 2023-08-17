@@ -18,9 +18,25 @@ export const replaceSwedishChars = value => {
 }
 
 export const replaceChar = (origString, replaceChar, index) => {
-    let firstPart = origString.substr(0, index);
-    let lastPart = origString.substr(index + 1);
+    let firstPart = origString.substring(0, index);
+    let lastPart = origString.substring(index + 1);
       
     let newString = firstPart + replaceChar + lastPart;
     return newString;
 }
+
+export const styleSquare = userSettings=>{
+    const color = userSettings.color
+    const background = 'linear-gradient(to bottom right, ' + userSettings.backgroundColorLight + ' ,' + userSettings.backgroundColorDark + ')'
+    const borderWidth = userSettings.borderWidth
+    const borderColor = userSettings.borderColor
+    const backgroundColor = userSettings.backgroundColorLight
+    const backgroundImage = `url(${userSettings.backgroundImage})`
+    return(
+        
+    userSettings.backgroundImage?
+        {textAlign:'center', color, backgroundSize:'50% 100%', backgroundImage:backgroundImage, backgroundColor, borderStyle:'solid', borderWidth, borderColor}
+    :
+        {width:300, height:150, textAlign:'center', color, background, borderStyle:'solid', borderWidth, borderColor}
+    )
+}        

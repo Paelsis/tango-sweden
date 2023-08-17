@@ -1,8 +1,10 @@
 import request from 'superagent'
 import moment from 'moment-with-locales-es6'
-import getStyle from './getStyle'
+import findStaticStyle from './findStaticStyle'
 import serverFetch from './serverFetch'
 import {replaceChar} from '../services/functions'
+import casaBlanca from '../images/VitaHuset.jpg';
+
 
 const CULTURE = (language) => language===LANGUAGE_SV?'sv':language===LANGUAGE_ES?'es':'en'
 const LANGUAGE_SV='SV'
@@ -19,26 +21,28 @@ const findParameter = (s, val) => {
   }  
 }  
 
-function createEvent(props)  {
-  const {start, end, title, description, location, email, company, color, backgroundColorLight, backgroundColorDark, border, borderWidth, borderColor} = props
+function _createEvent(props)  {
+  const {start, end, title, description, location, email, staticStyleId, color, backgroundColorLight, backgroundColorDark, backgroundImage, border, borderWidth, borderColor} = props
   const mstart=moment(start)
   const mend=moment(end).add(start.length <= 10?-1:0, 'days')
-  const duration = moment.duration(mend.diff(mstart));
-  const durationHours = duration.asHours()
-  const dateShift =  moment(start).dayOfYear() - moment(end).dayOfYear() !== 0
+  const timeStart = mstart.format('LT')
+  const timeEnd = mend.format('LT')
+  const fullDay = start.length <= 10 || (timeStart==="00:00" && timeEnd ==="00:00") && dateShift <= 1 || (timeStart==="00:00" && timeEnd ==="23:59")
+  const durationHours = moment.duration(mend.diff(mstart)).asHours()
+  const dateShift =  moment(end).dayOfYear() - moment(start).dayOfYear() 
   const dateRange=(mstart.format('ddd D/M') + ((dateShift && durationHours > 11)?(' - ' +  mend.format('ddd D/M')):''))
-  const timeStart = mstart.format('LT');
-  const timeEnd = mend.format('LT');
   const timeUnset =  (timeStart==="00:00" && timeEnd ==="00:00") 
-  const allDay = start.length < 10 || (timeStart==="00:00" && timeEnd ==="23:59") || (timeStart==="00:00" && timeEnd ==="00:00") 
   const maxPar = Number(findParameter(description, 'MAX_PAR'))
   const maxInd = Number(findParameter(description, 'MAX_IND'))
   const opacity = moment() < mend?1.0:0.4
   const background = "linear-gradient(to bottom right, " + backgroundColorLight + ", " + backgroundColorDark + ")"
-  const style = company?
-      getStyle(company, title, description, opacity)
-    :
-      {...getStyle(company, title, description, opacity), color, background, border, borderWidth, borderColor}
+  const style = 
+    staticStyleId?
+      findStaticStyle(staticStyleId, title, description, opacity)
+    :backgroundImage?
+        {color, border, borderWidth, borderColor, backgroundSize:'50% 100%', backgroundImage:`url(${backgroundImage})`, backgroundColor:backgroundColorLight, border, borderWidth, borderColor,}
+    :  
+        {color, background, border, borderWidth, borderColor}
 
   // alert('hours=' + durationHours)
 
@@ -50,7 +54,7 @@ function createEvent(props)  {
         mend,
         maxInd,
         maxPar,
-        allDay, 
+        fullDay, 
         timeUnset, 
         isToday:moment().isSame(moment(start), 'day')?true:false,
         isWeekend:moment(start).isoWeekday() >=6,
@@ -60,10 +64,8 @@ function createEvent(props)  {
         location:location?location:'No given location',
         city: cityForEvent(title, location),
         weekNumber: moment(start).isoWeek(),
-        dayOfYearStart: moment(start).dayOfYear(),
-        dayOfYearEnd: moment(end).dayOfYear(),
 
-        timeRange: allDay?'Full day':(mstart.format('LT') + '-' + mend.format('LT')),
+        timeRange: fullDay?'Full day':(mstart.format('LT') + '-' + mend.format('LT')),
         timeRangeWithDay: (dateShift && durationHours > 11)?(mstart.format('ddd LT') + '-' + mend.format('ddd LT'))
           :(mstart.format('LT') + '-' + mend.format('LT')),
         style,
@@ -89,7 +91,7 @@ function cityForEvent (title, location) {
 }    
 
 // export means that this function will be available to any module that imports this module
-export function getEventsFromGoogleCal (calendarId, apiKey, timeMin, timeMax, language, company, callback) {
+export function getEventsFromGoogleCal (calendarId, apiKey, timeMin, timeMax, language, staticStyleId, handleReply) {
   const url = `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?key=${apiKey}&timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=${true}&orderBy=startTime`
   request
     .get(url)
@@ -110,11 +112,11 @@ export function getEventsFromGoogleCal (calendarId, apiKey, timeMin, timeMax, la
           const location = it.location?it.location.replace(/Tangokompaniet, |, 212 11 |, 224 64|, 223 63|, Sverige|Stiftelsen Michael Hansens Kollegium, /g, ' ').replace('Fredriksbergsgatan','Fredriksbergsg.'):'Plats ej angiven'
           const eventId = it.id
 
-          event = createEvent({start, end, company, title, description, location, eventId, email:'daniel@tangokompaniet.com', hideLocationAndTime:false, useRegistrationButton:false})
+          event = _createEvent({start, end, staticStyleId, title, description, location, eventId, email:'daniel@tangokompaniet.com', hideLocationAndTime:false, useRegistrationButton:false})
 
           events.push(event)
         })
-        callback(events)
+        handleReply(events)
       } 
     })
 }
@@ -128,8 +130,9 @@ export function getEventsFromTable (irl, callback, timeMin, timeMax, language) {
       list.forEach(it => {
         const location = it.location?it.location.replace(/Tangokompaniet, |, 212 11 |, 224 64|, 223 63|, Sverige|Stiftelsen Michael Hansens Kollegium, /g, ' ').replace('Fredriksbergsgatan','Fredriksbergsg.'):'No location given'
         const start = replaceChar(it.start, 'T', 10); // Fill in T between date and time in start (to get sorting work with Google Cal start)
+        const end = replaceChar(it.end, 'T', 10); // Fill in T between date and time in start (to get sorting work with Google Cal start)
         // alert(start)
-        event = createEvent({...it, location, start})
+        event = _createEvent({...it, location, start, end})
         events.push(event)
       })
     } 

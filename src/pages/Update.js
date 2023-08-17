@@ -1,42 +1,49 @@
 import React, {useState, useEffect} from 'react';
 import { useSharedState } from '../store';
-import  {Component } from 'react'
-import FormTemplate from '../components/FormTemplate0';
+import FormTemplate from '../components/FormTemplate';
 import Button from '@mui/material/Button';
 import {useLocation} from 'react-router-dom'
 import moment from 'moment-with-locales-es6'
-import { textAlign } from '@mui/system';
-import Tooltip from '@mui/material/Tooltip';
-import { AirlineSeatReclineExtra, Description } from '@mui/icons-material';
-import { getAuth, onAuthStateChanged} from 'firebase/auth';
 import { useNavigate } from "react-router-dom";
 import serverPost from '../services/serverPost'
 import AddEvent from '../components/AddEvent'
-
-
+import { BUTTON_STYLE } from '../services/const';
+import { EditorState, ContentState, convertFromHTML } from 'draft-js'
+import Square from '../components/Square'
 
 const styles={
     container:{
+        paddingTop:30,
         display: 'flex',
+        /*
         flexDirection:'column',
         alignItems: 'center',
         justifyContent: 'center',
         maxWidth:'100%'   
+        */
     },
     button:{
         color:'black',
         border:'1px solid red'
     }    
 
-  }
-  
+}
 
+
+const development = process.env.NODE_ENV === 'development'
+  
 const fields = [
     {
         type:'checkbox',
         label:'Change all occurances (default change only single)',
         name:'changeAll',
         tooltip:'Change all events that was creted with this eventId'
+    },
+    {
+        type:'checkbox',
+        label:'Update event with latest settings',
+        name:'updateWithSettings',
+        tooltip:'Change colors of the latest updated ones in settings'
     },
     {
         type:'text',
@@ -90,18 +97,26 @@ const fields = [
         tooltip:'Change end time on all events'
     },
     {
-        type:'textarea',
+        type:'checkbox',
+        label:'Use HTML-editor',
+        name:'htmlEditor',
+        tooltip: 'You can use the HTML-editor if you desire to use more advanced featurs with html for you description field'
+    },
+    {
+        // type:'rte',
+        type:'draft',
         label:'Description',
         name:'description',
+        draftName:'draft_description',
         required:true,
-        hiddenIf:'facebookEventId',
+        hiddenIf:'htmlEditor',
     },
     {
         type:'textarea',
         label:'Description',
         name:'description',
         required:false,
-        notHiddenIf:'facebookEventId',
+        notHiddenIf:'htmlEditor',
     },
     {
         type:'text',
@@ -109,104 +124,184 @@ const fields = [
         tooltip:'The facebook event id (A long digit number)',
         name:'facebookEventId',
     },
+    /*
     {
         type:'checkbox',
-        label:'Change colors to latest settings',
-        name:'adjustColors',
-        tooltip:'Change colors of the latest updated ones in settings'
+        label:'Update settings for this event',
+        name:'updateSettings',
+        tooltip:'Change colors for this particular event'
     },
     {
-        type:'checkbox',
-        label:'Use default settings',
-        tooltip:'Check this box to fill in company if you are from Malmö/Lund and wants defalut settings for colors etc.',
-        name:'defaultSettings',
+        type:'text',
+        label:'Text color',
+        tooltip: 'Text color in text or hex code, Ex 1:red Ex 2:#F6A3BB',
+        name:'color',
+        notHiddenIf:'updateSettings'
     },
     {
-        type:'company',
-        label:'Company (Shall be filled with company for Malmö/Lund (Ex: CARMARIN, ARRIBA, MARCELA, URBANA, HOMERO, CASA BLANCA, ...)',
-        name:'company',
-        tooltip:'If this value is set then the colors defined in the Settings page are overruled and the default colors for Malmö/Lund are used',
-        notHiddenIf: 'defaultSettings'
-    },    
+        type:'text',
+        label:'Background color light',
+        tooltip: 'Light background color when shifting from dark to light, Ex 1:lightBlue Ex 2:#F6A3BB',
+        name:'backgroundColorLight',
+        notHiddenIf:'updateSettings'
+    },
+    {
+        type:'text',
+        label:'Background color dark',
+        tooltip: 'Dark background color when shifting from dark to light, Ex 1:darkBlue Ex 2:#F6A3BB',
+        name:'backgroundColorDark',
+        notHiddenIf:'updateSettings'
+    },
+    {
+      type:'text',
+      label:'Background image (Use url of image)',
+      tooltip: 'You can use a url to an image stored on internet type https://www.kasandbox.org/programming-images/avatars/marcimus-purple.png',
+      name:'backgroundImage',
+      notHiddenIf:'updateSettings'
+    },
+    { 
+      type:'radio',
+      label:'Border thickness',
+      radioValues:['0px', '1px', '2px', '3px', '4px'],
+      tooltip: 'Thickness of border',
+      name:'borderWidth',
+      notHiddenIf:'updateSettings'
+    },
+    {
+      type:'text',
+      label:'Border color',
+      tooltip: 'Color of border',
+      //disabled:true,
+      name:'borderColor',
+      notHiddenIf:'updateSettings'
+    },
+    /*
     {
         type:'checkbox',
         label:'Use registration button',
         name:'useRegistrationButton',
         tooltip:'If you want a registration button and save registrations for the event',
-    },    
+        styleLabel:{opacity:0.4},
+        disabled:true,
+    },
+    */
 ]
+
+function generateEditorStateFromValue(value) {
+    const blocksFromHTML = convertFromHTML(value)
+    const content = ContentState.createFromBlockArray(blocksFromHTML.contentBlocks, blocksFromHTML.entityMap)
+    return EditorState.createWithContent(content)
+}
+
 
   
 export default props => {
     const [userSettings, ] = useSharedState()
-    const [copy, setCopy] = useState()
+    const [value, setValue] = useState({})
+    const [buttonStyle, setButtonStyle] = useState()
     const navigate = useNavigate() 
     const location = useLocation();
-    const event = location.state?location.state:undefined
-    const originalStartDateTime=location.state?location.state.startDateTime:undefined
-    const handleReply = reply => {
-        reply.status==='OK'?navigate('/calendar/' + userSettings.region):reply.message?alert(reply.message):alert('ERROR with no reply message')     
-    }
-    const handleSubmit = (e, value) => {
-        const irl = '/updateEvent'
 
-        e.preventDefault();
+    const initEvent = () => {
+        const event = location.state?location.state:undefined
+        if (event) {
+            const changeAll = event.changeAll
+
+            return {...event,
+                    startTime:event.startDateTime.substring(11, 16),
+                    endTime:event.endDateTime.substring(11,16),
+                    startDateTime:changeAll?undefined:event.startDateTime.substring(0,16),
+                    endDateTime:changeAll?undefined:event.endDateTime.substring(0,16),
+                    draft_description: generateEditorStateFromValue(event.description),
+            }
+        } else {
+            // Draft editor init without value
+            const draft_description = EditorState.createEmpty()
+            return {draft_description}
+        }
+    }
+    const init = initEvent()
+
+    useEffect(()=>{
+        if (location.state) {
+            setValue(init)
+        } else {
+            navigate('/home')
+        }    
+    }, [location.state])
+
+    const handleReply = reply => {
+        setButtonStyle(BUTTON_STYLE.SAVED)
+        if (reply.status==='OK') {
+            navigate('/calendar/' + userSettings.region)
+            setButtonStyle(BUTTON_STYLE.SAVED)
+            setTimeout(() => setButtonStyle(BUTTON_STYLE.DEFAULT), 2000);
+    
+        } else {
+            setButtonStyle(BUTTON_STYLE.ERROR)
+            setTimeout(() => alert('ERROR:' + reply.message), 5000);
+        }     
+    }
+    const handleUpdate = () => {
+        const irl = '/updateEvent'
+        setButtonStyle(BUTTON_STYLE.CLICKED)
+
         if (moment(value.startDateTime) > moment(value.endDateTime)) {
             alert('WARNING: End of the event must be set later than start of the event. Please check dates and times.')
             return
         }
-        const settings = value.adjustColors===true?userSettings:{}
-        const data = {...value, ...settings, originalStartDateTime}
+        const backgroundImage = userSettings.backgroundImage?userSettings.backgroundImage:""
+        const settings = value.updateWithSettings?{...userSettings, backgroundImage}:{}
+        const startDateTime = value.changeAll?undefined:value.startDateTime;
+        const endDateTime = value.changeAll?undefined:value.endDateTime;
+        const data = {...value, ...settings, startDateTime, endDateTime} 
 
-        // alert('handleSubmit:' + JSON.stringify(data))
+        // alert('handleUpdate:' + JSON.stringify(data))
         
         serverPost(irl, '', '', data, handleReply)
     }    
 
-    const handleCopy = value => {
-            setCopy({...value, id:undefined})
-    }    
+    const handleReset = () => {setValue(init)}
 
-    const handleCancel = () => setCopy(undefined)
+    const handleEmpty = () => {setValue({})}
 
-    const adjustEvent = event => {
-        return {...event,
-            startTime:event.startDateTime.substring(11, 16), 
-            endTime:event.endDateTime.substring(11,16), 
-            startDateTime:event.startDateTime.substr(0,16),
-            endDateTime:event.endDateTime.substr(0,16),
-        }
-    }
+    const buttons=[
+        {
+            type:'button',
+            label:'Update',
+            style:buttonStyle,
+            handleClick:handleUpdate
+        },    
+        {
+            type:'button',
+            label:'Reset',
+            style:buttonStyle,
+            handleClick:handleReset
+        },    
+        {
+            type:'button',
+            label:'Empty',
+            style:buttonStyle,
+            handleClick:handleEmpty
+        },    
+    ]
+
             
     return (
         <div style={styles.container}>
-            <h3>Calendar name: {userSettings.calendarName}</h3>
-            {copy?
-                <>
-                <h3>Change in the copy below and save</h3>
-                <AddEvent 
-                    {...props}
-                    init={copy} 
-                    handleCancel={handleCancel}
+            <div className='columns m-2 is-centered is-half'>
+                <div className="column is-three-quarters">
+                <FormTemplate 
+                    fields={fields} 
+                    value={value}
+                    setValue={setValue}
+                    buttons={buttons}
                 />
-            </>
-            :event?
-                <>
-                    <FormTemplate 
-                        fields={fields} 
-                        init={adjustEvent(event)} 
-                        handleCopy={handleCopy}
-                        handleSubmit={handleSubmit}
-                        submitButtonLabel={'Update'}
-                        submitButtonTooltip={'Update calendar wiht new data'}
-                        submitButtonText={'UPDATE'}
-                        submitButtonColor='grey'
-                        update={true}
-                    />
-                </>
-            :
-                <h4>Click on Update button of any event in the calendar</h4>
-            }        
+                </div>
+                <Square settings={value.updateWithSettings?userSettings:value} />
+            </div>
         </div>
    )
 }
+
+// {JSON.stringify(value)}

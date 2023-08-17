@@ -80,10 +80,10 @@ export default props => {
         let obj = list.find(it=>it.id)
         let text = "Tag bort bort id:" + id + " från tabellen. \n\nNamn:" + (obj?obj.namn?obj.namn:'Saknas':'Saknas') + '\n\nRecord:\n' + JSON.stringify(obj)
         // eslint-disable-next-line no-restricted-globals
-        if (confirm(text)) {
+        //if (confirm(text)) {
             handleStatus({color:'white', backgroundColor:'green'}, 'Remove from table ' + tableName); 
             serverPost('/deleteRow', '', '', {tableName, 'id':id, 'fetchRows':true}, handleReplyDelete)
-        }
+        //}
     }
 
     const handleChange = (e, id) => setList(list.map(it=>{

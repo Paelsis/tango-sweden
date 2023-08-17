@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import { useSharedState } from '../store';
 import { useNavigate } from 'react-router-dom';
-import FormTemplate from './FormTemplate0';
+import FormTemplate from './FormTemplate';
 import Button from '@mui/material/Button';
 import moment from 'moment'
 import IconButton from '@mui/material/IconButton';
@@ -11,15 +11,21 @@ import RemoveCircleIcon from '@mui/icons-material/RemoveCircleOutline';
 import Tooltip from '@mui/material/Tooltip';
 import serverPost from '../services/serverPost'
 import { getAuth, onAuthStateChanged} from 'firebase/auth';
+import {isAndroidOperatingSystem} from '../services/isAndroid'
+import Square from '../components/Square'
 
+const isAndroid = isAndroidOperatingSystem()
 
 const styles={
     container:{
-        maxWidth:'100%',
+        paddingTop:30,
+        /*
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-    }    
+        flexDirection:'column',
+        maxWidth:'100%',   
+        alignItems:'center'
+        */
+    },
   }
 
 const BUTTON_STYLE = {
@@ -121,18 +127,25 @@ const fields = [
         tooltip: 'Event enddate is filled in when not same as startdate'
     },
     {
-        type:'textarea',
+        type:'checkbox',
+        label:'HTML-editor (runs better on Android mobiles)',
+        name:'htmlEditor',
+        tooltip: 'Event enddate defaults to same as startdate'
+    },
+    {
+        // type:'rte',
+        type:'draft',
         label:'Description',
         name:'description',
         required:true,
-        hiddenIf:'facebookEventId',
+        hiddenIf:'htmlEditor',
     },
     {
         type:'textarea',
         label:'Description',
         name:'description',
         required:false,
-        notHiddenIf:'facebookEventId',
+        notHiddenIf:'htmlEditor',
     },
     {
         type:'text',
@@ -163,7 +176,7 @@ const fields = [
         type:'radio',
         label:'Offset unit',
         name:'unit',
-        values:['days', 'weeks', 'months'],
+        radioValues:['days', 'weeks', 'months'],
         notHiddenIf:'repeat',
         required:true,
         tooltip: 'The offset between events should be combined with offset unit'
@@ -180,24 +193,53 @@ const fields = [
     },
     {
         type:'checkbox',
-        label:'Use default settings',
-        tooltip:'Check this box to fill in company if you are from Malmö/Lund and wants defalut settings for colors etc.',
-        name:'defaultSettings',
-    },
-    {
-        type:'text',
-        label:'Company (Shall be filled with company for Malmö/Lund (Ex: CARMARIN, ARRIBA, MARCELA, URBANA, HOMERO, CASA BLANCA, ...)',
-        name:'company',
-        tooltip:'If this value is set then the colors defined in the Settings page are overruled and the default colors for Malmö/Lund are used',
-        notHiddenIf: 'defaultSettings'
-    },    
-    {
-        type:'checkbox',
         label:'Use registration button',
         name:'useRegistrationButton',
         tooltip:'If you want a registration button and save registrations for the event',
+        disabled:'true'
     },    
 ]
+const fieldsSettings = [
+    {
+        type:'text',
+        label:'Text color',
+        tooltip: 'Text color in text or hex code, Ex 1:red Ex 2:#F6A3BB',
+        name:'color',
+    },
+    {
+        type:'text',
+        label:'Background color light',
+        tooltip: 'Light background color when shifting from dark to light, Ex 1:lightBlue Ex 2:#F6A3BB',
+        name:'backgroundColorLight',
+    },
+    {
+        type:'text',
+        label:'Background color dark',
+        tooltip: 'Dark background color when shifting from dark to light, Ex 1:darkBlue Ex 2:#F6A3BB',
+        name:'backgroundColorDark',
+    },
+    {
+    type:'text',
+    label:'Background image (Use url of image)',
+    tooltip: 'You can use a url to an image stored on internet type https://www.kasandbox.org/programming-images/avatars/marcimus-purple.png',
+    name:'backgroundImage',
+    },
+    { 
+    type:'radio',
+    label:'Border thickness',
+    radioValues:['0px', '1px', '2px', '3px', '4px'],
+    tooltip: 'Thickness of border',
+    name:'borderWidth',
+    },
+    {
+    type:'text',
+    label:'Border color',
+    tooltip: 'Color of border',
+    //disabled:true,
+    name:'borderColor',
+    },
+]
+
 
 /*
 {
@@ -250,99 +292,146 @@ const CandidateTable = ({list, deleteRow, clearAll, handleAddToCalendar, buttonS
 
 
 export default props => {
-    const [userSettings,] = useSharedState()
+    const [userSettings, setUserSettings] = useSharedState()
     const [email, setEmail] = useState(undefined)
-    const [color, setColor] = useState('black')
+    const [value, setValue] = useState(props.init?props.init:{})
     const [buttonStyle, setButtonStyle] = useState(BUTTON_STYLE.DEFAULT)
+    const [list, setList] = useState([])
     const navigate = useNavigate()
     const auth = getAuth()
+    const irl = '/addEvents'
 
+    // useEffect(()=>setValue(props.init),[props.init])
 
     useEffect(()=>onAuthStateChanged(auth, user => {
         setEmail(user.email)
         moment.locale('sv', {week:{dow : 1}})
     }))
-    const [list, setList] = useState([])
-    const irl = '/addEvents'
     const deleteRow = index => setList(list.filter((it, idx)=>idx !== index))  
     const handleReply = reply => {
             if (reply.status==='OK') {
-                setButtonStyle(BUTTON_STYLE.SAVED)
-                setTimeout(() => navigate('/calendar/' + userSettings.region), 1000)
+                setButtonStyle(BUTTON_STYLE.DEFAULT)
+                navigate('/calendar/' + userSettings.region)
             } else {
                 setButtonStyle(BUTTON_STYLE.ERROR)
                 alert(reply.message?('Error message:' + reply.message):JSON.stringify(reply))
             }
     }
+    const handleCancel = () => {
+        navigate('/calendar/' + userSettings.region)
+    }
+
+    const handleReset = () => {
+        setValue({})
+    }
+
     const handleAddToCalendar = () => {setButtonStyle(BUTTON_STYLE.CLICKED); serverPost(irl, '', '', list, handleReply);}
 
-    const changeToDbEntry = form => ({
-            title:form.title, 
-            description:form.description?form.description:'No description yet ...',
-            company:form.company,
-            startDateTime:form.startDate + 'T' + (form.startTime?form.startTime:'00:00'),
-            endDateTime:(form.endDate?form.endDate:form.startDate) + 'T' + (form.endTime?form.endTime:'23:59'),
-            location:form.location,
+    const changeToDbEntry = val => ({
+            title:val.title, 
+            description:val.description?val.description:'No description yet ...',
+            company:val.company,
+            startDateTime:val.startDate + 'T' + (val.startTime?val.startTime:'00:00'),
+            endDateTime:(val.endDate?val.endDate:val.startDate) + 'T' + (val.endTime?val.endTime:'23:59'),
+            location:val.location,
             email,
-            ...userSettings,
+            ...userSettings, // Not all columns in userSettings that has the corresponding column in tbl_calendar will copy this value from tbl_user to tbl_calendar
     })
 
-    const adjustForm = originalForm => {
-        if (originalForm.multipleDays) {
-            return originalForm
+    const adjustValue = () => {
+        if (value.multipleDays) {
+            return value
         } else {
-            return {...originalForm, endDate:originalForm.startDate}
+            return {...value, endDate:value.startDate}
         }
     }
 
-    const handleSubmit = (e, form) => {
-        e.preventDefault(); 
-        let dbEntry = changeToDbEntry(adjustForm(form))
+    const handleAddList = () => {
+        let dbEntry = changeToDbEntry(adjustValue(value))
         let myList =[dbEntry]
 
         // Endddate must be greater than start date
         if (moment(dbEntry.startDateTime) >= moment(dbEntry.endDateTime)) {
-            alert('Check start and end date. End of this event must be later than start of the event.')
+            alert('Warning: End time must be later than start time of the event.')
             return
         }
     
-        if (form.repeat) {
-            let offset = form.offset
-            let unit = form.unit
-            let until = form.until
-            let numberOfTimes = form.numberOfTimes
-            let startDate = form.startDate
-            let endDate = form.endDate?form.endDate:form.startDate
+        if (value.repeat) {
+            let offset = value.offset
+            let unit = value.unit
+            let until = value.until
+            let numberOfTimes = value.numberOfTimes
+            let startDate = value.startDate
+            let endDate = value.endDate?value.endDate:value.startDate
             let cnt = 1
             do {
-                startDate = moment(startDate, ).add(offset, unit).format('YYYY-MM-DD')
-                endDate = moment(endDate, 'YYYY-MM-DD').add(offset, unit).format('YYYY-MM-DD')
-                let offsetForm = {...form, startDate, endDate}
-                dbEntry = changeToDbEntry(offsetForm);
+                startDate = moment(startDate).add(offset, unit).format('YYYY-MM-DD')
+                endDate = moment(endDate).add(offset, unit).format('YYYY-MM-DD')
+                let offsetValue = {...value, startDate, endDate}
+                dbEntry = changeToDbEntry(offsetValue);
                 myList = [...myList, dbEntry]
                 cnt++
-            } while (until?(moment(startDate, 'YYYY-MM-DD').add(offset, unit) <= moment(until, 'YYYY-MM-DD')):numberOfTimes > 1?cnt < numberOfTimes:false)
+                // alert(startDate + ' offset:' + offset)
+            } while (until?(moment(startDate) <= moment(until, 'YYYY-MM-DD')):numberOfTimes > 1?cnt < numberOfTimes:false)
         }
         
         setList([...list, ...myList].sort((a,b)=> moment(a.startDateTime)-moment(b.startDateTime)))
     }
+    const buttons=[
+        {
+            type:'button',
+            label:'Add to list',
+            style:buttonStyle,
+            handleClick:handleAddList
+        },    
+        {
+            type:'button',
+            label:'Reset',
+            style:buttonStyle,
+            handleClick:handleReset
+        },    
+        {
+            type:'button',
+            label:'Reset',
+            style:buttonStyle,
+            handleClick:handleCancel
+        },    
+    ]
+    const currentSettings = props.init?props.init:userSettings
     return(
-        <div>
-            <h3 style={{textAlign:'center'}}>City: {userSettings.city} Region:{userSettings.region}</h3>    
+        <div style={styles.container}>
+            <div className='columns is-centered'>
+                <div className='is-2 column'>
+                    <h3>City: {userSettings.city} Region:{userSettings.region}</h3>    
+                </div>
+            </div>    
+            <div className='columns m-2 is-centered'>
+                <div className='column is-6 is-narrow'>
+                    <FormTemplate 
+                                fields={fields} 
+                                value={value}
+                                setValue={setValue}
+                                setList={setList}
+                                buttons={buttons}
+                    />
+                </div>
+                <div className='column is-4 is-narrow'>
+                    <CandidateTable 
+                        buttonStyle={buttonStyle} 
+                        list={list} 
+                        deleteRow={deleteRow} 
+                        handleAddToCalendar={handleAddToCalendar} 
+                        clearAll={()=>setList([])}
+                    />
+                 </div>
+                 <div className='column is-2 is-narrow'>
+                    <div className="column is-hidden-mobile">
+                        <Square settings={userSettings} />
+                    </div>  
+                </div>    
 
-            <div style={{...styles.container, color}}>
-            <FormTemplate 
-                init={props.init?props.init:undefined}
-                handleCancel={props.handleCancel}
-                fields={fields} 
-                handleSubmit={handleSubmit}
-                submitButtonTooltip={'Add to list of candidates before sending final list to calender'}
-                submitButtonLabel={'Add to list'}
-                submitButtonColor={buttonStyle.color}
-            />
-            <CandidateTable buttonStyle={buttonStyle} list={list} deleteRow={deleteRow} handleAddToCalendar={handleAddToCalendar} clearAll={()=>setList([])} />
-            </div>           
-        </div>
+            </div>     
+          </div>
     )
         
 }

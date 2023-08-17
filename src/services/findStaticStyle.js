@@ -5,7 +5,13 @@ import easter from '../images/easter_banner.jpg';
 import maraton from '../images/maraton_banner.jpg';
 
   
-  const stylesByCompany = [
+  const staticStyleIds = [
+    {
+      searchValue:'TANGOKOMPANIET',
+      // style:{color:"yellow", backgroundImage: `url(${Dance})`},  
+      style:{color:"#f2e2e9", background: 'linear-gradient(to bottom right, #81185B, #442222)'}
+    },
+    /*
     {
       searchValue:'CAMARIN',
       style:{color:'white', background: 'linear-gradient(to bottom right, #BB0000, #222233'},
@@ -82,38 +88,33 @@ import maraton from '../images/maraton_banner.jpg';
       style:{color:"white", background: 'linear-gradient(-45deg, #D08E1F 0%, #C17E2F 100%'}
     },
     {
-      searchValue:'TANGOKOMPANIET',
-      // style:{color:"yellow", backgroundImage: `url(${Dance})`},  
-      style:{color:"#f2e2e9", background: 'linear-gradient(to bottom right, #81185B, black'}
-    },
-    {
       searchValue:'DEFAULT',
       // style:{color:"yellow", backgroundImage: `url(${Dance})`},  
       style:{color:"#f2e2e9", background: 'linear-gradient(to bottom right, darkRed, orange'}
     },
+    */
   ]
     
-  const getCompanyStyle = val => val?stylesByCompany.find(it => val.toUpperCase().indexOf(it.searchValue.toUpperCase()) > -1):undefined
+  const _findStyle = val => val?staticStyleIds.find(it => val.toUpperCase().indexOf(it.searchValue.toUpperCase()) > -1):undefined
 
-
-  export default (company, title, description, opacity) => {
-    let companyStyle=getCompanyStyle(company) // If company given, try this first
-    if (companyStyle) {
-      return {...companyStyle.style, padding:2, opacity}
+  export default (staticStyleId, title, description, opacity) => {
+    let foundStyle=_findStyle(staticStyleId) // If staticStyleId given, try this first
+    if (foundStyle) {
+      return {...foundStyle.style, padding:2, opacity}
     }  
 
-    companyStyle=getCompanyStyle(title)  // Try to figure out company by title text
-    if (companyStyle) {
-      return {...companyStyle.style, padding:2, opacity}
+    foundStyle=_findStyle(title)  // Try to figure out staticStyleId by title text
+    if (foundStyle) {
+      return {...foundStyle.style, padding:2, opacity}
     }  
     
-    companyStyle=getCompanyStyle(description) // Try to figure out company by desc text
-    if (companyStyle) {
-      return {...companyStyle.style, padding:2, opacity}
+    foundStyle=_findStyle(description) // Try to figure out staticStyleId by desc text
+    if (foundStyle) {
+      return {...foundStyle.style, padding:2, opacity}
     }  
 
-    companyStyle=stylesByCompany[stylesByCompany.length-1]  // Use default style
-    return {...companyStyle.style, padding:2, opacity}
+    foundStyle=staticStyleIds[staticStyleIds.length-1]  // Use default style
+    return {...foundStyle.style, padding:2, opacity}
   }  
 
 

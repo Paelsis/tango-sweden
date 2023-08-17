@@ -13,6 +13,33 @@ import { useNavigate } from "react-router-dom";
 import AddEvent from '../components/AddEvent'
 import reactBreak from 'react-break';
 
+const styles = {
+  textarea:{
+    backgroundColor:'transparent',
+    padding:0,
+    margin:0, 
+    whiteSpace: 'pre-wrap',       
+    wordWrap: 'break-word',
+  },
+
+  rte:{
+    maxWidth:'98vw', 
+    fontWeight:700
+  }
+}
+
+const renderDescription = (description, type, handleClose) => {
+  return(
+    type==='rte'?
+       <div style={styles.rte} dangerouslySetInnerHTML={{__html: description}} onClick={handleClose} />
+    :type==='textarea'?
+      <pre className = 'is-family-primary' style={styles[type]} onClick={handleClose} >{description}</pre>
+    :<div style={styles['textarea']} onClick={handleClose} >{description}</div>
+  )
+}
+
+
+
 export default function DialogSlide(props) {
   const {open, setOpen, event} = props
   const  [email, setEmail] = useState(undefined)
@@ -28,6 +55,45 @@ export default function DialogSlide(props) {
     e.preventDefault(); 
     // alert('Update:' + JSON.stringify(ev))
     navigate('/update', {
+      state: { 
+        eventId:ev.eventId, 
+        facebookEventId:ev.facebookEventId,
+        title:ev.title, 
+        company:ev.company, 
+        description:ev.description, 
+        location:ev.location, 
+        startDateTime:ev.start, 
+        endDateTime:ev.end,
+        hideLocationAndTime:ev.hideLocationAndTime==1?1:0, 
+        useRegistrationButton:ev.useRegistrationButton==1?1:0,
+        color:ev.color,
+        backgroundColorLight:ev.backgroundColorLight,
+        backgroundColorDark:ev.backgroundColorDark,
+        borderColor:ev.borderColor,
+        borderWidth:ev.borderWidth,
+        backgroundImage:ev.backgroundImage,
+
+      }
+    })
+  }
+  const handleDeleteSingle = () =>  {
+    let text = "Press OK to delete this event (eventId=" + eventId + ")";
+    // eslint-disable-next-line no-restricted-globals
+    //if (confirm(text) === true) {
+    serverPost(irl, '', '', {eventId, email, startDateTime:event.start}, handleReply)
+    // } 
+  }  
+  const handleDeleteAll = () => {
+    let reply = "Press OK to delete all occurrances of this event (eventId=" + eventId + ")";
+    // eslint-disable-next-line no-restricted-globals
+    if (confirm(reply) === true) {
+      serverPost(irl, '', '', {eventId, email}, handleReply)
+    } 
+  }
+  const handleCopy = (e, ev) => {
+    e.preventDefault(); 
+    // alert('Update:' + JSON.stringify(ev))
+    navigate('/copy', {
       state: {
         eventId:ev.eventId, 
         facebookEventId:ev.facebookEventId,
@@ -39,26 +105,14 @@ export default function DialogSlide(props) {
         endDateTime:ev.end,
         hideLocationAndTime:ev.hideLocationAndTime==1?1:0, 
         useRegistrationButton:ev.useRegistrationButton==1?1:0,
+        color:ev.color,
+        backgroundColorLight:ev.backgroundColorLight,
+        backgroundColorDark:ev.backgroundColorDark,
+        borderColor:ev.borderColor,
+        borderWidth:ev.borderWidth,
+        backgroundImage:ev.backgroundImage,
       }
     })
-  }
-  const handleDeleteSingle = () =>  {
-    let text = "Press OK to delete this event (eventId=" + eventId + ")";
-    // eslint-disable-next-line no-restricted-globals
-    if (confirm(text) === true) {
-      serverPost(irl, '', '', {eventId, email, startDateTime:event.start}, handleReply)
-    } 
-  }  
-  const handleDeleteAll = () => {
-    let reply = "Press OK to delete all occurrances of this event (eventId=" + eventId + ")";
-    // eslint-disable-next-line no-restricted-globals
-    if (confirm(reply) === true) {
-      serverPost(irl, '', '', {eventId, email}, handleReply)
-    } 
-  }
-  const handleCopy = (e, event) => {
-    e.preventDefault()  
-    setCopy(event)
   }
 
   const handleRegistration = (event) => {
@@ -85,9 +139,9 @@ export default function DialogSlide(props) {
           }
           <DialogContent>
             <DialogContentText id="alert-dialog-description">
-              {linkToFacebook?<a href={linkToFacebook}>Link to event in Facebook</a>:null}
+              {linkToFacebook?<a href={linkToFacebook}>Link to Facebook</a>:null}
               <p/>
-              <div style={{maxWidth:'99vw', fontWeight:900}} dangerouslySetInnerHTML={{__html: event.description}} onClick={handleClose} />
+              <div style={styles.rte} dangerouslySetInnerHTML={{__html: event.description}} onClick={handleClose} />
             </DialogContentText>
           </DialogContent>
           <DialogActions>
@@ -95,6 +149,9 @@ export default function DialogSlide(props) {
                <>
                 <Button variant='outlined' onClick={e=>handleUpdate(e, event)} autoFocus>
                   Update
+                </Button>
+                <Button variant='outlined' onClick={e=>handleCopy(e, event)} autoFocus>
+                  Copy
                 </Button>
                 <Button variant='outlined' onClick={handleDeleteSingle} autoFocus>
                   Delete single
@@ -121,3 +178,5 @@ export default function DialogSlide(props) {
   );
 
 }
+
+

@@ -6,7 +6,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import '../style.css';
 import {getEventsFromGoogleCal, getEventsFromTable} from '../services/getEvents'
 import DialogSlide from './DialogSlide'
-import SmallCalendarView from './SmallCalendarView'
+import CalendarSmall from './CalendarSmall'
 import { isMobile} from "react-device-detect"
 import ShowTable from "../components/ShowTable"
 import Button from '@mui/material/Button';
@@ -95,13 +95,14 @@ export default props => {
     )
     */
     if (calendarName === 'malmö' || calendarName === 'skåne') {
+      const staticStyleId = 'TANGOKOMPANIET'
       getEventsFromGoogleCal(
         calendarId_TK,
         apiKey_TK,
         timeMin.format('YYYY-MM-DD') + 'T00:00:00Z', 
         timeMax.format('YYYY-MM-DD') + 'T23:59:00Z',
         'SV',
-        'TANGOKOMPANIET',
+        staticStyleId,
         events => setEvents_TK(events),
       )
     } else {
@@ -139,7 +140,7 @@ export default props => {
     {events?events.length?
       <div className="App">
             <OnAtMostPhablet>
-              <SmallCalendarView 
+              <CalendarSmall 
                         events={events} 
                         handleEvent={handleEvent} 
               />

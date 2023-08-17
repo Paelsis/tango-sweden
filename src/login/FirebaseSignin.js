@@ -55,6 +55,7 @@ const FirebaseSignin = () => {
       if (result.city) {
         // alert('AppBar 1' + JSON.stringify(result))
         setUserSettings(result)
+        setTimeout(() => navigate('/calendar/' + result.region), 1000);
       } else {
         setUserSettings({...userSettings, city:'unknown', region:'skåne'})
       }

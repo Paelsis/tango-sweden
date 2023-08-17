@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext } from 'react';
 
 const initialState = {
-    name:'unkown name',
+    name:'unknown name',
     city:'unknown city',
     region:'unknown country',
     color:'white',

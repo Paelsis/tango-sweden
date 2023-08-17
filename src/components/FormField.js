@@ -1,11 +1,15 @@
 
 import React, {useState, useEffect, useRef} from 'react';
 import RteEditor from './RteEditor'
-import {isAndroidOperatingSystem} from '../services/isAndroid'
+import DraftEditor from './DraftEditor'
+import { stateToHTML } from "draft-js-export-html";
+import draftToHtml from 'draftjs-to-html'
+import { ContentState, convertToRaw, EditorState } from 'draft-js'
+
 import moment from 'moment'
 import { FacebookAuthProvider } from 'firebase/auth';
-
-const isAndroid = isAndroidOperatingSystem()
+//import {isAndroidOperatingSystem} from '../services/isAndroid'
+//const isAndroid = isAndroidOperatingSystem()
 
 const styles  = {
     textarea:{
@@ -27,6 +31,7 @@ const FormField1 = props => {
     const labelStyle={fontWeight:700, ...props.labelStyle?props.labelStyle:{}}
     const supStyle = {color:'red', fontWeight:700, ...props.subStyle?props.subStyle:{}}
     const valueStyle = props.valueStyle?props.valueStyle:{}
+    const draftName = 'draft_' + fld.name 
 
     return(
     <p>
@@ -47,7 +52,12 @@ const FormField = props => {
     const handleChange = e => {
         setValue({...value, [e.target.name]:e.target.type==='checkbox'?e.target.checked?1:0:e.target.value})
     }    
-    const handleChangeRte = (fld, val) => setValue({...value, [fld]:val})
+    const handleChangeRte = val => setValue({...value, [fld.name]:val})
+    const onEditorStateChange = val => {
+        const draftName='draft_' + fld.name
+        const html = draftToHtml(convertToRaw(val.getCurrentContent()))
+        setValue({...value, [draftName]:val, [fld.name]:html})
+    }    
     const handleChangeDate = e => {
         setValue({...value, [e.target.name]:e.target.value});
     }    
@@ -174,17 +184,33 @@ const FormField = props => {
                             <br/>
                             <RteEditor 
                                         value={value[fld.name]?value[fld.name]:''} 
-                                        name={fld.name} 
                                         style={{cols:50}} 
                                         required={required} 
                                         disabled={disabled}
-                                        onChange={val => handleChangeRte(fld.name, val)} 
+                                        onChange={val => handleChangeRte(val)} 
                             />
                         </p>
                         )    
                 
-                case 'date':
-                    return(
+                case 'draft':
+                            return(
+                                <p>
+                                    <label style={labelStyle}>
+                                            {label}&nbsp;{required?<sup style={supStyle}>*</sup>:null}&nbsp;
+                                    </label>    
+                                    <br/>
+                                    <DraftEditor 
+                                                style={{cols:50}} 
+                                                required={required} 
+                                                disabled={disabled}
+                                                editorState={value['draft_' + fld.name]?value['draft_' + fld.name]:''} 
+                                                onEditorStateChange={val => onEditorStateChange(val)} 
+                                    />
+                                </p>
+                                )    
+                        case 'date':
+
+                return(
                         <p>
                             <label style={labelStyle}>
                                     {label}&nbsp;{required?<sup style={supStyle}>*</sup>:null}&nbsp;
