@@ -7,7 +7,6 @@ import Button from '@mui/material/Button';
 
 const language = 'SV'
 
-
 const CULTURE = (language) => language==='SV'?'sv':language==='ES'?'es':'en'
 
 const TEXTS = {
@@ -59,12 +58,12 @@ let styles = {
     tbody: {
         cellPadding:1,
     },
-    tr: (durationHours, isToday) => ({
+    tr: (durationHours, isToday, forceSmallFonts) => ({
         //border:'1px solid',
-        height:durationHours > 48?45:durationHours>11?40:isToday?30:25,
         verticalAlign:'center',
-        fontSize:durationHours > 48?24:durationHours>24?20:durationHours>11?20:isToday?'large':'normal',
-        fontWeight:durationHours > 48?900:durationHours > 11?800:isToday?700:600,
+        height:forceSmallFonts?20:durationHours > 48?50:durationHours>11?40:isToday?35:25,
+        fontSize:forceSmallFonts?14:durationHours > 48?24:durationHours>11?20:isToday?'large':'normal',
+        fontWeight:forceSmallFonts?500:durationHours > 48?800:durationHours > 11?700:isToday?600:500,
     }),
 };
 
@@ -101,7 +100,6 @@ class SmallCalendarView extends Component {
         this.setState({fontSize: this.state.fontSize==='small'?'large':'small'})
     }
 
-
     renderEvent = event => {
         const {handleEvent} = this.props;
         const mstart = event.mstart
@@ -117,15 +115,16 @@ class SmallCalendarView extends Component {
         const useRegistrationButton = event.useRegistrationButton
         const endsOtherDay=(mstart.calendar('l') !== mend.calendar('l')) && (mend.diff(mstart, 'hours') > 11) && !event.fullDay
         const tdStyle = event.style
- 
+        //const forcedSmallFonts= ['milonga', 'practica', 'pratika'].find(it  => event.title.toLowerCase().includes(it)) && event.durationHours >12
+        const forceSmallFonts = event.forceSmallFonts
         return(
 
             <tr 
                 key={'Row' + event.productId} 
-                style={styles.tr(event.durationHours, event.isToday)}
+                style={styles.tr(event.durationHours, event.isToday, forceSmallFonts)}
                 onClick={()=>handleEvent(event)}
             > 
-                {endsOtherDay?
+                {endsOtherDay && !forceSmallFonts?
                     <td colSpan={3} style={tdStyle}>  
                         {event.title}<br/>{dateTimeRange}
                     </td>

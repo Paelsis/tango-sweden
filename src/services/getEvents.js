@@ -40,10 +40,22 @@ function _createEvent(props)  {
     staticStyleId?
       findStaticStyle(staticStyleId, title, description, opacity)
     :backgroundImage?
-        {color, border, borderWidth, borderColor, backgroundSize:'50% 100%', backgroundImage:`url(${backgroundImage})`, backgroundColor:backgroundColorLight, border, borderWidth, borderColor,}
+        {color,
+          //border, 
+          //borderWidth, 
+          //borderColor, 
+          backgroundImage:`url(${backgroundImage})`, 
+          backgroundPosition: 'center center',   
+          backgroundRepeat:'auto', 
+          backgroundSize:'cover', 
+          backgroundColor:backgroundColorLight, 
+          height:50, 
+          fontWeight:'bold'}
+
     :  
         {color, background, border, borderWidth, borderColor}
 
+  
   // alert('hours=' + durationHours)
 
   // var numberOfMinutes = duration.asMinutes()
@@ -56,16 +68,16 @@ function _createEvent(props)  {
         maxPar,
         fullDay, 
         timeUnset, 
-        isToday:moment().isSame(moment(start), 'day')?true:false,
-        isWeekend:moment(start).isoWeekday() >=6,
         dateRange,
         durationHours, 
+        isToday:moment().isSame(moment(start), 'day')?true:false,
+        isWeekend:moment(start).isoWeekday() >=6,
         calendar:moment(start).calendar(),
-        location:location?location:'No given location',
+        location:location?location:'Ingen plats angiven',
         city: cityForEvent(title, location),
         weekNumber: moment(start).isoWeek(),
 
-        timeRange: fullDay?'Full day':(mstart.format('LT') + '-' + mend.format('LT')),
+        timeRange: fullDay?'Hela dagen':(mstart.format('LT') + '-' + mend.format('LT')),
         timeRangeWithDay: (dateShift && durationHours > 11)?(mstart.format('ddd LT') + '-' + mend.format('ddd LT'))
           :(mstart.format('LT') + '-' + mend.format('LT')),
         style,
@@ -90,6 +102,25 @@ function cityForEvent (title, location) {
   }    
 }    
 
+function _forceSmallFonts(event) {
+  if ( (typeof _forceSmallFonts.mstartPreviousBigEvent == 'undefined')|| (event === undefined)) {
+    // It has not... perform the initialization
+    _forceSmallFonts.mstartPreviousBigEvent = moment('2000-01-01T00:00')
+    return event
+  } else if (event.durationHours > 24) {
+      const daysBetweenEvents = moment.duration(event.mstart.diff(_forceSmallFonts.mstartPreviousBigEvent)).asDays()
+      _forceSmallFonts.mstartPreviousBigEvent = event.mstart
+      if (daysBetweenEvents < 6) {
+        // alert(JSON.stringify({...event, forceSmallFonts:true}))
+        return {...event, forceSmallFonts:true};
+      } else {
+        return event
+      }
+  } else {  
+      return event
+  }  
+}  
+
 // export means that this function will be available to any module that imports this module
 export function getEventsFromGoogleCal (calendarId, apiKey, timeMin, timeMax, language, staticStyleId, handleReply) {
   const url = `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?key=${apiKey}&timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=${true}&orderBy=startTime`
@@ -100,9 +131,13 @@ export function getEventsFromGoogleCal (calendarId, apiKey, timeMin, timeMax, la
         // create array to push events into
         const events = []
         let event={}
+        let moreThan24Hours = undefined
+        let mstartLastBig =moment('2000-01-01')
         // in practice, this block should be wrapped in a try/catch block, 
         // because as with any external API, we can't be sure if the data will be what we expect
         moment.locale(CULTURE(language))
+        _forceSmallFonts(undefined)
+
         JSON.parse(resp.text).items.forEach(it => {
           //alert(JSON.stringify(it))
           const start = it.start.dateTime?it.start.dateTime:it.start.date
@@ -114,7 +149,11 @@ export function getEventsFromGoogleCal (calendarId, apiKey, timeMin, timeMax, la
 
           event = _createEvent({start, end, staticStyleId, title, description, location, eventId, email:'daniel@tangokompaniet.com', hideLocationAndTime:false, useRegistrationButton:false})
 
+          event = _forceSmallFonts(event)
+
           events.push(event)
+
+          let previousEnd = end
         })
         handleReply(events)
       } 
