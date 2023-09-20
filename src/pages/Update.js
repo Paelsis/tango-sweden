@@ -208,8 +208,7 @@ export default props => {
             const changeAll = event.changeAll
 
             return {...event,
-                    startTime:event.startDateTime.substring(11, 16),
-                    endTime:event.endDateTime.substring(11,16),
+                    startDateTimeOriginal:changeAll?undefined:event.startDateTime.substring(0,16),
                     startDateTime:changeAll?undefined:event.startDateTime.substring(0,16),
                     endDateTime:changeAll?undefined:event.endDateTime.substring(0,16),
                     draft_description: generateEditorStateFromValue(event.description),
@@ -233,9 +232,10 @@ export default props => {
     const handleReply = reply => {
         setButtonStyle(BUTTON_STYLE.SAVED)
         if (reply.status==='OK') {
-            navigate('/calendar/' + userSettings.region)
             setButtonStyle(BUTTON_STYLE.SAVED)
-            setTimeout(() => setButtonStyle(BUTTON_STYLE.DEFAULT), 2000);
+            setTimeout(() => {
+                navigate('/calendar/' + userSettings.region)    
+        }, 500);
     
         } else {
             setButtonStyle(BUTTON_STYLE.ERROR)
@@ -243,7 +243,6 @@ export default props => {
         }     
     }
     const handleUpdate = () => {
-        const irl = '/updateEvent'
         setButtonStyle(BUTTON_STYLE.CLICKED)
 
         if (moment(value.startDateTime) > moment(value.endDateTime)) {
@@ -254,10 +253,13 @@ export default props => {
         const settings = value.updateWithSettings?{...userSettings, backgroundImage}:{}
         const startDateTime = value.changeAll?undefined:value.startDateTime;
         const endDateTime = value.changeAll?undefined:value.endDateTime;
-        const data = {...value, ...settings, startDateTime, endDateTime} 
+        
+
+        const data = {...value, ...settings, startDateTime, endDateTime, startTime:undefined, endTime:undefined} 
 
         // alert('handleUpdate:' + JSON.stringify(data))
-        
+
+        const irl = '/updateEvent'
         serverPost(irl, '', '', data, handleReply)
     }    
 
@@ -274,7 +276,7 @@ export default props => {
         },    
         {
             type:'button',
-            label:'Reset',
+            label:'Undo',
             style:buttonStyle,
             handleClick:handleReset
         },    

@@ -62,3 +62,6 @@ export const BUTTON_STYLE = {
   SAVED:{color:'green', borderColor:'green'},
   ERROR:{color:'red', borderColor:'red'},
 }
+
+export const ADMINISTRATORS=['anita@tangosweden.se', 'anita.e.dobi@gmail.com', 'admin@tangosweden.se'];
+

@@ -1,8 +1,8 @@
 import axios from 'axios'
 const apiBaseUrl = process.env.REACT_APP_API_BASE_URL
 
-// serverFetch
-export default function (irl, username, password, handleResult) {
+// serverFetchDataResult
+export function serverFetchDataResult(irl, username, password, handleResult) {
     const url= irl.slice(0,4).toLowerCase().localeCompare('http')===0?irl:apiBaseUrl + irl
     console.log('fetch url:', url)
     axios({
@@ -15,8 +15,8 @@ export default function (irl, username, password, handleResult) {
       })
     .then(response => {
         const result = response.data?response.data.result?response.data.result:undefined:undefined
-        if (result === undefined) {
-            alert('No result found in responsre' + JSON.stringify(response.data))
+        if (response.data === undefined) {
+            alert('No result found in response ' + JSON.stringify(response.data))
         }
         handleResult(result);
     })
@@ -24,12 +24,12 @@ export default function (irl, username, password, handleResult) {
         const errorMessage = 'url=' + url + ' ERROR:' + JSON.stringify(e)
         // alert(errorMessage)
         console.log('(function: functions/fetch) Error message:', errorMessage);
-        handleResult([]);
+        handleResult(undefined);
     });
 }
 
-// serverFetch
-export function serverFetchReply(irl, username, password, handleReply) {
+// serverFetchDataResult
+export function serverFetchData(irl, username, password, handleReply) {
     const url= irl.slice(0,4).toLowerCase().localeCompare('http')===0?irl:apiBaseUrl + irl
     console.log('fetch url:', url)
     axios({

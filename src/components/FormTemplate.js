@@ -2,7 +2,7 @@ import React, {useState, useRef, useEffect} from 'react';
 import Button, { buttonClasses } from '@mui/material/Button';
 import FormField from './FormField';
 import getTypeFromColumnType from '../services/getTypeFromColumnType'
-
+import {isEmail} from '../services/functions'
 const TEXTS={
     BUTTON:'Send registration'
 }
@@ -14,6 +14,7 @@ const getField = column => {
 }    
 
 // FormTemplate.js
+// FormTemplate.js
 export default props => {
     const {fields, buttons, value, setValue} = props
     const handleKeyPress = e => {
@@ -23,11 +24,22 @@ export default props => {
     }
 
     const inputRef = useRef(null);
-
-    //useEffect(()=>inputRef.current.focus(), [])
     const isHidden = fld => (fld.hiddenIf?value[fld.hiddenIf]?true:false:false) || (fld.notHiddenIf?value[fld.notHiddenIf]?false:true:false)
-    const isReqiredEmptyAndNotHidden = fld =>fld.required?value[fld.name]?false:!isHidden(fld):false
-    const disabled = fields.filter(fld => isReqiredEmptyAndNotHidden(fld)).length > 0
+
+    const isValidFld = fld => {
+        if (isHidden(fld)) {
+            return true
+        } else if (fld.required && !value[fld.name]) {
+            return false
+        } else {    
+            switch (fld.type) {
+                case 'email': return isEmail(value[fld.name])
+                default: return true
+            }        
+        }    
+    }
+
+    const isValid = fields.find(fld => !isValidFld(fld))
     return(
         <div>   
                 <form>
@@ -51,10 +63,10 @@ export default props => {
                                 <span style={button.style}>
                                     {
                                         <Button 
+                                            type={button.type} 
                                             variant="outlined" 
                                             color="inherit" 
-                                            type={button.type} 
-                                            disabled={button.disabled?true:button.required?disabled:false}
+                                            disabled={button.disabled?true:button.validate?isValid:false}
                                             onClick={button.handleClick}
                                         >
                                             {button.label}
@@ -73,6 +85,8 @@ export default props => {
 
 
 //{JSON.stringify(fld)}
+
+
 
 
 

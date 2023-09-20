@@ -3,7 +3,6 @@ import { useSharedState } from '../store';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
-import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
@@ -16,10 +15,7 @@ import ListItemText from '@mui/material/ListItemText';
 import { useNavigate } from 'react-router-dom';
 import { getAuth, signOut, onAuthStateChanged } from 'firebase/auth';
 import {AuthContext} from "../login/FirebaseAuth"
-import serverFetch from '../services/serverFetch'
-
-const ADMINISTRATORS=['per.eskilson@gmail.com', 'admin@tangosweden.se']
-
+import {serverFetchDataResult} from '../services/serverFetch'
 // AppBar.js
 export default () => {
   const [userSettings, setUserSettings] = useSharedState()
@@ -38,18 +34,19 @@ export default () => {
 
   const handleResult = result => {
     //alert('AppBar 0:' + JSON.stringify(result?result:'No result'))
-    if (result !== undefined) {
-        /* alert(JSON.stringify(result)) */
-        setUserSettings(result)
-    } 
+    if (result && !!result.region) {
+      setUserSettings({...userSettings, ...result})
+    } else {
+      navigate('/settings')
+    }
   }
   
   useEffect(()=>{
     onAuthStateChanged(auth, user => {
       setEmail(user?user.email:undefined);
-      const irl = '/getUser?email=' +  user.email
       if (user.email) {
-        serverFetch(irl, '', '', result=>handleResult(result))
+        const irl = '/getUser?email=' +  user.email
+        serverFetchDataResult(irl, '', '', result=>handleResult(result))
       } 
     })
   }, [])
@@ -70,69 +67,69 @@ export default () => {
   }
 
   return (
-    <div>
-    <Menu
-      id="basic-menu"
-      anchorEl={anchorEl}
-      open={open}
-      onClose={handleClose}
-      MenuListProps={{
-        'aria-labelledby': 'basic-button',
-      }}
-    >
-      <MenuItem onClick={()=>handleNavigate('/calendars')}>Alla kalendrar</MenuItem>
-      <Divider />
-      <MenuItem><ListItemText inset></ListItemText></MenuItem>
-      {email?<MenuItem onClick={()=>handleSignout()}>Signout</MenuItem>
-      :<MenuItem onClick={()=>handleSignin()}>Signin</MenuItem>}
-      {email?<MenuItem onClick={()=>navigate('/settings')}>Settings</MenuItem>:null}
-      {email?<MenuItem onClick={()=>navigate('/add')}>Add Event</MenuItem>:null}
-      {(email&& (userSettings.authLevel >=8))?<MenuItem onClick={()=>navigate('/setupUser')}>Setup users</MenuItem>:null}
-      <MenuItem onClick={()=>handleNavigate('/usage')}>Usage</MenuItem>
-    </Menu>
+      <div>
+      <Menu
+        id="basic-menu"
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+        MenuListProps={{
+          'aria-labelledby': 'basic-button',
+        }}
+      >
+        <MenuItem onClick={()=>handleNavigate('/calendars')}>Alla kalendrar</MenuItem>
+        <Divider />
+        <MenuItem><ListItemText inset></ListItemText></MenuItem>
+        {email?<MenuItem onClick={()=>handleSignout()}>Signout</MenuItem>
+        :<MenuItem onClick={()=>handleSignin()}>Signin</MenuItem>}
+        {email?<MenuItem onClick={()=>navigate('/settings')}>Settings</MenuItem>:null}
+        {email?<MenuItem onClick={()=>navigate('/add')}>Add Event</MenuItem>:null}
+        {(email&& (userSettings?userSettings.authLevel >=8:false))?<MenuItem onClick={()=>navigate('/setupUser')}>Setup users</MenuItem>:null}
+        <MenuItem onClick={()=>handleNavigate('/usage')}>Usage</MenuItem>
+      </Menu>
 
-    <Box sx={{ flexGrow: 2}}>
-      <AppBar position="static" sx={{color:'#FFFFA7',  backgroundColor:'#232323'}}>
-        <Toolbar>
-          <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            sx={{ mr: 0 }}
-          >
-            <HomeIcon 
-                  id="basic-button"
-                  aria-controls={open ? 'basic-menu' : undefined}
-                  aria-haspopup="true"
-                  aria-expanded={open ? 'true' : undefined}
-                  onClick={()=>handleNavigate('/home')}
-            />
-          </IconButton>
-          <Typography variant="h5" component="div" sx={{ flexGrow: 1 }}  onClick={()=>handleNavigate('/home')}>
-          </Typography>
-          <Typography variant="h8" component="div" sx={{ flexGrow: 4 }}  onClick={()=>handleNavigate('/home')}>
-            {email?'Signed in ' + userSettings.city + ' ' +  userSettings.region + ' ' + email:null}
-          </Typography>
-          <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            sx={{ mr: 0 }}
-            onClick={handleClick}
+      <Box sx={{ flexGrow: 2}}>
+        <AppBar position="static" sx={{color:'#FFFFA7',  backgroundColor:'#232323'}}>
+          <Toolbar>
+            <IconButton
+              size="large"
+              edge="start"
+              color="inherit"
+              aria-label="menu"
+              sx={{ mr: 0 }}
             >
-            <MenuIcon 
-                  id="basic-button"
-                  aria-controls={open ? 'basic-menu' : undefined}
-                  aria-haspopup="true"
-                  aria-expanded={open ? 'true' : undefined}
-            />
-          </IconButton>
-        </Toolbar>
-      </AppBar>
-    </Box>
-    </div>
+              <HomeIcon 
+                    id="basic-button"
+                    aria-controls={open ? 'basic-menu' : undefined}
+                    aria-haspopup="true"
+                    aria-expanded={open ? 'true' : undefined}
+                    onClick={()=>handleNavigate('/home')}
+              />
+            </IconButton>
+            <Typography variant="h5" component="div" sx={{ flexGrow: 1 }}  onClick={()=>handleNavigate('/home')}>
+            </Typography>
+            <Typography variant="h8" component="div" sx={{ flexGrow: 4 }}  onClick={()=>handleNavigate('/home')}>
+              {email?'Signed in ' + (userSettings.city?userSettings.city:'') + ' ' +  (userSettings.region?userSettings.region:'') + ' ' + (email?email:null):null}
+            </Typography>
+            <IconButton
+              size="large"
+              edge="start"
+              color="inherit"
+              aria-label="menu"
+              sx={{ mr: 0 }}
+              onClick={handleClick}
+              >
+              <MenuIcon 
+                    id="basic-button"
+                    aria-controls={open ? 'basic-menu' : undefined}
+                    aria-haspopup="true"
+                    aria-expanded={open ? 'true' : undefined}
+              />
+            </IconButton>
+          </Toolbar>
+        </AppBar>
+      </Box>
+      </div>
   );
 }
 

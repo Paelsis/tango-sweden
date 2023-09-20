@@ -1,10 +1,10 @@
 import request from 'superagent'
 import moment from 'moment-with-locales-es6'
 import getStyle from './getStyle'
-import serverFetch from './serverFetch'
+import {serverFetchDataResult} from './serverFetchDataResult'
 
 export function getUser (irl, callback) {
   moment.locale(CULTURE(language))
-  serverFetch(irl, '', '', user => callback(user))
+  serverFetchDataResult(irl, '', '', user => callback(user))
 }
 

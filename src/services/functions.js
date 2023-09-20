@@ -25,6 +25,11 @@ export const replaceChar = (origString, replaceChar, index) => {
     return newString;
 }
 
+export const isEmail = value => {
+    var validRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    return value.toLowerCase().match(validRegex)?true:false 
+}    
+
 export const styleSquare = userSettings=>{
     const color = userSettings.color
     const background = 'linear-gradient(to bottom right, ' + userSettings.backgroundColorLight + ' ,' + userSettings.backgroundColorDark + ')'

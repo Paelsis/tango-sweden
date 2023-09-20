@@ -17,7 +17,6 @@ import RedirectToMultiple from './pages/RedirectToMultiple'
 import FirebaseAuth from './login/FirebaseAuth'
 import FirebaseSignin from './login/FirebaseSignin';
 import FirebaseResetPassword from './login/FirebaseResetPassword';
-import serverFetch from './services/serverFetch'
 import {COLORS} from './services/const'
 import 'bulma/css/bulma.min.css';
 

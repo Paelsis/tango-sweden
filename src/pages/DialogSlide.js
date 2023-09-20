@@ -1,17 +1,24 @@
 import * as Reactfrom from 'react';
 import {useContext, useState, useEffect} from 'react';
+import IconButton from '@mui/material/IconButton';
 import Button from '@mui/material/Button';
+import EditIcon from '@mui/icons-material/Edit';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import DeleteIcon from '@mui/icons-material/Delete';
+import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
+import CloseIcon from '@mui/icons-material/Close';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import Tooltip from '@mui/material/Tooltip';
 import {AuthContext} from "../login/FirebaseAuth"
 import { getAuth, onAuthStateChanged} from 'firebase/auth';
 import serverPost from '../services/serverPost'
 import { useNavigate } from "react-router-dom";
-import AddEvent from '../components/AddEvent'
-import reactBreak from 'react-break';
+import {ADMINISTRATORS} from '../services/const'
+
 
 const styles = {
   textarea:{
@@ -51,6 +58,7 @@ export default function DialogSlide(props) {
     reply.status === 'OK'?window.location.reload():alert(JSON.stringify(reply.message?reply.message:reply))
   }  
   const irl = '/cancelEvent'
+
   const handleUpdate = (e, ev) => {
     e.preventDefault(); 
     // alert('Update:' + JSON.stringify(ev))
@@ -64,35 +72,22 @@ export default function DialogSlide(props) {
         location:ev.location, 
         startDateTime:ev.start, 
         endDateTime:ev.end,
-        hideLocationAndTime:ev.hideLocationAndTime==1?1:0, 
-        useRegistrationButton:ev.useRegistrationButton==1?1:0,
         color:ev.color,
         backgroundColorLight:ev.backgroundColorLight,
         backgroundColorDark:ev.backgroundColorDark,
-        borderColor:ev.borderColor,
+        borderStyle:ev.borderStyle,
         borderWidth:ev.borderWidth,
+        borderColor:ev.borderColor,
         backgroundImage:ev.backgroundImage,
 
       }
     })
   }
-  const handleDeleteSingle = () =>  {
-    let text = "Press OK to delete this event (eventId=" + eventId + ")";
-    // eslint-disable-next-line no-restricted-globals
-    //if (confirm(text) === true) {
-    serverPost(irl, '', '', {eventId, email, startDateTime:event.start}, handleReply)
-    // } 
-  }  
-  const handleDeleteAll = () => {
-    let reply = "Press OK to delete all occurrances of this event (eventId=" + eventId + ")";
-    // eslint-disable-next-line no-restricted-globals
-    if (confirm(reply) === true) {
-      serverPost(irl, '', '', {eventId, email}, handleReply)
-    } 
-  }
+
+
+
   const handleCopy = (e, ev) => {
     e.preventDefault(); 
-    // alert('Update:' + JSON.stringify(ev))
     navigate('/copy', {
       state: {
         eventId:ev.eventId, 
@@ -108,11 +103,28 @@ export default function DialogSlide(props) {
         color:ev.color,
         backgroundColorLight:ev.backgroundColorLight,
         backgroundColorDark:ev.backgroundColorDark,
+        borderStyle:ev.borderStyle,
         borderColor:ev.borderColor,
         borderWidth:ev.borderWidth,
         backgroundImage:ev.backgroundImage,
       }
     })
+  }
+
+  const handleDeleteSingle = () =>  {
+    let text = "Press OK to delete this event (eventId=" + eventId + ")";
+    // eslint-disable-next-line no-restricted-globals
+    //if (confirm(text) === true) {
+    serverPost(irl, '', '', {eventId, email, startDateTime:event.start}, handleReply)
+    // } 
+  }  
+
+  const handleDeleteAll = () => {
+    let reply = "Press OK to delete all occurrances of this event (eventId=" + eventId + ")";
+    // eslint-disable-next-line no-restricted-globals
+    if (confirm(reply) === true) {
+      serverPost(irl, '', '', {eventId, email}, handleReply)
+    } 
   }
 
   const handleRegistration = (event) => {
@@ -145,20 +157,52 @@ export default function DialogSlide(props) {
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            {email===event.email || email === 'anita@tangosweden.se' || email === 'admin@tangosweden.se'? 
+            {ADMINISTRATORS.includes(email) || email === event.email ? 
                <>
-                <Button variant='outlined' onClick={e=>handleUpdate(e, event)} autoFocus>
-                  Update
-                </Button>
-                <Button variant='outlined' onClick={e=>handleCopy(e, event)} autoFocus>
-                  Copy
-                </Button>
-                <Button variant='outlined' onClick={handleDeleteSingle} autoFocus>
-                  Delete single
-                </Button>
-                <Button variant='outlined' onClick={handleDeleteAll} autoFocus>
-                  Delete all
-                </Button>
+                <IconButton
+                  size="small"
+                  edge="start"
+                  color="inherit"
+                  sx={{ mr: 0 }}
+                  onClick={e=>handleUpdate(e, event)}
+                >
+                  <Tooltip title='Update this event'>
+                    <EditIcon />
+                  </Tooltip>          
+                </IconButton>
+                <IconButton
+                  size="small"
+                  edge="start"
+                  color="inherit"
+                  sx={{ mr: 0 }}
+                  onClick={e=>handleCopy(e, event)}
+                >
+                  <Tooltip title='Copy this event to new dates and times'>
+                  <ContentCopyIcon />
+                  </Tooltip>
+                </IconButton>
+                <IconButton
+                  size="small"
+                  edge="start"
+                  color="inherit"
+                  sx={{ mr: 0 }}
+                  onClick={e=>handleDeleteSingle(e, event)}
+                >
+                  <Tooltip title='Delete this event'>
+                  <DeleteIcon />
+                  </Tooltip>
+                </IconButton>
+                <IconButton
+                  size="small"
+                  edge="start"
+                  color="inherit"
+                  sx={{ mr: 0 }}
+                  onClick={e=>handleDeleteAll(e, event)}
+                >
+                  <Tooltip title='Delete all repeated events when repeat checkbox was marked in Add'>
+                  <DeleteSweepIcon />
+                  </Tooltip>
+                </IconButton>
                 </>
             :null
             }   
@@ -169,9 +213,17 @@ export default function DialogSlide(props) {
             :
               null
             }       
-            <Button variant="outlined" onClick={handleClose} autoFocus>
-              Close
-            </Button>
+            <IconButton
+              size="small"
+              edge="start"
+              color="inherit"
+              sx={{ mr: 0 }}
+              onClick={handleClose}
+            >
+              <Tooltip title='Close this window'>
+              <CloseIcon />
+              </Tooltip>
+            </IconButton>
           </DialogActions>
         </Dialog>
     </div>

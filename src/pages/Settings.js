@@ -4,22 +4,18 @@ import { Navigate, useNavigate } from 'react-router-dom'
 import firebaseApp from '../services/firebaseApp'
 import { getAuth, onAuthStateChanged} from 'firebase/auth'
 import FormTemplate from '../components/FormTemplate'
-import serverFetch from '../services/serverFetch'
+import SelectSettings from '../components/SelectSettings'
+import {serverFetchDataResult} from '../services/serverFetch'
 import Add from '../components/AddEvent'
 import serverPost from "../services/serverPost"
 import Square from "../components/Square"
 
 const styles = {
     container:{
-      position:'relative',
-      top:0,
-      display:'flex',
-      alignItems:'center',
-      flexDirection:'column',
-      justifyContent:'center',
+      top:400,
       color:'green',
-      fontSize:24,
-      fontWeight:200,
+      fontSize:18,
+      fontWeight:400,
     },
     button: color=>({
       color,
@@ -52,6 +48,7 @@ const styles = {
       name:'city',
       required:true,
       tooltip:'Events with same city is show in same calendar for that city',
+      placeholder:'Please enter your city'
     },
     {
       type:'radio',
@@ -72,23 +69,27 @@ const styles = {
         label:'User name',
         name:'name',
         required:'true', 
-        tooltip:'First and last name of the logged in user'
+        tooltip:'First and last name of the logged in user',
+        placeholder:'Please enter your name'
     },
     {
         type:'text',
         label:'Text color',
+        required:'true', 
         tooltip: 'Text color in text or hex code, Ex 1:red Ex 2:#F6A3BB',
         name:'color',
     },
     {
         type:'text',
         label:'Background color light',
+        required:'true', 
         tooltip: 'Light background color when shifting from dark to light, Ex 1:lightBlue Ex 2:#F6A3BB',
         name:'backgroundColorLight',
     },
     {
         type:'text',
         label:'Background color dark',
+        required:'true', 
         tooltip: 'Dark background color when shifting from dark to light, Ex 1:darkBlue Ex 2:#F6A3BB',
         name:'backgroundColorDark',
     },
@@ -99,11 +100,26 @@ const styles = {
       name:'backgroundImage',
     },
     { 
+      type:'checkbox',
+      name:'hasBorder',
+      label:'I want a border',
+      tooltip: 'I want a border around my event',
+    },
+    { 
       type:'radio',
-      label:'Border thickness',
-      radioValues:['0px', '1px', '2px', '3px', '4px'],
-      tooltip: 'Thickness of border',
+      name:'borderStyle',
+      label:'BorderStyle',
+      radioValues:['none', 'solid', 'dotted', 'dashed'],
+      tooltip: 'Border style',
+      notHiddenIf:'hasBorder'
+    },
+    { 
+      type:'radio',
       name:'borderWidth',
+      label:'Border thickness',
+      radioValues:['1px', '2px', '3px', '4px'],
+      tooltip: 'Thickness of border',
+      notHiddenIf:'hasBorder'
     },
     {
       type:'text',
@@ -111,6 +127,7 @@ const styles = {
       tooltip: 'Color of border',
       //disabled:true,
       name:'borderColor',
+      notHiddenIf:'hasBorder'
     },
 ]
 
@@ -126,31 +143,31 @@ const BUTTON_STYLE = {
 // Settings.js
 export default props => {
     const [email, setEmail] = useState(undefined)
-    const [userSettings, setUserSettings] = useSharedState();
+    const [userSettings, setUserSettings] = useSharedState()
     const [buttonStyle, setButtonStyle] = useState(BUTTON_STYLE.DEFAULT)
     const auth = getAuth()
 
     const handleResult = reply => {
       // alert('Settings:' + JSON.stringify(reply.result?reply.result:'No result'))
-      if (!!reply.result) {
-          setUserSettings(reply.result)
+      if (reply.status === 'OK' && !!reply.result) {
+          setUserSettings({...userSettings, ...reply.result})
       } 
     }
-    
+
     useEffect(()=>{
       onAuthStateChanged(auth, user => {
         if (user.email) {
           setEmail(user.email);
           const irl = '/getUser?email=' +  user.email
-          serverFetch(irl, '', '', reply=>handleResult(reply))
-        } else {
+          serverFetchDataResult(irl, '', '', result=>handleResult(result))
+        }  else {
           alert('No email fond when calling onAuthStateChange')
         }
       })
     }, [])
    
   
-    const handleReplySubmit = result => {
+    const handleSaveReply = result => {
       if (result.status === 'OK') {
         const rec = result.rows.find(it=>it.email === email)
         // alert('RESULT value :' +  JSON.stringify(rec) + ' email:' + email)
@@ -165,6 +182,9 @@ export default props => {
       }
     }
 
+ 
+
+
 
     const handleSave = (e, value) => {
 
@@ -172,47 +192,46 @@ export default props => {
         setButtonStyle(BUTTON_STYLE.CLICKED)
         if (!!email) {
           const backgroundImage = value.backgroundImage?value.backgroundImage:null
-          const record = {...value, email, backgroundImage, creaTimestamp:undefined, updTimestamp:undefined, authLevel:undefined}
+          const borderStyle = value.hasBorder?value.borderStyle:'none'
+          const record = {...value, email, backgroundImage, creaTimestamp:undefined, updTimestamp:undefined, authLevel:undefined, borderStyle}
           const data = {tableName:'tbl_user', record, fetchRows:true}
           // alert('handleSubmit data:' + JSON.stringify(data))
-          serverPost('/replaceRow', '', '', data, result=>handleReplySubmit(result))
+          serverPost('/replaceRow', '', '', data, result=>handleSaveReply(result))
         } else {
           alert('Error: Dont save data since system cannot find any valid login email address')
         }         
     }
 
-    const color = userSettings.color
-    const background = 'linear-gradient(to bottom right, ' + userSettings.backgroundColorLight + ' ,' + userSettings.backgroundColorDark + ')'
-    const borderWidth = userSettings.borderWidth
-    const borderColor = userSettings.borderColor
     const filterFields = fields.filter(it=>it.authLevel?userSettings.authLevel>=it.authLevel:true)
     const buttons=[
       {
           type:'button',
           label:'Save',
           style:buttonStyle,
+          validate:true,
           handleClick:e=>handleSave(e, userSettings)
       },    
     ]
-    const style = userSettings.backgroundImage?
-      {position:'absolute', width:200, height:100, textAlign:'center', color, backgroundSize:'50% 100%', backgroundImage:`url(${userSettings.backgroundImage})`, backgroundColor:userSettings.backgroundColorLight,  borderStyle:'solid', borderWidth, borderColor}
-    :
-      {position:'absolute', width:200, height:100, textAlign:'center', color, background, borderStyle:'solid', borderWidth, borderColor}
 
     return(  
-      <div style={{...styles.container}}>
+      <div style={styles.container}>
         {email?
-          <>
+          <div className='columns m-4 is-centered'>
+            {/*JSON.stringify(allUsers)*/}
+            <div className='column is-4'>
             <FormTemplate 
                 fields={filterFields} 
                 value={userSettings}
                 setValue={setUserSettings}
                 buttons={buttons}
             />
-            <div>
-              <Square settings={userSettings} />
             </div>
-          </>           
+            <div className='column is-2'>
+              <Square settings={userSettings} />
+              {}
+              <SelectSettings email={email} userSettings={userSettings} setUserSettings={setUserSettings} /> 
+            </div>
+          </div>           
         :
             <h1>
                 No access

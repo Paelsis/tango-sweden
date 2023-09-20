@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSharedState} from '../store';
 import Button from '@mui/material/Button';
-import serverFetch, {serverFetchReply} from '../services/serverFetch'
+import {serverFetchData} from '../services/serverFetch'
 import {labelSwedish} from '../services/functions'
 import Image from '../images/tangosweden.jpg';
 import {COLORS} from '../services/const'
@@ -72,7 +72,7 @@ export default () => {
 
     useEffect(()=>{
         const irl = '/getCalendarNames'
-        serverFetchReply(irl, '', '', reply=>{setCities(reply.cities); setRegions(reply.regions)})
+        serverFetchData(irl, '', '', reply=>{setCities(reply.cities); setRegions(reply.regions)})
     }, [])
 
 

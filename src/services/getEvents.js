@@ -1,7 +1,7 @@
 import request from 'superagent'
 import moment from 'moment-with-locales-es6'
 import findStaticStyle from './findStaticStyle'
-import serverFetch from './serverFetch'
+import {serverFetchDataResult} from './serverFetch'
 import {replaceChar} from '../services/functions'
 import casaBlanca from '../images/VitaHuset.jpg';
 
@@ -22,7 +22,7 @@ const findParameter = (s, val) => {
 }  
 
 function _createEvent(props)  {
-  const {start, end, title, description, location, email, staticStyleId, color, backgroundColorLight, backgroundColorDark, backgroundImage, border, borderWidth, borderColor} = props
+  const {start, end, title, description, location, email, staticStyleId, color, backgroundColorLight, backgroundColorDark, backgroundImage, borderStyle, borderWidth, borderColor} = props
   const mstart=moment(start)
   const mend=moment(end).add(start.length <= 10?-1:0, 'days')
   const timeStart = mstart.format('LT')
@@ -53,7 +53,7 @@ function _createEvent(props)  {
           fontWeight:'bold'}
 
     :  
-        {color, background, border, borderWidth, borderColor}
+        {color, background, borderStyle, borderWidth, borderColor}
 
   
   // alert('hours=' + durationHours)
@@ -164,7 +164,7 @@ export function getEventsFromTable (irl, callback, timeMin, timeMax, language) {
   moment.locale(CULTURE(language))
   let event = {}
   const events = []
-  serverFetch(irl, '', '', list => {
+  serverFetchDataResult(irl, '', '', list => {
     if (!!list) {
       list.forEach(it => {
         const location = it.location?it.location.replace(/Tangokompaniet, |, 212 11 |, 224 64|, 223 63|, Sverige|Stiftelsen Michael Hansens Kollegium, /g, ' ').replace('Fredriksbergsgatan','Fredriksbergsg.'):'No location given'

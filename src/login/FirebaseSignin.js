@@ -4,7 +4,7 @@ import firebaseApp from '../services/firebaseApp'
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged} from 'firebase/auth';
 import { useSharedState } from '../store';
 import Button from '@mui/material/Button';
-import serverFetch from '../services/serverFetch'
+import {serverFetchDataResult} from '../services/serverFetch'
 
 const styles = {
   container:{
@@ -49,17 +49,15 @@ const FirebaseSignin = () => {
 
   const auth = getAuth()
 
-  const handleFetchReply = result => {
+  const handleResult = result => {
     //alert('AppBar 0:' + JSON.stringify(result?result:'No result'))
-    if (result !== undefined) {
-      if (result.city) {
+    if (result && result.region) {
         // alert('AppBar 1' + JSON.stringify(result))
         setUserSettings(result)
-        setTimeout(() => navigate('/calendar/' + result.region), 1000);
-      } else {
-        setUserSettings({...userSettings, city:'unknown', region:'skåne'})
-      }
-    }   
+        navigate('/calendar/' + result.region);
+    } else {
+        navigate('/settings')
+    }
   }
 
   const handleSignin = e => {
@@ -72,7 +70,7 @@ const FirebaseSignin = () => {
       setUid(uid)
       setButtonColor('green')
       const irl = '/getUser?email=' +  credentials.email
-      serverFetch(irl, '', '', result=>handleFetchReply(result))
+      serverFetchDataResult(irl, '', '', result=>handleResult(result))
     })
     .catch(error => {
       const errorCode = error.code;
@@ -93,7 +91,7 @@ const FirebaseSignin = () => {
             <form  onSubmit={handleSignin}>
                  <p/>  
                 <label>
-                Signin with email and password (only for administrators of this site)<p/>
+                Signin with email and password (only for administrators of this calendar)<p/>
                 </label>
                 <input style={inputStyle} name='email' type='email' placeholder='Email' onChange={handleChange} />
                 <p/>

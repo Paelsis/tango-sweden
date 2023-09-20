@@ -38,12 +38,11 @@ export default props => {
         const event = location.state?location.state:undefined
         if (event) {
             const changeAll = event.changeAll
-
             return {...event,
                     startTime:event.startDateTime.substring(11, 16),
                     endTime:event.endDateTime.substring(11,16),
-                    startDateTime:changeAll?undefined:event.startDateTime.substring(0,16),
-                    endDateTime:changeAll?undefined:event.endDateTime.substring(0,16),
+                    // startDateTime:changeAll?undefined:event.startDateTime.substring(0,16),
+                    // endDateTime:changeAll?undefined:event.endDateTime.substring(0,16),
                     draft_description: generateEditorStateFromValue(event.description),
             }
         } else {
@@ -52,23 +51,14 @@ export default props => {
             return {draft_description}
         }
     }
-    const init = initEvent()
-
-    useEffect(()=>{
-        if (location.state) {
-        } else {
-            navigate('/home')
-        }    
-    }, [location.state])
-
-
+    let init = initEvent()
     return (
         <div style={styles.container}>
             <div className='classes m-2 is-centered'>
                 <div className='column is-three-quarters'>
                     <AddEvent 
-                        {...props}
-                        init={{...init, id:undefined}} 
+                        //{...props}
+                        init={init} 
                     />
                 </div>
             </div>    

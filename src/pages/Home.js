@@ -3,7 +3,7 @@ import { useSharedState} from '../store';
 import Image from '../images/tangosweden.jpg';
 import { useNavigate } from 'react-router-dom';
 import Button from '@mui/material/Button';
-import serverFetch, {serverFetchReply} from '../services/serverFetch'
+import {serverFetchData} from '../services/serverFetch'
 import {COLORS} from '../services/const'
 
 
@@ -87,7 +87,7 @@ const Home = () => {
     }
     useEffect(()=>{
         const irl = '/getCalendarNames'
-        serverFetchReply(irl, '', '', reply=>{setCities(reply.cities); setRegions(reply.regions)})
+        serverFetchData(irl, '', '', reply=>{setCities(reply.cities); setRegions(reply.regions)})
     }, [])
     return(
         <div style={styles.container}>

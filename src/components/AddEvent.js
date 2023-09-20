@@ -137,7 +137,6 @@ const fields = [
         type:'draft',
         label:'Description',
         name:'description',
-        required:true,
         hiddenIf:'htmlEditor',
     },
     {
@@ -292,9 +291,8 @@ const CandidateTable = ({list, deleteRow, clearAll, handleAddToCalendar, buttonS
 
 
 export default props => {
-    const [userSettings, setUserSettings] = useSharedState()
-    const [email, setEmail] = useState(undefined)
-    const [value, setValue] = useState(props.init?props.init:{})
+    const [userSettings,] = useSharedState()
+    const [value, setValue] = useState({})
     const [buttonStyle, setButtonStyle] = useState(BUTTON_STYLE.DEFAULT)
     const [list, setList] = useState([])
     const navigate = useNavigate()
@@ -303,10 +301,11 @@ export default props => {
 
     // useEffect(()=>setValue(props.init),[props.init])
 
-    useEffect(()=>onAuthStateChanged(auth, user => {
-        setEmail(user.email)
+    useEffect(()=>{
         moment.locale('sv', {week:{dow : 1}})
-    }))
+        setValue({...props.init, id:undefined})
+        setList([])
+    }, [props.init])
     const deleteRow = index => setList(list.filter((it, idx)=>idx !== index))  
     const handleReply = reply => {
             if (reply.status==='OK') {
@@ -328,14 +327,16 @@ export default props => {
     const handleAddToCalendar = () => {setButtonStyle(BUTTON_STYLE.CLICKED); serverPost(irl, '', '', list, handleReply);}
 
     const changeToDbEntry = val => ({
+            eventId:val.eventId,
             title:val.title, 
             description:val.description?val.description:'No description yet ...',
             company:val.company,
             startDateTime:val.startDate + 'T' + (val.startTime?val.startTime:'00:00'),
             endDateTime:(val.endDate?val.endDate:val.startDate) + 'T' + (val.endTime?val.endTime:'23:59'),
             location:val.location,
-            email,
+            email:userSettings.email,
             ...userSettings, // Not all columns in userSettings that has the corresponding column in tbl_calendar will copy this value from tbl_user to tbl_calendar
+            id:undefined,
     })
 
     const adjustValue = () => {
@@ -382,17 +383,18 @@ export default props => {
             type:'button',
             label:'Add to list',
             style:buttonStyle,
+            validate:true,
             handleClick:handleAddList
         },    
         {
             type:'button',
-            label:'Reset',
+            label:'Undo',
             style:buttonStyle,
             handleClick:handleReset
         },    
         {
             type:'button',
-            label:'Reset',
+            label:'Cancel',
             style:buttonStyle,
             handleClick:handleCancel
         },    

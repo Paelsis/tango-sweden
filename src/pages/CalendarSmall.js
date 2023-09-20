@@ -9,6 +9,7 @@ const language = 'SV'
 
 const CULTURE = (language) => language==='SV'?'sv':language==='ES'?'es':'en'
 
+
 const TEXTS = {
     button:{
         SV:'Info',
@@ -47,6 +48,26 @@ const TEXTS = {
     }
 }
 
+const calcTr = (forceSmallFonts, isToday, durationHours) => {
+    const opacity = isToday?1.0:1.0
+    const border = 'none'
+
+
+    if (forceSmallFonts || durationHours < 2.5) {
+        return {height:30, fontSize:14, fontWeight:600, verticalAlign:'middle', border}
+    } else if (durationHours < 3.0) {
+        return {height:40, fontSize:16, fontWeight:700, verticalAlign:'middle', border}
+    } else if (durationHours < 4.0) {
+        return {height:50, fontSize:18, fontWeight:700, verticalAlign:'middle', border}
+    } else if (durationHours < 11) {
+        return {height:60, fontSize:20, fontWeight:700, verticalAlign:'middle', border}
+    } else if (durationHours < 48) {
+        return {height:80, fontSize:22, fontWeight:700, verticalAlign:'middle', border}
+    } else {
+        return {height:100, fontSize:24, fontWeight:800, verticalAlign:'middle', border}
+    } 
+}
+
 let styles = {
     table: {
         width:'100%',
@@ -58,13 +79,13 @@ let styles = {
     tbody: {
         cellPadding:1,
     },
-    tr: (durationHours, isToday, forceSmallFonts) => ({
-        //border:'1px solid',
-        verticalAlign:'center',
-        height:forceSmallFonts?20:durationHours > 48?50:durationHours>11?40:isToday?35:25,
-        fontSize:forceSmallFonts?14:durationHours > 48?24:durationHours>11?20:isToday?'large':'normal',
-        fontWeight:forceSmallFonts?500:durationHours > 48?800:durationHours > 11?700:isToday?600:500,
-    }),
+    tr: (forceSmallFonts, isToday, durationHours) => calcTr(forceSmallFonts, isToday, durationHours),
+    verticalCenter:{
+        margin: 0,
+        position: 'absolute',
+        top: '50%',
+        transform: 'translateY(-50%)'
+    }
 };
 
 /**
@@ -121,7 +142,7 @@ class SmallCalendarView extends Component {
 
             <tr 
                 key={'Row' + event.productId} 
-                style={styles.tr(event.durationHours, event.isToday, forceSmallFonts)}
+                style={styles.tr(forceSmallFonts, event.isToday, event.durationHours)}
                 onClick={()=>handleEvent(event)}
             > 
                 {endsOtherDay && !forceSmallFonts?
@@ -157,8 +178,6 @@ class SmallCalendarView extends Component {
                         }
                     </td>
                 :null}    
-
-
             </tr>
         )
     }    

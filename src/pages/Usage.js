@@ -1,114 +1,190 @@
 import React, {useState} from 'react';
+import Button from '@mui/material/Button';
 
-const swedishUsage = () => 
+const SwedishUsage = () => 
 <div>
-    <h2 style={{textAlign:'center', width:'100%'}}>Manual för administratörer</h2>
+    <h1 style={{textAlign:'center', color:'red'}}>Manual för administratörer</h1>
 
-    <h3>    Manual tangosweden.se</h3>
+    <h3>Manual tangosweden.se</h3>
 
-    Hemsidan tangosweden.se är öppen för alla arrangörer i Sverige/Danmark/Norge/Finland som önskar ha en egen tangokalender för sin ort eller region.
-    På förstasidan finns knappar för alla regioner och städer som finns i kalendern. Alla regioner och städer filtrerar fram  
-    sina egna events. Det finns också några orter och föreningar som hare en egen kalender (Danmark, Göteborg, Halmstad).
-    Till städer har vi externa länkar som nås via knapparna. Där finns också en länk till Danmarks tangokalender 
-    som ligger som kallar kalender-undersidan på tango.dk.
+    Hemsidan tangosweden.se är öppen för alla arrangörer i Sverige/Danmark/Norge/Finland som önskar ha en tangokalender för sin ort eller region.
+    På förstasidan finns knappar för de regioner och städer som är aktiva i kalendern. Helsingborg, Göteborg och Danmark har sina egna kalendrar 
+    som även dessa nås via knappar på förstasidan.
+
+    <h3>Lägga till, ta bort och ändra händelser</h3>
+
+    <h4>Login</h4>
+
+    För att lägga ut ett event måste ha login-uppgifter som du erhåller genom att skicka ett mail till Per Eskilson på email per.eskilson@gmail.com
+    eller Anita Dobi på anita.e.dobi@gmail.com. De enda uppgifter vi behöver från dig är den email-adress ni vill nyttja för att logga in när ni
+    lägger till events i kalendern. Föreningar med många administratörer bör ha en gemensam email för föreningen så att alla administratörer
+    kan ändra eller ta bort events. När vi erhållit er email skickar vi dig ett initialt password som ni själva därefter kan ändra på login sidan. 
+    När ni loggat in första gången skall ni gå in i menyn <i>Settings</i> och sätta värden på stad, region och färger så att dina events. 
     
+    <h3>Settings</h3>
 
-<h3>Lägga till, ta bort och ändra händelser</h3>
+    I menyn uppe till höger finns där en menypunkt Settings. I denna fyller du i stad och region (Skåne, Väst, Mitt eller Norr).
+    Det finns för nuvarande bara 4 regioner men detta kan ändras. Det finns ingen begränsning på antalet städer.  
+    På förstasidan hos tangosweden.se finns knappar för regioner och städer.
+    Städer eller regioner som för tillfället saknar uppkommande arrangemang visas ej med knappar i kalendern.
+    <p/>
+    På Settings sidan gör du även färgval för text och bakgrund för dina händelser. 
+    Tanken är att varje arrangör gör sina egna unika färgval som representerar företaget/föreningen.
+    Du skall göra 3 färgval: color, backgroundColorLight och backgroundColorDark. Värdet <i>color</i> anger färgen på texten. 
+    Bakgrundsfärgen tonas från backgroundColorLight i vänster hörn till backgroundColorDark i höger hörn.
 
-<h4>Login</h4>
+    Värden på färgerna anges med text (ex red, green, blue, lightYellow), eller med ett hexadeimalt värde. 
+    Hexasdecimala färg-värden består av ett #-tecken följt av 6 siffror 0-9 eller bokstäverna a-f (eller A-F), ex #fa23e8. 
+    Hexademimala färger finner du genom att googla på något i stil med "hex color wine red". Då får du som sök-svar upp massor av hex-koder på nyanser av vinrött. 
+    Totalt har du med hex-koder tillgång till drygt 16 miljoner färger. På settingssidan
+    förhandsvisas dina färgval. Man kan även välja en ram av variabel tjocklek och färg. Ytterligare ett alternativ är att man använder en bild som bakgrund,
+    men då måste bilden vara upplagd på nätet med en given url (ex: https://tangokompaniet.com/images/anna.jpg).
+    Om man använder bilder kommer ingen ram visas.
 
-För att lägga ut ett event måste du först få login-uppgifter som 
-arrangör. Dessa erhåller du genom att skicka ett mail till Per Eskilson på email per.eskilson@gmail.com
-eller Anita Dobi på anita.e.dobi@gmail.com. De enda uppgifter vi behöver från dig är den email-adress som du/ni vill nyttja för att logga in på hemsidan när ni
-lägger in events för er förening. Det är bra om ni har en gemensam email för hela föreningen om olika personer skall kunna ändra/ta bort events.
-När vi erhållit email skickar vi dig ett initialt password som du/ni själv därefter kan ändra på login sidan. När du/ni loggat in första gången skall du 
-gå in i menyn <i>Settings</i> och sätta värden så att dina kalender events hamnar i rätt region och stad. 
-Här sätter du även färg på text och bakgrund för dina events i kalendern. 
+    Tryck på <i>Save</i> knappen när du ärklar med dina val i inställningar (Settings). 
+    Om du ändrat dina färgval i inställningar så ändras de bara på nya events eftersom varje event i kalendern får sina färger sparade när du lägger till dem. 
+    Om du vill ändra färgen på redan existerande händelser skall du 
+    kryssa i rutan "Change colors to latest settings" när du uppdaterar eventet (med pennan).
+    Detta för att du skall ha möjlighet att uppdatera färg på nya events utan att för den skull ändra färgen på events som skapats tidigare. 
+    Nya events får alltid automatiskt färgvalen som är definierade på sidan Settings.
 
-<h3>Settings</h3>
+    <h3>Lägga till events</h3>
 
-I menyn uppe till höger finns där en menypunkt Settings. I denna fyller du i region (Skåne, Väst, Mitt eller Norr) samt stad.
-Det finns 4 regioner men ingen begränsning på antalet städer.  
-På förstasidan hos tangosweden.se dyker sen först knappar för regionerna upp och därefter knappar för städerna.
-Städer eller regioner som saknar för tillfället inte har några uppkommande arrangemang syns ej i kalendern.
-<p/>
-På Settings sidan gör du färgvalen på text och bakgrund för dina händelser. 
-Tanken är att varje arrangör använder sina egna unika färgval som representerar företaget/föreningen.
-Du skall göra 3 färgval: color, backgroundColorLight och backgroundColorDark. Värdet <i>color</i> anger färgen på texten. 
-Bakgrundsfärgen tonas från backgroundColorLight i vänster hörn till backgroundColorDark i höger hörn.
+    Gå in i menyn uppe till höger och klicka på "Add Event". Fyll sen i dina data.
+    Om du önskar lägga in repeterade händelser med en viss frekvens kryssar du i Repeat. Då visas 3 nya värden för offset, enhet och antal repetitioner. 
+    Sättes tex <i>offset</i> till 2 och enhet till <i>weeks</i> betyder det varannan vecka. Fältet <i>repeat number of times</i> anger det antalet repetitioner med den angivna frekvensen.
+    När du därefter klickar på knappen <i>Add to list</i>, så visas en lista på genererade datumen. 
+    Du kan lägga till eller ta bort datum från listan. Därefter klickar du på knappen <i>ADD TO CALENDAR</i>
+    Om du fyller i starttid 00:00 och sluttid 23:59 kommer tidsfältet visas för kunden som “Hela dagen” på mobilkalendern. 
+    Detta kan vara lämpligt för heldags-events, festivaler och marathon som sträcker sig över men än en dag. För events längre än 11 timmar och som
+    sträcker sig över flera dagar blir texten större i mobil-kalendern. Detta för att ge lite promotion till de som gör sig besväret att
+    arrangera flerdagsevents.
 
-Värden på färgerna anges med text eller som hexadecimalt värde. Som exempel kan du välja enkla text färger som yellow, blue, organge, green, brow, lightBlue, lightYellow, etc. 
-Man kan också använda hexasdecimala färg-värden besstår av ett #-tecken följt av 6 siffror 0-9 eller bokstäverna A-F (alternativt samma resultat med små bokstäver a-f), ex #A322F5. 
-Hexademimala färger finner du genom att googla på något i stil med "hex color wine red". Då får du som sök-svar upp massor av hex-koder på nyanser av vinrött. 
-Totalt kan du med hex-koder möjlighet att välja mellan drygt 16 miljoner färger. På settingssidan
-förhandsvisas dina färgval. Glöm inte trycka på  <i>Save</i> när du testat klart dina färgval. 
-Om du ändrat dina färgval så ändras de bara på nya events. Om du även vill ändra färgen på redan skapade händelser måste du 
-för varje gammalt event du har gå in och uppdatera eventet manuellt samt kryssa i rutan "Change colors to latest settings".
-Detta för att du skall ha möjlighet att uppdatera färg på nya events utan att för den skull ändra färgen på de events som tidigare skapats. 
-Nya events som skapats under meny-punkten <i>Add Event</i> får automatiskt de färgvalen som står i Settings.
+    <h3>Ta bort events</h3>
 
- <h4>Automatiskt färgval (endast Malmö/Lund)</h4>
-Notera att om du vill nyttja de färgval du gjort under <i>Settings</i> skall boxen näst längst ner med titeln <i>Use default settings</i> inte vara ikryssad.
-Denna nyttjas enbart för de föreningar i Malmö/Lund som önskar förbestämda färgval som Per och Anita valt initialt för Lund/Malmö. Om detta fält kryssas i kommer en ny rad Company.
-Company kan tex sättas till CAMARIN, ARRIBA, URBANA, eller liknande. Med detta värde identifieras automatiskt det standard färgval som Per gjort till de olika arrangörerna.
-Endast om fältet "Company" är tomt kommer dina färger tas från de värden som står i <i>Settings</i>.
-
-<h3>Lägga till events</h3>
-
-Klicka på menyn (hamburger-menyn uppe till höger) och klicka på menyunkt "Add Event". Då ser du en hemsida som är relativt enkel att förstå. 
-Om du önskar lägga in repeterade events med en viss frekvens kryssar du i repeat. Då kommer det upp 3 nya värden för offset, enhete och antal repetitioner. 
-Det betyder att om detta sättes till 1 och radio-knappen under sättes till weeks, så repeteras eventet varje vecka. 
-Sättes offset till 2 och enhet till vecka betyder det varannan vecka. Fältet <i>repeat number of times</i> anger det antalet gånger eventet skall repeteras.
-När du därefter klickar på knappen <i>Add to list</i>, så får du upp en lista på de datum som genererats. 
-Du kan lägga till eller ta bort datum från listan. När du är nöjd med listan klickar du på knappen <i>ADD TO CALENDAR</i>
-Om du fyller i starttid 00:00 och sluttid 23:59 kommer tidsfältet visas för kunden som “Whole day” på mobilkalendern. 
-Detta är lämpligt för helg-events, festivaler och marathon som sträcker sig över men än en dag. För events längre än 11 timmar och som
-sträcker sig över flera dagar blir texten större i mobil-kalendern. Detta för att ge lite promotion till de som gör sig besväret att
-skapa flerdagsevents.
-
-<h3>Ta bort events</h3>
-
-Om du som inloggad klickar på eventet i kalendern finns där två knappar för att ta bort ditt/dina event/s i kalendern, <i>Delete</i> och <i>Delete All</i>.
-Den första knappen <i>Delete</i> knappen tar bort enbart det event du klickat på. Den anrdra knappen <i>Delete All</i> tar bort hela serien av eventsdu skapat med <i>Add to calender</i>, 
-om du kryssade i <i>Repeat</i>. Då tas samtliga repeterade events skapade i denna serie att tas bort. Du kan bara ta bort de events som skapats under den email-adress som du 
-loggat på med, dvs events som ägs av denna email. Detta för att undvika att någon arrangör gör misstaget att ta bort någon annans event. Om ni är en förening där många 
-personer i föreningen skall kunna lägga till, ändra, eller ta bort events, då är det bra att använda föreningens gemensamma email som login eftersom samtliga events
-då skapats under ett och samma email.
+    Om du som inloggad klickar på eventet i kalendern finns där två knappar för att ta bort ditt/dina event/s i kalendern, <i>Spann</i> och <i>Spann med streck</i>.
+    Den första knappen <i>Spann</i> knappen tar bort enbart det event du klickat på. Den andra knappen <i>Spann med streck</i> tar bort hela serien du skapat då du använd <i>Repeat</i> 
+    Du har bara möjlighet att ta bort de events som skapats under din email-adress (som ägs av emailen du loggat in med). Detta för att undvika att man av misttag 
+    tar bort någon annan arrangörs events. Om ni är en förening med många   administratörer så är det lämpligt att använda föreningens gemensamma email
+    som login eftersom alla då kan ändra eller ta bort existerande events.
 
 
-<h3>Ändra existerande events</h3>
+    <h3>Ändra existerande events</h3>
 
-Logga in på kalendern och gå till eventet du önskar ändra. I fönstret som kommer upp finns längst ned en Update knapp. 
-Klicka på denna och ändra de uppgifter du önskar. Klicka därefter på Update knappen längst ned.
+    Logga in på kalendern och gå till eventet du önskar ändra. I fönstret som kommer upp finns längst ned en knapp som ser ut som en <i>Penna</i>. 
+    Klicka på denna och uppdatera de uppgifter du önskar. Klicka därefter på Update knappen längst ned.
 
-<h3>Duplicera existerande events till framtiden</h3>
+    <h3>Kopiera data till nya events</h3>
 
-Om du vill skapa nya events med samma information som du haft förr kan du använda knappen <i>Copy</i>.
-Typiskt har du en milonga eller praktika som återkommer varje vecka under hösten och som vill skall fortsätta under nästa säsong.
-<p/>
-Som inloggad klickar du då först på eventet som du vill kopiera data från. I fönstret som kommer upp klicka på <i>Update</i>  knappen längst ned.
-Längst ned i fönstret klickar du därefter på knappen <i>Copy</i> l. I fönstet som poppar upp finns förifylda data som du nu kan ändra på. 
-Detta fönster ser precis ut som <i>Add</i> fönstret fast med fälten för datum och tider tomma. Fyll i dina nya datum och tider och eventuell frekvens de de skall repeteras med <i>Repeat</i>.
-Sen fortsätter du bara som du gjorde med Add.
+    Om du vill återanvända samma information som du haft förr kan du använda knappen <i>Kopiera</i>.
+    Typiskt har du en milonga eller praktika som återkommer varje vecka under hösten och som vill skall fortsätta under nästa säsong.
+    <p/>
+    Som inloggad klickar du då först på eventet som du vill kopiera data från och sen på knappen <i>Kopiera</i>. I fönstet som poppar upp finns nu förifylda data 
+    samt tomma fält för datum och tid. Fyll i ditt nya datum och din nya tid samt eventuell upprepad frekvens med <i>Repeat</i>.
 
-<h3>Förslagslåda:</h3>
-Om du har förslag på ändringar eller vidareutveckling av kalendern skicka dessa i email till per.eskilson@gmail.com eller till anita.e.dobi@gmail.com.
+    <h3>Förslagslåda:</h3>
+    Om du har några fantastiska förslag på ändringar för viddareutveckling av kalendern, 
+    skicka dessa i en email till per.eskilson@gmail.com eller till anita.e.dobi@gmail.com.
 </div>
 
-const englishUsage = () => <h4>Yet no translation to english. Coming up if demand comes in.</h4>
+const EnglishUsage = () => 
+<div>
+    <h1 style={{textAlign:'center', color:'red'}}>Manual for administrators</h1>
+
+    <h3>Manual for tangosweden.se</h3>
+
+    The website tangosweden.se is open to all oranizers in Sweden/Denmark/Norway/Finland that wish to have their own tango calendar for their locality or region.
+    On the front page there are direct-buttons for all the regions and cities that are in the loaded  calendar. Denmark, Gothenburg and Halmstad have their own 
+    calenders. The buttons for those redirect you to their home pages or calendars.
+    
+    <h3>Add, change and remove events</h3>
+
+    <h4>Login</h4>
+
+    To post an event, you must first receive login details such as
+    organizer. You can obtain these by sending an email to Per Eskilson at email per.eskilson@gmail.com
+    or Anita Dobi at anita.e.dobi@gmail.com. The information we need from you is the email address that you want to use for login to the tangosweden.se when you
+    want to add events for your organisation. Please use a commona common email for the whole organization so that different actors are able to change/delete events.
+    After we received your email, we will send you an initial password, which you can change on the login page. When you log in for the first time, you must
+    go to the <i>Settings</i> menu and initialize values ​for region and city.
+    Here you also set the color for text and background for your events in the calendar.
+
+    <h3>Settings</h3>
+
+    In the menu at the top right there is a menu item Settings. In this you fill in the city and region. 
+    Currently there are 4 regions, Skåne, West, Middle or North. There is no limitations on the number of cities.
+    On the front page of tangosweden.se there are buttons for all active regions and cities.
+    Cities or regions that with no upcoming events are not shown with buttons in the calendar.
+    <p/>
+    On the Settings page, you make color choices for text and background for your events in the calendar.
+    The idea is that each organizer uses their own unique colors.
+    You must make 3 color choices: color, backgroundColorLight and backgroundColorDark. The <i>color</i> value specifies the color of the text.
+    The background color fades from backgroundColorLight in the upper left corner to backgroundColorDark in the lower right corner.
+
+    The values ​​of the colors are specified with text or as a hexadecimal value. For example, you can choose simple text colors such as yellow, blue, organge, green, brow, lightBlue, lightYellow, etc.
+    You can also use hexadecimal color values ​​consisting of a # sign followed by 6 numbers 0-9 or the letters A-F (alternatively the same result with lowercase letters a-f), eg #A322F5.
+    You can find hexadecimal colors by googling something like "hex color wine red". Then you will get lots of hex codes for shades of burgundy as a search response.
+    In total, you can choose from roughly 16 million colors with hex codes. On the settings page
+    your color choices shown in a square. You also have theoption to chose a solid frame with variable a particular thickness and color.
+    Another option is to use an image as a background (you give an url to the image).
+    If you use images, no frame will be displayed for images.
+
+    Don't forget to press <i>Save</i> when you have finished testing your choices in settings (Settings).
+    If you changed your color choices in settings, they will only change on new events. If you also want to change the color of an already existing event, you must
+    go in and update the event and check the checkbox "Change colors to latest settings".
+    This will ensure to update the color from the latest values in the settings meny.
+    New events created under the menu item <i>Add Event</i> will always take the color choices from the Settings menu.
+  
+    <h3>Add new events</h3>
+
+    Click on the menu (the hamburger menu at the top right) and click on the menu item "Add Event". Then you will see a website that is relatively easy to understand.
+    If you wish to enter repeated events with a certain frequency, check repeat. Then 3 new values ​​for offset, unit and number of repetitions appear.
+    This means that if this is set to 1 and the radio button below is set to weeks, the event is repeated every week.
+    An offset of 2 and a unit set to 'weeks' is translated to every two weeks. The field <i>repeat number of times</i> specifies the number of times the event is to be repeated.
+    When you then click on the button <i>Add to list</i>, you will get a list with the dates that have been generated.
+    You can add or remove more dates to/from the list. When you are satisfied with the list, click the button <i>ADD TO CALENDAR</i>
+    If you enter start time 00:00 and end time 23:59, the time field will be displayed to the customer as "Whole day" on the mobile calendar.
+    This is suitable for weekend events, festivals and marathons that span more than one day. For events longer than 11 hours and which
+    extends over several days, the text becomes larger in the mobile calendar. This is to give a little promotion to those who take the trouble to
+    create multi-day events.
+    <h3>Remove events</h3>
+
+    If you click on the event in the calendar as logged in, there are two buttons to delete your event(s) in the calendar.
+    The first delete button deletes only the single event you clicked on. The second button (Sweep delete) deletes the entire series of events you created
+    if you checked <i>Repeat</i> button when adding a series of events. Then the whole series is deleted. You can only delete the events created owned by your logi email address
+    This is to avoid other organizer by mistake removing your events. For oragnizations with many
+    administratiors it is good that all users use the same email to login. Then all administrations can  
+    handle change or delete all evetns for the organization.
+
+    <h3>Modify existing events</h3>
+
+    Log in to the calendar and go to the event you wish to change. In the window that appears, there is an PEN-button at the bottom.
+    Click on this and change the information you want. Then click on the Update button at the bottom.
+     
+    <h3>Duplicate contents from existing events to upcoming events</h3>
+
+    If you want to create new events with the same data as you had before, use the COPY-button.
+    Typically, you have a milonga or practia that occurs every week during the fall and that you want to continue during the next season.
+    <p/>
+    As logged in, you then first click on the event from which you want to copy data. In the window that appears, click the COPY-button.
+    In the windo that pops up there is a prefilled template but with date and time fields empty.
+    Fill in your new dates and times and any frequency they are to be repeated with <i>Repeat</i>.
+    Then you just continue as you did with Add.
+
+    <h3>Proposals:</h3>
+    If you have suggestions for changes or further development of the calendar, send them by email to per.eskilson@gmail.com or to anita.e.dobi@gmail.com.</div>
 
 
 
 export default () => {
     const [language, setLanguage] = useState('SV')
     return(
-        <div style={{width:'90%', maxWidth:800, margin:'auto'}}>
-            {language==='SV'?swedishUsage():englishUsage()}
+        <div className='content' style={{width:'100%', maxWidth:800, padding:'2%', margin:'auto'}}>
+            {language==='SV'?<SwedishUsage />:<EnglishUsage/>}
             <div style={{display:'flex', alignItems:'center', justifyContent:'center'}}>
-                <button className='button' onClick={()=>{setLanguage(language==='EN'?'SV':'EN')}}>{language}</button>
+                <Button variant='outlined' color='inherit' onClick={()=>{setLanguage('SV')}}>SV</Button>
+                <Button variant='outlined' color='inherit' onClick={()=>{setLanguage('EN')}}>EN</Button>
             </div>
         </div>
     )
-
-
 }
