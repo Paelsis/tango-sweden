@@ -99,9 +99,6 @@ const Home = () => {
                         {it.region}                    
                     </Button>    
                 )}    
-                <Button variant="outlined" type="button" style={styles.buttonDenmark}  onClick={()=>handleNavigate('/denmark')}>
-                    Danmark                    
-                </Button>    
                 <Button variant="outlined" type="button" style={styles.button}  onClick={()=>handleNavigate('/calendar/malmö')}>
                     Malmö/Lund                    
                 </Button>    
@@ -110,6 +107,11 @@ const Home = () => {
                         {it.city}                    
                     </Button>    
                 )}    
+                <div style={{height:15}}/>
+                <h4>External Calendars</h4>
+                <Button variant="outlined" type="button" style={styles.buttonDenmark}  onClick={()=>handleNavigate('/denmark')}>
+                    Danmark                    
+                </Button>    
                 <Button variant="outlined" type="button" style={styles.button}  onClick={()=>handleNavigate('/halmstad')}>
                     Halmstad                    
                 </Button>    
