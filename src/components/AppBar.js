@@ -43,8 +43,9 @@ export default () => {
   
   useEffect(()=>{
     onAuthStateChanged(auth, user => {
+
       setEmail(user?user.email:undefined);
-      if (user.email) {
+      if (user?user.email:false) {
         const irl = '/getUser?email=' +  user.email
         serverFetchDataResult(irl, '', '', result=>handleResult(result))
       } 

@@ -5,7 +5,10 @@ const apiBaseUrl = process.env.REACT_APP_API_BASE_URL
 const serverPost = (irl, username, password, data, handleReply) => {
     const url = irl.slice(0,4).toLowerCase().localeCompare('http')===0?irl:apiBaseUrl + irl
     console.log('--- serverPost --- url:', url, ' data:', data);
-    axios.post(url, data, {auth: {username, password}})
+    const axiosConfig = {
+        // auth: {username, password}
+    }
+    axios.post(url, data, axiosConfig)
     .then(response => {
         const status = response.status?response.status:'No status'
         if (response.status === 200) {

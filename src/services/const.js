@@ -49,7 +49,44 @@ export const COLORS = {
   RED:'#FF4D4D',
   WHITE:'white',
   BLUE:'blue',
-  LIGHTBLUE:'lightBlue'
+  LIGHTBLUE:'lightBlue',
+  ICEBLUE:'#baf2ef',
+  REGION:{
+    TEXT:'#ffffa7',
+    BORDER:'#dcf3ff',
+  },
+  CITY:{
+    TEXT:'yellow',
+    BORDER:'#FFFFDA',
+  },
+  HELSINGBORG:{
+    TEXT:'#d50000',
+    BORDER:'#d50000',
+  },
+  HALMSTAD:{
+    TEXT:'#d40000', // röd
+    BORDER:'2596be', //blå
+  },
+  DENMARK:{
+    TEXT:'white', // vit
+    BORDER:'#FF4D4D', // röd  
+  },
+  GOTHENBURG:{
+    TEXT:'#F8CB0A', // gul 
+    BORDER:'1251a0', // blå
+  },
+  STOCKHOLM:{
+    TEXT:'#ffcd50', // gul
+    BORDER:'#003d8f', // blå  
+  },
+  MALMO:{
+    TEXT:'#bd9009', // gul
+    BORDER:'#ee1d23', // röd  
+  },
+  SUNDSVALL:{
+    TEXT:'#eeeeee', // grå
+    BORDER:'#003d84', // blå  
+  },
 }
 
 export const backgroundImages = {
@@ -63,5 +100,5 @@ export const BUTTON_STYLE = {
   ERROR:{color:'red', borderColor:'red'},
 }
 
-export const ADMINISTRATORS=['anita@tangosweden.se', 'anita.e.dobi@gmail.com', 'admin@tangosweden.se'];
+export const ADMINISTRATORS=['tangosmedjan@gmail.com', 'anita.e.dobi@gmail.com', 'admin@tangosweden.se'];
 

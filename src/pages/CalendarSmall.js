@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {AVA_STATUS} from '../services/const.js'
 
+
 //import moment from 'moment';
 import moment from 'moment-with-locales-es6'
 import Button from '@mui/material/Button';
@@ -48,24 +49,22 @@ const TEXTS = {
     }
 }
 
-const calcTr = (forceSmallFonts, isToday, durationHours) => {
+const calcTr = (forceSmallFonts, isToday, durationHours, length) => {
     const opacity = isToday?1.0:1.0
     const border = 'none'
+    const height = durationHours < 4?durationHours*15
+        :(4*15 + Math.min((durationHours-4)*3, 90))
 
+    let fontSize = durationHours < 2.5?14
+    :durationHours <3.0?16
+    :durationHours <4.0?18
+    :durationHours <11?20
+    :durationHours <48?22
+    :24
+    
+    fontSize = length > 60?fontSize-4:length > 40?fontSize-2:fontSize    
 
-    if (forceSmallFonts || durationHours < 2.5) {
-        return {height:30, fontSize:14, fontWeight:600, verticalAlign:'middle', border}
-    } else if (durationHours < 3.0) {
-        return {height:40, fontSize:16, fontWeight:700, verticalAlign:'middle', border}
-    } else if (durationHours < 4.0) {
-        return {height:50, fontSize:18, fontWeight:700, verticalAlign:'middle', border}
-    } else if (durationHours < 11) {
-        return {height:60, fontSize:20, fontWeight:700, verticalAlign:'middle', border}
-    } else if (durationHours < 48) {
-        return {height:80, fontSize:22, fontWeight:700, verticalAlign:'middle', border}
-    } else {
-        return {height:100, fontSize:24, fontWeight:800, verticalAlign:'middle', border}
-    } 
+    return {height, fontSize, fontWeight:800, verticalAlign:'middle', border}
 }
 
 let styles = {
@@ -79,7 +78,7 @@ let styles = {
     tbody: {
         cellPadding:1,
     },
-    tr: (forceSmallFonts, isToday, durationHours) => calcTr(forceSmallFonts, isToday, durationHours),
+    tr: (forceSmallFonts, isToday, durationHours, length) => calcTr(forceSmallFonts, isToday, durationHours, length),
     verticalCenter:{
         margin: 0,
         position: 'absolute',
@@ -142,7 +141,7 @@ class SmallCalendarView extends Component {
 
             <tr 
                 key={'Row' + event.productId} 
-                style={styles.tr(forceSmallFonts, event.isToday, event.durationHours)}
+                style={styles.tr(forceSmallFonts, event.isToday, event.durationHours, event.title.length)}
                 onClick={()=>handleEvent(event)}
             > 
                 {endsOtherDay && !forceSmallFonts?

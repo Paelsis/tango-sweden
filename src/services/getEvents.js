@@ -20,7 +20,6 @@ const findParameter = (s, val) => {
     return undefined
   }  
 }  
-
 function _createEvent(props)  {
   const {start, end, title, description, location, email, staticStyleId, color, backgroundColorLight, backgroundColorDark, backgroundImage, borderStyle, borderWidth, borderColor} = props
   const mstart=moment(start)
@@ -41,16 +40,12 @@ function _createEvent(props)  {
       findStaticStyle(staticStyleId, title, description, opacity)
     :backgroundImage?
         {color,
-          //border, 
-          //borderWidth, 
-          //borderColor, 
           backgroundImage:`url(${backgroundImage})`, 
           backgroundPosition: 'center center',   
           backgroundRepeat:'auto', 
           backgroundSize:'cover', 
           backgroundColor:backgroundColorLight, 
-          height:50, 
-          fontWeight:'bold'}
+        }
 
     :  
         {color, background, borderStyle, borderWidth, borderColor}

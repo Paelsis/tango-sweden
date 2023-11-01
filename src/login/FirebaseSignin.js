@@ -91,7 +91,7 @@ const FirebaseSignin = () => {
             <form  onSubmit={handleSignin}>
                  <p/>  
                 <label>
-                Signin with email and password (only for administrators of this calendar)<p/>
+                Signin med email och lösenord (enbart för full aukotiserade Späckhuggare)<p/>
                 </label>
                 <input style={inputStyle} name='email' type='email' placeholder='Email' onChange={handleChange} />
                 <p/>

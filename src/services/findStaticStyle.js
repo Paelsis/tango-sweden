@@ -3,13 +3,23 @@ import festivalito from '../images/festivalito_banner.jpg';
 import summer from '../images/summer_banner.jpg';
 import easter from '../images/easter_banner.jpg';
 import maraton from '../images/maraton_banner.jpg';
+import tangokompaniet from '../images/tangokompaniet.jpg';
 
   
   const staticStyleIds = [
     {
       searchValue:'TANGOKOMPANIET',
       // style:{color:"yellow", backgroundImage: `url(${Dance})`},  
-      style:{color:"#f2e2e9", background: 'linear-gradient(to bottom right, #81185B, #442222)'}
+      style:{
+        fontWeight:700,
+        color:'white', // #f2e2e9', 
+        background: 'linear-gradient(to bottom right, #81185B, #442222)',
+        backgroundImage: `url(${tangokompaniet})`,
+        backgroundPosition: 'center center',   
+        backgroundRepeat:'auto', 
+        backgroundSize:'cover', 
+        backgroundColor:'#81185B',
+      }
     },
     /*
     {
