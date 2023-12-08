@@ -78,6 +78,7 @@ export const COLORS = {
   STOCKHOLM:{
     TEXT:'#ffcd50', // gul
     BORDER:'#003d8f', // blå  
+    BACKGROUND:'#FF2222', 
   },
   MALMO:{
     TEXT:'#bd9009', // gul

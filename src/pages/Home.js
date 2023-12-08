@@ -206,6 +206,9 @@ const Home = () => {
 
                 <div style={{height:15}}/>
                 <h4>Städer</h4>
+                <Button variant="outlined" type="button" style={styles.city.stockholm}  onClick={()=>handleNavigate('/calendar/stockholm')}>
+                    Stockholm                    
+                </Button>    
                 <Button 
                     variant="outlined" 
                     type="button" 
@@ -213,6 +216,9 @@ const Home = () => {
                     onClick={()=>handleNavigate('/calendar/malmö')}
                 >
                     Malmö/Lund                    
+                </Button>    
+                <Button variant="outlined" type="button" style={styles.city.gothemburg}  onClick={()=>handleNavigate('/got')}>
+                    Göteborg                    
                 </Button>    
                 {cities.filter(it => !it.city.toLowerCase().includes('malmö')).map(it=>
                     <Button 
@@ -223,14 +229,8 @@ const Home = () => {
                         {it.city}                    
                     </Button>    
                 )}    
-                <Button variant="outlined" type="button" style={styles.city.stockholm}  onClick={()=>handleNavigate('/stockholm')}>
-                    Stockholm                    
-                </Button>    
                 <Button variant="outlined" type="button" style={styles.city.halmstad}  onClick={()=>handleNavigate('/halmstad')}>
                     Halmstad                    
-                </Button>    
-                <Button variant="outlined" type="button" style={styles.city.gothemburg}  onClick={()=>handleNavigate('/gothenburg')}>
-                    Göteborg                    
                 </Button>    
              </div>
         </div>

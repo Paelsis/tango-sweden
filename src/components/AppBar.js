@@ -35,6 +35,7 @@ export default () => {
   const handleResult = result => {
     //alert('AppBar 0:' + JSON.stringify(result?result:'No result'))
     if (result && !!result.region) {
+      /* alert('xxxx ' + JSON.stringify(result) + ' ' + email) */
       setUserSettings({...userSettings, ...result})
     } else {
       navigate('/settings')
@@ -43,7 +44,6 @@ export default () => {
   
   useEffect(()=>{
     onAuthStateChanged(auth, user => {
-
       setEmail(user?user.email:undefined);
       if (user?user.email:false) {
         const irl = '/getUser?email=' +  user.email

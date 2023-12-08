@@ -60,8 +60,7 @@ export default function App() {
                 <Route path="fortuna" element={<RedirectTo url='https://www.tangofortuna.com/' />} />
                 <Route path="tangorama" element={<RedirectTo url='https://www.tangorama.se/kalendar' />} />
                 <Route path="halmstad" element={<RedirectTo url='http://www.tangoexperimental.com/sv-SE' />} />
-                <Route path="gothenburg" element={<RedirectTo url={"https://teamup.com/ks863ac26a05ed5d28"} />} />
-                <Route path="stockholm" element={<RedirectTo url={"https://tinyurl.com/Agenda-Tango-in-Stockholm"} />} />
+                <Route path="got" element={<RedirectTo url={"https://teamup.com/ks863ac26a05ed5d28"} />} />
                 <Route path="settings" element={<Settings />} />
                 <Route path="usage" element={<Usage />} />
                 <Route path="privacy" element={<Privacy/>} />

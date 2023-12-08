@@ -150,8 +150,10 @@ export default props => {
     const handleResult = reply => {
       // alert('Settings:' + JSON.stringify(reply.result?reply.result:'No result'))
       if (reply.status === 'OK' && !!reply.result) {
-          setUserSettings({...userSettings, ...reply.result})
-      } 
+          setUserSettings({...userSettings, email, ...reply.result})
+      } else {
+        alert('User settings could not be saved, status=' + reply.status)
+      }
     }
 
     useEffect(()=>{

@@ -22,6 +22,7 @@ const findParameter = (s, val) => {
 }  
 function _createEvent(props)  {
   const {start, end, title, description, location, email, staticStyleId, color, backgroundColorLight, backgroundColorDark, backgroundImage, borderStyle, borderWidth, borderColor} = props
+  const mnow = moment()
   const mstart=moment(start)
   const mend=moment(end).add(start.length <= 10?-1:0, 'days')
   const timeStart = mstart.format('LT')
@@ -33,11 +34,15 @@ function _createEvent(props)  {
   const timeUnset =  (timeStart==="00:00" && timeEnd ==="00:00") 
   const maxPar = Number(findParameter(description, 'MAX_PAR'))
   const maxInd = Number(findParameter(description, 'MAX_IND'))
-  const opacity = moment() < mend?1.0:0.4
+  const opacity = mnow < mend?1.0:0.4
+  const ongoing = (mnow >= mstart) && (mnow < mend)
+  const staticStyle = staticStyleId?findStaticStyle(staticStyleId):undefined
+  const isToday = mnow.isSame(mstart, 'day')?true:false
   const background = "linear-gradient(to bottom right, " + backgroundColorLight + ", " + backgroundColorDark + ")"
+  const border = ongoing?'2px dotted':'0px'
   const style = 
-    staticStyleId?
-      findStaticStyle(staticStyleId, title, description, opacity)
+    staticStyle?
+      {...staticStyle, border, opacity}
     :backgroundImage?
         {color,
           backgroundImage:`url(${backgroundImage})`, 
@@ -45,10 +50,13 @@ function _createEvent(props)  {
           backgroundRepeat:'auto', 
           backgroundSize:'cover', 
           backgroundColor:backgroundColorLight, 
+          fontSize:14,
+          opacity,
+          border
         }
 
     :  
-        {color, background, borderStyle, borderWidth, borderColor}
+        {color, background, borderStyle:border?undefined:borderStyle, borderWidth:border?undefined:borderWidth, borderColor, border, opacity}
 
   
   // alert('hours=' + durationHours)
@@ -65,18 +73,18 @@ function _createEvent(props)  {
         timeUnset, 
         dateRange,
         durationHours, 
-        isToday:moment().isSame(moment(start), 'day')?true:false,
-        isWeekend:moment(start).isoWeekday() >=6,
-        calendar:moment(start).calendar(),
+        isToday,
+        ongoing, 
+        isWeekend:mstart.isoWeekday() >=6,
+        calendar:mstart.calendar(),
         location:location?location:'Ingen plats angiven',
         city: cityForEvent(title, location),
-        weekNumber: moment(start).isoWeek(),
+        weekNumber: mstart.isoWeek(),
 
         timeRange: fullDay?'Hela dagen':(mstart.format('LT') + '-' + mend.format('LT')),
         timeRangeWithDay: (dateShift && durationHours > 11)?(mstart.format('ddd LT') + '-' + mend.format('ddd LT'))
           :(mstart.format('LT') + '-' + mend.format('LT')),
         style,
-
         /* Registration props */
         maxRegistrants : Number(maxInd?maxInd:maxPar?(maxPar*2):500),
     })

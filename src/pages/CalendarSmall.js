@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, {Component, useState} from 'react';
 import {AVA_STATUS} from '../services/const.js'
 
 
@@ -131,10 +131,10 @@ class SmallCalendarView extends Component {
         const dateRange=event.dateRange
         const timeRange = moment() <= mend?event.timeRange:(TEXTS.ENDED[language] + ' ' + mend.format('LT'))
         const dateTimeRange = mstart.format('ddd D MMM H:mm') + ' - ' +  mend.format('ddd D MMM H:mm')
-        const opacity = moment() <= mend?1.0:0.3
         const useRegistrationButton = event.useRegistrationButton
         const endsOtherDay=(mstart.calendar('l') !== mend.calendar('l')) && (mend.diff(mstart, 'hours') > 11) && !event.fullDay
         const tdStyle = event.style
+        const tdStyleDateTime = {...tdStyle, fontSize:16, fontWeight:600}
         //const forcedSmallFonts= ['milonga', 'practica', 'pratika'].find(it  => event.title.toLowerCase().includes(it)) && event.durationHours >12
         const forceSmallFonts = event.forceSmallFonts
         return(
@@ -150,10 +150,10 @@ class SmallCalendarView extends Component {
                     </td>
                 :
                     <>
-                        <td style={tdStyle} >  
-                            <small>{dateRange}</small>
+                        <td style={tdStyleDateTime} >  
+                            <small>{event.sameDate?'':dateRange}</small>
                         </td>
-                        <td style={tdStyle}>  
+                        <td style={tdStyleDateTime}>  
                             <small>{timeRange}</small>
                         </td>
                         <td colspan={useRegistrationButton==1?1:2} style={tdStyle}>  
@@ -181,7 +181,10 @@ class SmallCalendarView extends Component {
         )
     }    
 
-    renderAllEvents = (events) => (events.map(event =>this.renderEvent(event)))
+    renderAllEvents = (events) => {
+        
+        return(events.map(event =>this.renderEvent(event)))
+    }
 
     render() {
         const {language, events} = this.props

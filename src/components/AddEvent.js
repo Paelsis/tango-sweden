@@ -291,13 +291,12 @@ const CandidateTable = ({list, deleteRow, clearAll, handleAddToCalendar, buttonS
 
 
 export default props => {
-    const [userSettings,] = useSharedState()
+    const [userSettings, ] = useSharedState()
     const [value, setValue] = useState({})
     const [buttonStyle, setButtonStyle] = useState(BUTTON_STYLE.DEFAULT)
     const [list, setList] = useState([])
     const navigate = useNavigate()
     const auth = getAuth()
-    const irl = '/addEvents'
 
     // useEffect(()=>setValue(props.init),[props.init])
 
@@ -310,7 +309,7 @@ export default props => {
     const handleReply = reply => {
             if (reply.status==='OK') {
                 setButtonStyle(BUTTON_STYLE.DEFAULT)
-                navigate('/calendar/' + userSettings.region)
+                navigate('/calendar/' + (userSettings.region?userSettings.region:'Skåne'))
             } else {
                 setButtonStyle(BUTTON_STYLE.ERROR)
                 alert(reply.message?('Error message:' + reply.message):JSON.stringify(reply))
@@ -324,7 +323,12 @@ export default props => {
         setValue({})
     }
 
-    const handleAddToCalendar = () => {setButtonStyle(BUTTON_STYLE.CLICKED); serverPost(irl, '', '', list, handleReply);}
+    const handleAddToCalendar = () => {
+        const irl = '/addEvents'
+        // alert(JSON.stringify(list))
+        setButtonStyle(BUTTON_STYLE.CLICKED) 
+        serverPost(irl, '', '', list, handleReply)
+    }
 
     const changeToDbEntry = val => ({
             eventId:val.eventId,
@@ -334,7 +338,6 @@ export default props => {
             startDateTime:val.startDate + 'T' + (val.startTime?val.startTime:'00:00'),
             endDateTime:(val.endDate?val.endDate:val.startDate) + 'T' + (val.endTime?val.endTime:'23:59'),
             location:val.location,
-            email:userSettings.email,
             ...userSettings, // Not all columns in userSettings that has the corresponding column in tbl_calendar will copy this value from tbl_user to tbl_calendar
             id:undefined,
     })
