@@ -132,7 +132,6 @@ class SmallCalendarView extends Component {
         const timeRange = moment() <= mend?event.timeRange:(TEXTS.ENDED[language] + ' ' + mend.format('LT'))
         const dateTimeRange = mstart.format('ddd D MMM H:mm') + ' - ' +  mend.format('ddd D MMM H:mm')
         const useRegistrationButton = event.useRegistrationButton
-        const endsOtherDay=(mstart.calendar('l') !== mend.calendar('l')) && (mend.diff(mstart, 'hours') > 11) && !event.fullDay
         const tdStyle = event.style
         const tdStyleDateTime = {...tdStyle, fontSize:16, fontWeight:600}
         //const forcedSmallFonts= ['milonga', 'practica', 'pratika'].find(it  => event.title.toLowerCase().includes(it)) && event.durationHours >12
@@ -144,7 +143,7 @@ class SmallCalendarView extends Component {
                 style={styles.tr(forceSmallFonts, event.isToday, event.durationHours, event.title.length)}
                 onClick={()=>handleEvent(event)}
             > 
-                {endsOtherDay && !forceSmallFonts?
+                {event.moreThan11Hours && !forceSmallFonts?
                     <td colSpan={3} style={tdStyle}>  
                         {event.title}<br/>{dateTimeRange}
                     </td>

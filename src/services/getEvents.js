@@ -27,19 +27,20 @@ function _createEvent(props)  {
   const mend=moment(end).add(start.length <= 10?-1:0, 'days')
   const timeStart = mstart.format('LT')
   const timeEnd = mend.format('LT')
-  const fullDay = start.length <= 10 || (timeStart==="00:00" && timeEnd ==="00:00") && dateShift <= 1 || (timeStart==="00:00" && timeEnd ==="23:59")
-  const durationHours = moment.duration(mend.diff(mstart)).asHours()
   const dateShift =  moment(end).dayOfYear() - moment(start).dayOfYear() 
+  const fullDay = start.length <= 10 || (timeStart==="00:00" && timeEnd ==="00:00") && dateShift <= 1 || (timeStart==="00:00" && timeEnd ==="23:59")
+  const moreThan11Hours=(mstart.calendar('l') !== mend.calendar('l')) && (mend.diff(mstart, 'hours') > 11) 
+  const durationHours = moment.duration(mend.diff(mstart)).asHours()
   const dateRange=(mstart.format('ddd D/M') + ((dateShift && durationHours > 11)?(' - ' +  mend.format('ddd D/M')):''))
   const timeUnset =  (timeStart==="00:00" && timeEnd ==="00:00") 
   const maxPar = Number(findParameter(description, 'MAX_PAR'))
   const maxInd = Number(findParameter(description, 'MAX_IND'))
-  const opacity = mnow < mend?1.0:0.4
   const ongoing = (mnow >= mstart) && (mnow < mend)
   const staticStyle = staticStyleId?findStaticStyle(staticStyleId):undefined
   const isToday = mnow.isSame(mstart, 'day')?true:false
   const background = "linear-gradient(to bottom right, " + backgroundColorLight + ", " + backgroundColorDark + ")"
   const border = ongoing?'2px dotted':'0px'
+  const opacity = mnow < mend?1.0:0.4
   const style = 
     staticStyle?
       {...staticStyle, border, opacity}
@@ -74,6 +75,7 @@ function _createEvent(props)  {
         dateRange,
         durationHours, 
         isToday,
+        moreThan11Hours,
         ongoing, 
         isWeekend:mstart.isoWeekday() >=6,
         calendar:mstart.calendar(),
