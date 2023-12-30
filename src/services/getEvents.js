@@ -176,7 +176,9 @@ export function getEventsFromTable (irl, callback, timeMin, timeMax, language) {
         const start = replaceChar(it.start, 'T', 10); // Fill in T between date and time in start (to get sorting work with Google Cal start)
         const end = replaceChar(it.end, 'T', 10); // Fill in T between date and time in start (to get sorting work with Google Cal start)
         // alert(start)
-        event = _createEvent({...it, location, start, end})
+        const staticStyleId = it.city.toUpperCase() === 'STOCKHOLM'?'STOCKHOLM':undefined;
+
+        event = _createEvent({...it, location, start, end, staticStyleId})
         events.push(event)
       })
     } 

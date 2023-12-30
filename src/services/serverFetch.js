@@ -21,9 +21,9 @@ export function serverFetchDataResult(irl, username, password, handleResult) {
         handleResult(result);
     })
     .catch(e => {
-        const errorMessage = 'url=' + url + ' ERROR:' + JSON.stringify(e)
+        const errorMessage = 'url=' + url + ' e:' + JSON.stringify(e.message)
         // alert(errorMessage)
-        console.log('(function: functions/fetch) Error message:', errorMessage);
+        console.log('[serverFerchDataResult] Error message:', errorMessage);
         handleResult(undefined);
     });
 }
@@ -48,9 +48,10 @@ export function serverFetchData(irl, username, password, handleReply) {
         handleReply(data);
     })
     .catch(e => {
-        const errorMessage = 'url=' + url + ' ERROR:' + JSON.stringify(e)
+        const errorMessage = 'url=' + url + ' e:' + JSON.stringify(e.message)
         // alert(errorMessage)
-        console.log('(function: functions/fetch) Error message:', errorMessage);
+        console.log('[serverFerchData] Error message:', errorMessage);
+        alert('[serverFerchData] Error message:' + errorMessage)
         handleReply([]);
     });
 }
