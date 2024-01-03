@@ -17,7 +17,7 @@ const staticStyleIds = [
       backgroundImage: `url(${tangokompaniet})`,
       backgroundPosition: 'center center',   
       backgroundRepeat:'auto', 
-      backgroundSize:'cover', 
+      backgroundSize:'3000%', 
       backgroundColor:'#81185B',
     }
   },

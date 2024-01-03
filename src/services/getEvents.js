@@ -4,6 +4,7 @@ import findStaticStyle from './findStaticStyle'
 import {serverFetchDataResult} from './serverFetch'
 import {replaceChar} from '../services/functions'
 import casaBlanca from '../images/VitaHuset.jpg';
+const apiBaseUrl = process.env.REACT_APP_API_BASE_URL
 
 
 const CULTURE = (language) => language===LANGUAGE_SV?'sv':language===LANGUAGE_ES?'es':'en'
@@ -46,7 +47,7 @@ function _createEvent(props)  {
       {...staticStyle, border, opacity}
     :backgroundImage?
         {color,
-          backgroundImage:`url(${backgroundImage})`, 
+          backgroundImage:`url(${apiBaseUrl + backgroundImage})`, // Note images is stored in SLIM4 public dir
           backgroundPosition: 'center center',   
           backgroundRepeat:'auto', 
           backgroundSize:'cover', 
