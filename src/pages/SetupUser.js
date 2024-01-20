@@ -1,7 +1,6 @@
 
 import React, {useState, useEffect, useRef} from 'react';
-import StatusMessage from '../components/StatusMessage'
-import {useParams } from 'react-router-dom';
+import {useParams} from 'react-router-dom';
 import serverPost from '../services/serverPost'
 import {search} from '../services/search'
 import SearchTemplate from '../components/SearchTemplate'
@@ -117,21 +116,16 @@ export default () => {
     //const navigate = useNavigate()
     const [list, setList] = useState([])
     const [value, setValue] = useState({})
-    const [statusMessage, setStatusMessage] = useState({})
 
     const inputRef = useRef(null)
    
     useEffect(()=>{
         inputRef.current.focus()
         if (params.id > 0) {
-            handleStatus({backgroundColor:'green'}, 'Söker ...') 
             search(searchView, {id:params.id}, handleSearchReply) 
         }
     }, []) 
 
-    const handleStatus = (style, message) => {
-        setStatusMessage({style, message})
-    }
 
     const handleClickLine = rec => {
         updateValueAfterSearch(rec)
@@ -143,15 +137,13 @@ export default () => {
         if (status === 'OK') {
             const disabledSaveSr = (value.kontaktadAvhamtningAv) ?1:0
             setValue({...value, disabledSaveSr})
-            handleStatus({backgroundColor:'green'}, undefined)
         } else {
             const message = 'FELMEDDELANDE: Could not be updated'
-            handleStatus({backgroundColor:'red'}, message)
+            alert(message)
         }    
     }        
 
     const handleSave = () => {
-            handleStatus({backgroundColor:'green'}, 'Uppdaterar servicerapporten i databasen')
             const record = {...value, id:undefined}
             serverPost('/updateRow', '', '', {tableName, record, id:value.id}, handleSaveCallback)
     }
@@ -168,26 +160,22 @@ export default () => {
 
     const updateValueAfterSearch = rec =>
     {
-        handleStatus({backgroundColor:'green'}, '')    
         setValue(rec)
         setList([])
     }
 
     const handleSearchReply = list => {
         if (list.length === 0) {
-            handleStatus({backgroundColor:'green'}, 'Not found')    
+            alert('Not found')    
         } if (list.length === 1) {
-            handleStatus({backgroundColor:'green'}, undefined)    
             const rec = list[0]
             updateValueAfterSearch(rec)
         } else {
-            handleStatus({backgroundColor:'green'}, undefined)    
             setList(list)
         }    
     }
 
     const handleSearch = searchKeys => {
-        handleStatus({backgroundColor:'green'}, 'Söker ...')    
         search(searchView, searchKeys, handleSearchReply) 
     }
 
@@ -228,11 +216,9 @@ export default () => {
                         fields={formFields} 
                         value={value} 
                         setValue={setValue}
-                        handleStatus={handleStatus}  
                     >
                    <h1>Setup for user {value.email}</h1>     
                 </FormTemplate> 
-                <StatusMessage style={statusMessage.style} message={statusMessage.message} />
                 </div>
             </div>
         :
@@ -244,7 +230,6 @@ export default () => {
                         setValue={setValue} 
                         setList={setList} 
                         handleSearch={handleSearch}
-                        handleStatus={handleStatus}
                     />
                 </div>
                 <div style={styles.item}>
@@ -254,11 +239,9 @@ export default () => {
                         searchFields={searchFields}
                         list={list} 
                         setList={setList} 
-                        handleStatus={handleStatus}  
                         handleClickLine={handleClickLine}
                     />
                 </div>
-                <StatusMessage style={statusMessage.style} message={statusMessage.message} />
             </div>
     }    
     </>

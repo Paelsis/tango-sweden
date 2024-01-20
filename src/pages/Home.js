@@ -28,13 +28,38 @@ const styles = {
         maxHeight:'calc(80vh - 70px)',
     },
     buttonContainer:{
+        backgroundColor:COLORS.BLACK,
         color:COLORS.YELLOW,
         style:'absolute',
         width:'100%',
         height:'50vh',
-        width:'100%',
         textAlign:'center',
     },
+    djContainer:{
+        backgroundColor:COLORS.BLACK,
+        color:COLORS.YELLOW,
+        style:'absolute',
+        width:'100%',
+        height:'10vh',
+        textAlign:'center',
+    },
+    lowerLeftCorner:{
+        marginBottom:1,
+        marginLeft :1,
+        width: 100,
+        height: 100,
+        padding:5,
+        textAlign:'center',
+        backgroundColor:COLORS.YELLOW,
+        color: COLORS.BLACK,
+        opacity:0.7,
+        position: 'fixed',
+        bottom: -50,
+        left:-50,
+        transform: 'rotateY(0deg) rotate(45deg)',
+        transition: 'transform 2s',
+    },
+
     button:{
         fontWeight:'bold', 
         borderWidth:'2px',
@@ -192,6 +217,7 @@ const Home = () => {
                 <p/>
                 {regions.map(it=>
                     <Button 
+                        key={it.region}
                         variant="outlined" 
                         type="button" 
                         style={styles.region[it.region]?styles.region[it.region]:styles.region.default}  
@@ -206,10 +232,11 @@ const Home = () => {
 
                 <div style={{height:15}}/>
                 <h4>Städer</h4>
-                <Button variant="outlined" type="button" style={styles.city.stockholm}  onClick={()=>handleNavigate('/calendar/stockholm')}>
+                <Button key='Stockholm' variant="outlined" type="button" style={styles.city.stockholm}  onClick={()=>handleNavigate('/calendar/stockholm')}>
                     Stockholm                    
                 </Button>    
                 <Button 
+                    key='Malmoe'
                     variant="outlined" 
                     type="button" 
                     style={styles.city.malmo}  
@@ -217,11 +244,12 @@ const Home = () => {
                 >
                     Malmö/Lund                    
                 </Button>    
-                <Button variant="outlined" type="button" style={styles.city.gothemburg}  onClick={()=>handleNavigate('/got')}>
+                <Button key='Gothenburg' variant="outlined" type="button" style={styles.city.gothemburg}  onClick={()=>handleNavigate('/got')}>
                     Göteborg                    
                 </Button>    
                 {cities.filter(it => !it.city.toLowerCase().includes('malmö')).map(it=>
                     <Button 
+                        key = {it.city}
                         variant="outlined" 
                         type="button" style={styles.city[it.city.toLowerCase()]?styles.city[it.city.toLowerCase()]:styles.city.default}  
                         onClick={()=>handleNavigate('/calendar/' + it.city)}
@@ -229,10 +257,11 @@ const Home = () => {
                         {it.city}                    
                     </Button>    
                 )}    
-                <Button variant="outlined" type="button" style={styles.city.halmstad}  onClick={()=>handleNavigate('/halmstad')}>
+                <Button key = 'Halmstad' variant="outlined" type="button" style={styles.city.halmstad}  onClick={()=>handleNavigate('/halmstad')}>
                     Halmstad                    
                 </Button>    
              </div>
+             <div style={styles.lowerLeftCorner} onClick={()=>handleNavigate('/djs')}>DJs</div>
         </div>
     )
 }

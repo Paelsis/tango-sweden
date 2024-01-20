@@ -1,9 +1,82 @@
 .App {
-  text-align: center;
+  text-align:'center'
 }
+
 
 .App-logo {
   height: 40vmin;
   pointer-events: none;
 }
+
+
+a:hover {
+  color:pink;
+} 
+
+.has-white-text strong {
+   color:#fffff0;
+}
+
+.has-white-text h1 {
+  color:#fffff0;
+}
+
+.has-white-text h2 {
+  color:#fffff0;
+}
+
+.has-white-text h3 {
+  color:#fffff0;
+}
+
+.has-white-text h4 {
+  color:#fffff0;
+}
+
+.has-white-text h5 {
+  color:#fffff0;
+}
+
+.has-white-text h6 {
+  color:#fffff0;
+}
+
+.has-white-text a * {
+  color:lightblue;
+}
+
+.has-white-text a:hover * {
+  color:pink;
+} 
+
+.has-white-text a {
+  color:lightblue;
+}
+
+.has-white-text a:hover {
+  color:pink;
+} 
+
+
+.box {
+  position:fixed;
+  bottom:0;
+  left:0;
+  width: 150px;
+  height: 150px;
+  background: red;
+  margin-top: 20px;
+  margin-left: auto;
+  margin-right: auto;
+  -webkit-transition: background-color 2s ease-out;
+  -moz-transition: background-color 2s ease-out;
+  -o-transition: background-color 2s ease-out;
+  transition: background-color 2s ease-out;
+}
+
+.box:hover {
+  background-color: green;
+  cursor: pointer;
+}
+
 

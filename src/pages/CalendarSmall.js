@@ -49,22 +49,21 @@ const TEXTS = {
     }
 }
 
-const calcTr = (forceSmallFonts, isToday, durationHours, length) => {
-    const opacity = isToday?1.0:1.0
+const calcTr = (isToday, durationHours, length) => {
     const border = 'none'
     const height = durationHours < 4?durationHours*15
         :(4*15 + Math.min((durationHours-4)*3, 90))
 
-    let fontSize = durationHours < 2.5?14
-    :durationHours <3.0?16
-    :durationHours <4.0?18
-    :durationHours <11?20
-    :durationHours <48?22
-    :24
+    let fontSize = durationHours < 2.5?16
+    :durationHours <3.0?18
+    :durationHours <4.0?20
+    :durationHours <11?22
+    :durationHours <48?24
+    :26
     
-    fontSize = length > 60?fontSize-4:length > 40?fontSize-2:fontSize    
+    fontSize = length > 70?fontSize-2:length > 60?fontSize-1:fontSize    
 
-    return {height, fontSize, fontWeight:800, verticalAlign:'middle', border}
+    return {height, fontSize, fontWeight:600, verticalAlign:'middle', border}
 }
 
 let styles = {
@@ -78,7 +77,7 @@ let styles = {
     tbody: {
         cellPadding:1,
     },
-    tr: (forceSmallFonts, isToday, durationHours, length) => calcTr(forceSmallFonts, isToday, durationHours, length),
+    tr: (isToday, durationHours, length) => calcTr(isToday, durationHours, length),
     verticalCenter:{
         margin: 0,
         position: 'absolute',
@@ -130,17 +129,20 @@ class SmallCalendarView extends Component {
         weekdayEnd = weekdayEnd.toUpperCase().charAt(0) + weekdayEnd.slice(1,3)
         const dateRange=event.dateRange
         const timeRange = moment() <= mend?event.timeRange:(TEXTS.ENDED[language] + ' ' + mend.format('LT'))
-        const dateTimeRange = mstart.format('ddd D MMM H:mm') + ' - ' +  mend.format('ddd D MMM H:mm')
+        const noTime = mstart.format('H:mm') + ' - ' +  mend.format('H:mm') === "0:00 - 0:00"
+        const dateTimeRange = noTime?mstart.format('ddd D MMM') + ' - ' +  mend.format('ddd D MMM')
+            :mstart.format('ddd D MMM H:mm') + ' - ' +  mend.format('ddd D MMM H:mm')
         const useRegistrationButton = event.useRegistrationButton
         const tdStyle = event.style
-        const tdStyleDateTime = {...tdStyle, fontSize:16, fontWeight:600}
+        const tdStyleDateTime = {...tdStyle, fontSize:18, fontWeight:600}
         //const forcedSmallFonts= ['milonga', 'practica', 'pratika'].find(it  => event.title.toLowerCase().includes(it)) && event.durationHours >12
         const forceSmallFonts = event.forceSmallFonts
+
         return(
 
             <tr 
                 key={'Row' + event.productId} 
-                style={styles.tr(forceSmallFonts, event.isToday, event.durationHours, event.title.length)}
+                style={styles.tr(event.isToday, event.durationHours, event.title.trim().length)}
                 onClick={()=>handleEvent(event)}
             > 
                 {event.moreThan11Hours && !forceSmallFonts?
@@ -149,7 +151,7 @@ class SmallCalendarView extends Component {
                     </td>
                 :
                     <>
-                        <td style={tdStyleDateTime} >  
+                        <td style={tdStyleDateTime}>  
                             <small>{event.sameDate?'':dateRange}</small>
                         </td>
                         <td style={tdStyleDateTime}>  

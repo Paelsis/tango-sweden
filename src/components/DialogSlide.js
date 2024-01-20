@@ -153,7 +153,7 @@ export default function DialogSlide(props) {
             <DialogContentText id="alert-dialog-description">
               {linkToFacebook?<a href={linkToFacebook}>Link to Facebook</a>:null}
               <p/>
-              <div style={styles.rte} dangerouslySetInnerHTML={{__html: event.description}} onClick={handleClose} />
+              <div style={styles.rte} className='content' dangerouslySetInnerHTML={{__html: event.description}} onClick={handleClose} />
             </DialogContentText>
           </DialogContent>
           <DialogActions>

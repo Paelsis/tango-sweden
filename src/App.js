@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react"
-import { useSharedState, SharedStateProvider} from './store';
+import { SharedStateProvider} from './store';
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Calendar from "./pages/Calendar";
 import AllCalendars from "./pages/AllCalendars";
@@ -9,6 +9,8 @@ import Usage from "./pages/Usage";
 import Privacy from "./pages/Privacy";
 import Service from "./pages/Service";
 import Add from "./pages/Add";
+import EditDj from "./pages/EditDj";
+import Djs from "./pages/Djs";
 import Update from "./pages/Update";
 import Copy from "./pages/Copy";
 import Camera from "./pages/Camera";
@@ -19,8 +21,10 @@ import FirebaseAuth from './login/FirebaseAuth'
 import FirebaseSignin from './login/FirebaseSignin';
 import FirebaseResetPassword from './login/FirebaseResetPassword';
 import {COLORS} from './services/const'
-import 'bulma/css/bulma.min.css';
+import {STATUSLINE_STYLE} from './services/const'
+import StatusLine, {setStatusLine} from './components/StatusLine'
 
+import 'bulma/css/bulma.min.css';
 import "./App.css"
 
 const styles = {
@@ -46,7 +50,10 @@ const RedirectTo = props =>  {
 const StringifyJSON = json => <h4>{JSON.stringify(json)}</h4>
 
 export default function App() {
+        const [statusLineStyle, setStatusLineStyle] = useState(STATUSLINE_STYLE.DEFAULT)
+        const [statusLineText, setStatusLineText] = useState()
         return (
+        <div className='App'>
         <BrowserRouter> 
            <SharedStateProvider>
            <FirebaseAuth>
@@ -66,11 +73,13 @@ export default function App() {
                 <Route path="privacy" element={<Privacy/>} />
                 <Route path="service" element={<Service />} />
                 <Route path="add" element={<Add />} />
+                <Route path="djs" element={<Djs />} />
                 <Route path="update" element={<Update />} />
                 <Route path="copy" element={<Copy />} />
-                <Route path="camera" element={<Camera />} />
+                <Route path="editDj" element={<EditDj setStatusLineText={setStatusLineText} setStatusLineStyle={setStatusLineStyle} />} /> 
+                <Route path="camera" element={<Camera setStatusLineText={setStatusLineText} setStatusLineStyle={setStatusLineStyle} />} />
+                <Route path="setupUser" element={<SetupUser setStatusLineText={setStatusLineText} setStatusLineStyle={setStatusLineStyle} />} />
                 <Route path="signin" element={<FirebaseSignin  />} />
-                <Route path="setupUser" element={<SetupUser  />} />
                 <Route path="resetPassword" element={<FirebaseResetPassword />} />
                 <Route
                     path="*"
@@ -84,6 +93,8 @@ export default function App() {
            </FirebaseAuth>
            </SharedStateProvider>
         </BrowserRouter>
+        <StatusLine style={statusLineStyle} text={statusLineText} />
+        </div>    
     );
   }
   

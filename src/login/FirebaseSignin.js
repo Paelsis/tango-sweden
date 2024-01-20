@@ -51,7 +51,10 @@ const FirebaseSignin = () => {
 
   const handleResult = result => {
     //alert('AppBar 0:' + JSON.stringify(result?result:'No result'))
-    if (result && result.region) {
+    if (result && result.isDiskjockey) {
+      setUserSettings(result)
+      navigate('/editDj');
+    } else if (result && result.region) {
         // alert('AppBar 1' + JSON.stringify(result))
         setUserSettings(result)
         navigate('/calendar/' + result.region);

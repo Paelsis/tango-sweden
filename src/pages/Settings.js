@@ -1,14 +1,14 @@
-import React, {useEffect, useRef, useState} from "react"
+import React, {useEffect, useRef, useReducer, useState} from "react"
 import { useSharedState } from '../store';
 import { Navigate, useNavigate } from 'react-router-dom'
 import firebaseApp from '../services/firebaseApp'
 import { getAuth, onAuthStateChanged} from 'firebase/auth'
 import FormTemplate from '../components/FormTemplate'
 import SelectSettings from '../components/SelectSettings'
-import {serverFetchDataResult} from '../services/serverFetch'
-import Add from '../components/AddEvent'
+import {serverFetchData} from '../services/serverFetch'
 import serverPost from "../services/serverPost"
 import Square from "../components/Square"
+import {BUTTON_STYLE, REGIONS} from '../services/const'
 
 const styles = {
     container:{
@@ -54,13 +54,7 @@ const styles = {
       type:'radio',
       label:'Region:',
       name:'region',
-      radioValues:
-        [
-            'Skåne',
-            'Väst',
-            'Mitt',
-            'Norr'
-        ],
+      radioValues:REGIONS,
       required:true,
       tooltip:'Events with same region is show in same calendar for that region',
     },
@@ -129,16 +123,14 @@ const styles = {
       name:'borderColor',
       notHiddenIf:'hasBorder'
     },
+    {
+      type:'checkbox',
+      label:'Is diskjockey',
+      tooltip: 'If you are a DJ you will after login be directly redirected to Add/Update DJ page',
+      //disabled:true,
+      name:'isDiskjockey',
+    },
 ]
-
-
-const BUTTON_STYLE = {
-  DEFAULT:{color:'black', borderColor:'black', },
-  CLICKED:{color:'yellow', borderColor:'yellow'},
-  SAVED:{color:'green', borderColor:'green'},
-  ERROR:{color:'red', borderColor:'red'},
-}
-
 
 // Settings.js
 export default props => {
@@ -147,12 +139,12 @@ export default props => {
     const [buttonStyle, setButtonStyle] = useState(BUTTON_STYLE.DEFAULT)
     const auth = getAuth()
 
-    const handleResult = reply => {
+    const handleReply = (email, data) => {
       // alert('Settings:' + JSON.stringify(reply.result?reply.result:'No result'))
-      if (reply.status === 'OK' && !!reply.result) {
-          setUserSettings({...userSettings, email, ...reply.result})
+      if (data.status === 'OK' && !!data.result) {
+          setUserSettings({...userSettings, email, ...data.result})
       } else {
-        alert('User settings could not be saved, status=' + reply.status)
+        alert('No user settings found for current user. (email=' + email)
       }
     }
 
@@ -161,7 +153,7 @@ export default props => {
         if (user.email) {
           setEmail(user.email);
           const irl = '/getUser?email=' +  user.email
-          serverFetchDataResult(irl, '', '', result=>handleResult(result))
+          serverFetchData(irl, '', '', data=>handleReply(email, data))
         }  else {
           alert('No email fond when calling onAuthStateChange')
         }
@@ -177,16 +169,16 @@ export default props => {
         if (rec.namn) {
           setUserSettings(rec)
         }  
-        setTimeout(() => setButtonStyle(BUTTON_STYLE.DEFAULT), 2000);
+        setTimeout(() => 
+          {
+            setButtonStyle(BUTTON_STYLE.DEFAULT) 
+          },  
+        2000);
       } else {
         setButtonStyle(BUTTON_STYLE.ERROR) 
         setTimeout(() => setButtonStyle(BUTTON_STYLE.DEFAULT), 5000);
       }
     }
-
- 
-
-
 
     const handleSave = (e, value) => {
 
@@ -197,7 +189,7 @@ export default props => {
           const borderStyle = value.hasBorder?value.borderStyle:'none'
           const record = {...value, email, backgroundImage, creaTimestamp:undefined, updTimestamp:undefined, authLevel:undefined, borderStyle}
           const data = {tableName:'tbl_user', record, fetchRows:true}
-          // alert('handleSubmit data:' + JSON.stringify(data))
+          //alert('Data:' + JSON.stringify(record))
           serverPost('/replaceRow', '', '', data, result=>handleSaveReply(result))
         } else {
           alert('Error: Dont save data since system cannot find any valid login email address')
@@ -211,6 +203,8 @@ export default props => {
           label:'Save',
           style:buttonStyle,
           validate:true,
+          variant:(buttonStyle===BUTTON_STYLE.SAVED)?'contained':'outlined',
+          color:'green',
           handleClick:e=>handleSave(e, userSettings)
       },    
     ]
@@ -230,7 +224,6 @@ export default props => {
             </div>
             <div className='column is-2'>
               <Square settings={userSettings} />
-              {}
               <SelectSettings email={email} userSettings={userSettings} setUserSettings={setUserSettings} /> 
             </div>
           </div>           

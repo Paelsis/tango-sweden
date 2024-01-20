@@ -4,6 +4,7 @@ body {
   font-size: 15px; 
   margin: 0;
   padding: 0;
+  color:#ffffa7;
 }
 
 button {
@@ -21,4 +22,6 @@ button {
   border-width:2px;
   border-radius:8px;
 }
+
+
 

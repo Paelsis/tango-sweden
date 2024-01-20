@@ -4,6 +4,7 @@ import {useLocation} from 'react-router-dom'
 import { useNavigate } from "react-router-dom";
 import AddEvent from '../components/AddEvent'
 import { EditorState, ContentState, convertFromHTML } from 'draft-js'
+import { generateEditorStateFromValue, emptyEditorState } from '../components/DraftEditor'
 
 const styles={
     container:{
@@ -24,12 +25,7 @@ const styles={
 
 const development = process.env.NODE_ENV === 'development'
 
-function generateEditorStateFromValue(value) {
-    const blocksFromHTML = convertFromHTML(value)
-    const content = ContentState.createFromBlockArray(blocksFromHTML.contentBlocks, blocksFromHTML.entityMap)
-    return EditorState.createWithContent(content)
-}
-  
+ 
 export default props => {
     const navigate = useNavigate() 
     const location = useLocation();
@@ -47,7 +43,7 @@ export default props => {
             }
         } else {
             // Draft editor init without value
-            const draft_description = EditorState.createEmpty()
+            const draft_description = emptyEditorState()
             return {draft_description}
         }
     }

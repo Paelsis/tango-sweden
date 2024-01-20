@@ -10,9 +10,14 @@ import SaveIcon from '@mui/icons-material/Save';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircleOutline';
 import Tooltip from '@mui/material/Tooltip';
 import serverPost from '../services/serverPost'
-import { getAuth, onAuthStateChanged} from 'firebase/auth';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import {isAndroidOperatingSystem} from '../services/isAndroid'
 import Square from '../components/Square'
+import {serverFetchData} from '../services/serverFetch';
+import { generateEditorStateFromValue, emptyEditorState, enhanceValueWithDraftVariables} from '../components/DraftEditor'
+
+const apiBaseUrl = process.env.REACT_APP_API_BASE_URL
+
 
 const isAndroid = isAndroidOperatingSystem()
 
@@ -74,6 +79,29 @@ const Save = ({onClick}) =>
             id="basic-button"
         />
     </IconButton>
+
+const SelectTemplate = ({list, name, value, setValue}) => {
+    const handleChange = e => {
+        // alert(e.target.value + ' ' + JSON.stringify(list))
+        const foundRec = list.find(it => (it.id == e.target.value))
+        const valueWithDraft = enhanceValueWithDraftVariables(fields, foundRec)
+        setValue(valueWithDraft);
+    }
+    return(
+      <select 
+        key={'selectTemplate'}
+        name={'id'} 
+        value={value.id}
+        onChange={handleChange}
+      >
+        <option disables value={""}>Select template</option>
+        {list.map(it => 
+            <option key={it.id} value={it.id}>{it[name]}</option>
+        )}
+      </select>
+    )
+}    
+  
 
 
 const fields = [
@@ -293,6 +321,7 @@ const CandidateTable = ({list, deleteRow, clearAll, handleAddToCalendar, buttonS
 export default props => {
     const [userSettings, ] = useSharedState()
     const [value, setValue] = useState({})
+    const [templates, setTemplates] = useState([])
     const [buttonStyle, setButtonStyle] = useState(BUTTON_STYLE.DEFAULT)
     const [list, setList] = useState([])
     const navigate = useNavigate()
@@ -300,11 +329,21 @@ export default props => {
 
     // useEffect(()=>setValue(props.init),[props.init])
 
+    const handleFetchTemplate = reply => {
+        if (reply.status === 'OK') {
+            // alert(JSON.stringify(reply.result))
+            setTemplates(reply.result)
+        } 
+   }
+
     useEffect(()=>{
+        let url = apiBaseUrl + "/fetchRows?tableName=tbl_template&email=" + userSettings.email
+        serverFetchData(url, '', '', handleFetchTemplate)
         moment.locale('sv', {week:{dow : 1}})
         setValue({...props.init, id:undefined})
         setList([])
-    }, [props.init])
+    }, [props.init, userSettings])
+
     const deleteRow = index => setList(list.filter((it, idx)=>idx !== index))  
     const handleReply = reply => {
             if (reply.status==='OK') {
@@ -402,41 +441,44 @@ export default props => {
             handleClick:handleCancel
         },    
     ]
-    const currentSettings = props.init?props.init:userSettings
     return(
         <div style={styles.container}>
-            <div className='columns is-centered'>
-                <div className='is-2 column'>
-                    <h3>City: {userSettings.city} Region:{userSettings.region}</h3>    
-                </div>
-            </div>    
-            <div className='columns m-2 is-centered'>
-                <div className='column is-6 is-narrow'>
-                    <FormTemplate 
-                                fields={fields} 
-                                value={value}
-                                setValue={setValue}
-                                setList={setList}
-                                buttons={buttons}
-                    />
-                </div>
-                <div className='column is-4 is-narrow'>
-                    <CandidateTable 
-                        buttonStyle={buttonStyle} 
-                        list={list} 
-                        deleteRow={deleteRow} 
-                        handleAddToCalendar={handleAddToCalendar} 
-                        clearAll={()=>setList([])}
-                    />
-                 </div>
-                 <div className='column is-2 is-narrow'>
-                    <div className="column is-hidden-mobile">
-                        <Square settings={userSettings} />
-                    </div>  
-                </div>    
-
-            </div>     
-          </div>
+                <>
+                    <div className='columns is-centered'>
+                        <div className='is-2 column'>
+                            <h3>City: {userSettings.city} Region:{userSettings.region}</h3>    
+                        </div>
+                    </div>    
+                    <div className='columns m-2 is-centered'>
+                        <div className='column is-6 is-narrow'>
+                            {templates.length > 0?<SelectTemplate list={templates} name='title' value={value} setValue={setValue} />:null}
+                            <p/>
+                            <FormTemplate 
+                                        fields={fields} 
+                                        value={value}
+                                        setValue={setValue}
+                                        setList={setList}
+                                        buttons={buttons}
+                            />
+                        </div>
+                        <div className='column is-4 is-narrow'>
+                            <CandidateTable 
+                                buttonStyle={buttonStyle} 
+                                list={list} 
+                                deleteRow={deleteRow} 
+                                handleAddToCalendar={handleAddToCalendar} 
+                                clearAll={()=>setList([])}
+                            />
+                        </div>
+                        <div className='column is-2 is-narrow'>
+                            <div className="column is-hidden-mobile">
+                                <Square settings={userSettings} />
+                            </div>  
+                        </div>    
+                    </div>     
+                </>
+        </div>
+        
     )
         
 }

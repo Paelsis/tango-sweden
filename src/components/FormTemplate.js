@@ -16,7 +16,7 @@ const getField = column => {
 // FormTemplate.js
 // FormTemplate.js
 export default props => {
-    const {fields, buttons, value, setValue} = props
+    const {fields, buttons, value, setValue, setStatusLine} = props
     const handleKeyPress = e => {
         if (e.key === 'Enter' && !!props.handlePressEnter) {
             props.handlePressEnter()
@@ -46,9 +46,7 @@ export default props => {
                     <div>
                         {props.children}
                         {fields.filter(fld=>!isHidden(fld)).map((fld, index) => 
-                            <>
                                 <FormField inputRef={fld.focus?inputRef:undefined} key={index}  fld={fld} value={value} setValue={setValue} handleKeyPress={handleKeyPress} />
-                            </>
                         )}
                     </div>
                     {fields && false?
@@ -64,8 +62,8 @@ export default props => {
                                     {
                                         <Button 
                                             type={button.type} 
-                                            variant="outlined" 
-                                            color="inherit" 
+                                            variant={button.variant?button.variant:"outlined"}
+                                            color={"inherit"}
                                             disabled={button.disabled?true:button.validate?isValid:false}
                                             onClick={button.handleClick}
                                         >

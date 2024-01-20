@@ -16,6 +16,7 @@ import { useNavigate } from 'react-router-dom';
 import { getAuth, signOut, onAuthStateChanged } from 'firebase/auth';
 import {AuthContext} from "../login/FirebaseAuth"
 import {serverFetchDataResult} from '../services/serverFetch'
+import {COLORS} from '../services/const'
 // AppBar.js
 export default () => {
   const [userSettings, setUserSettings] = useSharedState()
@@ -85,12 +86,13 @@ export default () => {
         :<MenuItem onClick={()=>handleSignin()}>Signin</MenuItem>}
         {email?<MenuItem onClick={()=>navigate('/settings')}>Settings</MenuItem>:null}
         {email?<MenuItem onClick={()=>navigate('/add')}>Add Event</MenuItem>:null}
+        {email?<MenuItem onClick={()=>navigate('/editDj')}>Edit DJ</MenuItem>:null}
         {(email&& (userSettings?userSettings.authLevel >=8:false))?<MenuItem onClick={()=>navigate('/setupUser')}>Setup users</MenuItem>:null}
         <MenuItem onClick={()=>handleNavigate('/usage')}>Usage</MenuItem>
       </Menu>
 
       <Box sx={{ flexGrow: 2}}>
-        <AppBar position="static" sx={{color:'#FFFFA7',  backgroundColor:'#232323'}}>
+        <AppBar position="static" sx={{color:COLORS.YELLOW,  backgroundColor:'#232323'}}>
           <Toolbar>
             <IconButton
               size="large"

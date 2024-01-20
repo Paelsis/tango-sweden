@@ -44,7 +44,7 @@ export default ({email, userSettings, setUserSettings}) => {
             onChange={handleChange}
         >
             <option selected disabled value={'test'}>Choose settings</option>
-            {users.map(user => <option name={user.name} value={user.email} selected={userSettings.email === user.email} >{user.name}</option>)}
+            {users.map(user => <option name={user.name} value={user.email} defaultValue={userSettings.email === user.email} >{user.name}</option>)}
         </select>
         </>
         :null}

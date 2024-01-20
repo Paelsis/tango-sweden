@@ -5,7 +5,6 @@ import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import "draft-js/dist/Draft.css";
 import '@draft-js-plugins/static-toolbar/lib/plugin.css';
 import { stateToHTML } from "draft-js-export-html";
-
 /*
 const oldFunction = props => {
     const editor = React.useRef(null);
@@ -38,6 +37,26 @@ const oldFunction = props => {
     )
 }
 */
+
+export const enhanceValueWithDraftVariables = (fields, value)  => {
+  let draftValues = value?value:{}
+  fields.forEach(fld => {
+      if (fld.type === 'draft') {
+          draftValues = {...draftValues, ['draft_' + fld.name]:value[fld.name]? generateEditorStateFromValue(value[fld.name]):emptyEditorState()}
+      }
+  })
+  return draftValues
+}    
+
+export const generateEditorStateFromValue = value => {
+  const blocksFromHTML = convertFromHTML(value)
+  const content = ContentState.createFromBlockArray(blocksFromHTML.contentBlocks, blocksFromHTML.entityMap)
+  return EditorState.createWithContent(content)
+}
+
+export const emptyEditorState = () => {
+  return EditorState.createEmpty()
+} 
 
 export default props => {
     const editor = React.useRef(null);

@@ -1,3 +1,5 @@
+import { generateEditorStateFromValue, emptyEditorState } from '../components/DraftEditor'
+
 export const labelSwedish = name => {
     switch (name.toLowerCase()) {
         case 'goteborg':return 'Göteborg'
@@ -45,3 +47,20 @@ export const styleSquare = userSettings=>{
         {width:300, height:150, textAlign:'center', color, background, borderStyle:'solid', borderWidth, borderColor}
     )
 }        
+
+// get draft value when you have some fileds thtat uses draft
+
+
+
+
+    
+
+
+
+
+
+    
+
+
+
+

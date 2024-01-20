@@ -6,16 +6,18 @@ import SaveIcon from '@mui/icons-material/Save';
 import Rotate90DegIcon from '@mui/icons-material/RotateRight'
 import serverPost from '../services/serverPost'
 import Button, { buttonClasses } from '@mui/material/Button';
+import withStatusLine from '../components/withStatusLine'
+import {STATUSLINE_STYLE} from '../services/const'
 
 const apiBaseUrl = process.env.REACT_APP_API_BASE_URL
 const BUTTON_COLOR={DEFAULT:'#888', OK:'green', PROCESSING:'lightGreen', WARNING:'orange', ERROR:'red'}
 
-// PhotoList
-export default props => {
-        const {subdir, list, setList} = props;
-        const [buttonColor, setButtonColor] = useState(BUTTON_COLOR.DEFAULT)
 
-        const irl='/listData?subdir=' + (subdir?subdir:'')
+
+// PhotoList
+const Func = props => {
+        const {subdir, list, setList, matching, setStatusLine} = props; // If matching is among calling parameters, then only files matching this string is is shown
+        const [buttonColor, setButtonColor] = useState(BUTTON_COLOR.DEFAULT)
 
         const styles = {
                 button:{color:buttonColor, width:45, height:45, padding:0, border:0},
@@ -23,7 +25,14 @@ export default props => {
 
         const handleReplyFetchData = data => {
                 if (data.status === 'OK') {
-                    setList(data.result)
+                    if (matching) {
+                        const newlist = data.result.filter(it=>it.fname.includes(matching) && !it.fname.includes('_thumb'))
+                        setStatusLine('Fetch of'  + newlist.length + ' rows successful', STATUSLINE_STYLE.OK, 2000) 
+                        setList(newlist)
+                    } else {
+                        setStatusLine('Fetch of'  + data.result.length + ' rows successful', STATUSLINE_STYLE.OK, 2000) 
+                        setList(data.result)
+                    }        
                 } else {
                     alert('ERROR PhotoList:' +  JSON.stringify(data)) 
                 }        
@@ -31,8 +40,24 @@ export default props => {
 
 
         useEffect(()=>{
+                // Fetch the list of images from subdir in sorted order with latest mdate put first
+                const irl='/listData?subdir=' + (subdir?subdir:'')
+                /* setList([]) */
                 serverFetchData(irl, '', '', handleReplyFetchData)
         },[subdir])
+
+        const handleReply = reply =>{
+                if (reply) {   
+                    if (reply.status==='OK') {
+                        setStatusLine('Delete successful', STATUSLINE_STYLE.OK, 2000) 
+                    } else {
+                        alert('Delete/Rotate failed. Message, status:' + reply.status + ' message:' + (reply.message?reply.message:'No message'))     
+                    }
+                } else {
+                    alert('handleReply: ERROR: No reply from serverPost')     
+                }    
+            }
+    
 
         const handleDelete = index => {
                 const newList = list.map((it,idx)=>{
@@ -42,7 +67,10 @@ export default props => {
                                 return it
                         }
                 })        
-                setList(newList)
+                const url = apiBaseUrl + '/removeOrRotateImages'
+                const files = newList
+                serverPost(url, '', '', {subdir, files}, handleReply)
+
         }
 
         const handleRotate = index => {
@@ -53,42 +81,18 @@ export default props => {
                                 return it
                         }
                 })        
-                setList(newList)
-        }
-
-        const handleReply = reply =>{
-            if (reply) {   
-                if (reply.status==='OK') {
-                        // alert('Successful delete/rotate rotated: ' + reply.rotated + ' deleted: ' + reply.deleted + ' result:' + JSON.stringify(reply.result))
-                        setList(reply.result)
-                        setButtonColor(BUTTON_COLOR.OK)
-                        setTimeout(() => setButtonColor(BUTTON_COLOR.DEFAULT), 3000);
-                } else {
-                        setButtonColor(BUTTON_COLOR.ERROR)
-                        alert('Delete/Rotate failed. Message, status:' + reply.status + ' message:' + (reply.message?reply.message:'No message'))     
-                        setTimeout(() => setButtonColor(BUTTON_COLOR.DEFAULT), 3000);
-                }
-            } else {
-                alert('handleReply: ERROR: No reply from serverPost')     
-            }    
-        }
-
-
-        const handleSubmit = () => {
                 setButtonColor(BUTTON_COLOR.PROCESSING)
                 const url = apiBaseUrl + '/removeOrRotateImages'
-                const files = list
+                const files = newList
                 serverPost(url, '', '', {subdir, files}, handleReply)
         }
+
         const path = apiBaseUrl + (subdir?('/'+subdir+'/'):'/') 
         return (
                 <div className='column is-8'>
-                        <div className="column is-12">
-                                <SaveIcon style={styles.button} fontSize='large' onClick={handleSubmit} />
-                        </div>
                         <div className="columns is-centered is-flex-wrap-wrap">
                                 {list.map((li, idx) =>
-                                        <div key={idx} className='column is-narrow is-2'>
+                                        <div key={idx} className='column is-narrow is-full'>
                                                 <img src={path + li.fname} style={{transform:li.rotate?"rotate(" + li.rotate + "deg)":undefined}} alt={path + li.fname} />
                                                 <p/>
                                                 <small>{path + li.fname}</small>   
@@ -97,11 +101,6 @@ export default props => {
                                                 :        
                                                         <DeleteIcon style={{fontSize:16, opacity:0.3}} onClick={()=>handleDelete(idx)} />     
                                                 }        
-                                                {li.rotate?
-                                                        <Rotate90DegIcon style={{color:'orange', fontSize:18}} onClick={()=>handleRotate(idx)} />     
-                                                :     
-                                                        <Rotate90DegIcon style={{fontSize:16, opacity:0.3}} onClick={()=>handleRotate(idx)} />     
-                                                }          
                                         </div>        
                                 )}
                         </div>
@@ -110,4 +109,5 @@ export default props => {
         )
 }
 
+export default withStatusLine(Func)
 

@@ -1,5 +1,6 @@
 import casaBlanca from '../images/VitaHuset.jpg';
 
+
 export const AVA_STATUS = {
     AV:'AV', // Avaiable space
     CC:'CC', // Completely closed
@@ -43,11 +44,11 @@ export const AVA_STATUS_TEXT = {
 }     
 
 export const COLORS = {
-  YELLOW:'#FFFFA7',
+  WHITE:'#FFFFF0',
+  YELLOW:'#FFFFa7',
   LIGHT_YELLOW:'#FFFFDA',
-  BLACK:'black',
+  BLACK:'#0C090A',
   RED:'#FF4D4D',
-  WHITE:'white',
   BLUE:'blue',
   LIGHTBLUE:'lightBlue',
   ICEBLUE:'#baf2ef',
@@ -94,11 +95,31 @@ export const backgroundImages = {
   casaBlanca:`url(${casaBlanca})`
 }  
 
+
+export const REGIONS = 
+[
+  'Skåne',
+  'Halland',
+  'Sydost',
+  'Danmark',
+  'Västra Götaland',
+  'Mitt',
+  'Norr',
+] 
 export const BUTTON_STYLE = {
   DEFAULT:{color:'black', borderColor:'black'},
-  CLICKED:{color:'yellow', borderColor:'yellow'},
+  CLICKED:{color:'grey', borderColor:'grey'},
   SAVED:{color:'green', borderColor:'green'},
   ERROR:{color:'red', borderColor:'red'},
+}
+
+export const STATUSLINE_STYLE = {
+  DEFAULT:{backgroundColor:'transparent', color:'green'},
+  PROCESSING:{backgroundColor:'lightGreen', color:'lightYellow'},
+  OK:{backgroundColor:'green', color:'white'},
+  WARNING:{backgroundColor:'yellow', color:'black'},
+  WARNING:{backgroundColor:'lightGreen', color:'black'},
+  ERROR:{backgroundColor:'red', borderColor:'lightYellow'},
 }
 
 export const ADMINISTRATORS=['tangosmedjan@gmail.com', 'anita.e.dobi@gmail.com', 'admin@tangosweden.se'];

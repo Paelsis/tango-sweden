@@ -1,4 +1,5 @@
 import React from 'react'
+const apiBaseUrl = process.env.REACT_APP_API_BASE_URL
 
 // Square
 export default ({settings})=>{
@@ -7,7 +8,7 @@ export default ({settings})=>{
     const borderWidth = settings.borderWidth
     const borderColor = settings.borderColor
     const backgroundColor = settings.backgroundColorLight
-    const backgroundImage = settings.backgroundImage?`url(${settings.backgroundImage})`:''
+    const backgroundImage = settings.backgroundImage?`url(${apiBaseUrl + settings.backgroundImage})`:''
     const backgroundSize="50% 100%"
     const borderStyle=settings.borderStyle
     /*

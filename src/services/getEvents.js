@@ -52,7 +52,6 @@ function _createEvent(props)  {
           backgroundRepeat:'auto', 
           backgroundSize:'cover', 
           backgroundColor:backgroundColorLight, 
-          fontSize:14,
           opacity,
           border
         }

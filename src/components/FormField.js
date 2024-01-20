@@ -1,11 +1,12 @@
 
 import React, {useState, useEffect, useRef} from 'react';
 import RteEditor from './RteEditor'
-import DraftEditor from './DraftEditor'
+import DraftEditor, {generateEditorStateFromValue, emptyEditorState} from './DraftEditor'
+
 import { stateToHTML } from "draft-js-export-html";
 import draftToHtml from 'draftjs-to-html'
 import { ContentState, convertToRaw, EditorState } from 'draft-js'
-
+import Tooltip from '@mui/material/Tooltip';
 import moment from 'moment'
 import { FacebookAuthProvider } from 'firebase/auth';
 //import {isAndroidOperatingSystem} from '../services/isAndroid'
@@ -19,7 +20,7 @@ const styles  = {
 }
 
 const FormField1 = props => {
-    const {fld, key, value, setValue, handleKeyPress} = props
+    const {fld, value, setValue, handleKeyPress} = props
     const radioValues = fld.radioValues?fld.radioValues.map(it=>it.trim()):[]
     const selectValues = fld.selectValues?fld.selectValues.map(it=>it.trim()):[]
     const label = fld.label?fld.label:'No label'
@@ -45,7 +46,7 @@ const FormField1 = props => {
 
 // FormField 
 const FormField = props => {
-    const {fld, key, value, setValue, handleKeyPress} = props
+    const {fld, value, setValue, handleKeyPress} = props
     const radioValues = fld.radioValues
     const selectValues = fld.selectValues?fld.selectValues.map(it=>it.trim()):[]
     const label = fld.label?fld.label:'No label'
@@ -53,6 +54,16 @@ const FormField = props => {
         setValue({...value, [e.target.name]:e.target.type==='checkbox'?e.target.checked?1:0:e.target.value})
     }    
     const handleChangeRte = val => setValue({...value, [fld.name]:val})
+
+    useEffect(()=>{
+        if (fld.type === 'draft') {
+            const draftFieldName = 'draft_' + fld.name;
+            if (value[fld.name] && !value[draftFieldName]) {
+                alert('The variable value[' + draftFieldName + '] must be initialized with function enhanceValueWithDraftVariables()')
+            }    
+        }    
+    }, []);
+    
     const onEditorStateChange = val => {
         const draftName='draft_' + fld.name
         const html = draftToHtml(convertToRaw(val.getCurrentContent()))
@@ -61,6 +72,8 @@ const FormField = props => {
     const handleChangeDate = e => {
         setValue({...value, [e.target.name]:e.target.value});
     }    
+
+
     const required = fld.required?true:false 
     const disabled = fld.disabled?fld.disabled:fld.disabledFunc?fld.disabledFunc(value):false
     const labelStyle={fontWeight:700, ...props.labelStyle?props.labelStyle:{}, opacity:disabled?0.4:1.0}
@@ -73,7 +86,7 @@ const FormField = props => {
                         <p>  
                             <label style={labelStyle}>
                             <input 
-                                key={key}
+                                key={fld.name}
                                 size={200} 
                                 type={fld.type} 
                                 checked={value[fld.name]?true:false} 
@@ -91,15 +104,17 @@ const FormField = props => {
             case 'checkboxes':
                 return(
                     <p>
-                        <label style={labelStyle}>
-                                {label}&nbsp;{required?<sup style={supStyle}>*</sup>:null}&nbsp;
-                        </label>    
+                            <label style={labelStyle}>
+                                    <Tooltip title='Hello'>
+                                        {label}&nbsp;{required?<sup style={supStyle}>*</sup>:null}&nbsp;
+                                    </Tooltip>
+                            </label>    
                         <br/>
                         {fld.names?fld.names.map(name =>
                             <label>
                                 {name}&nbsp;
                                 <input 
-                                    key={key}
+                                    key={fld.name}
                                     type={'checkbox'} 
                                     name={name} 
                                     checked={value[fld.name]?true:false} 
@@ -121,7 +136,7 @@ const FormField = props => {
                         {radioValues.map((val, idx) =>
                             <label>
                                 <input 
-                                    key={(val.value?val.value:val) + idx}
+                                    key={fld.name + idx}
                                     type={fld.type}
                                     value={val.value?val.value:val} 
                                     name={fld.name} 
@@ -143,14 +158,14 @@ const FormField = props => {
                             </label>    
                             <br/>
                             <select 
-                                key={key}
+                                key={fld.name}
                                 name={fld.name} 
                                 value={value[fld.name]?value[fld.name]:''} 
                                 required={required} 
                                 disabled={disabled}
                                 onChange={handleChange}
                             >
-                                <option selected disabled value={""}>Välj</option>
+                                <option defaultValue disabled value={""}>Välj</option>
                                 {selectValues.map(val => <option value={val}>{val}</option>)}
                             </select>
                         </p>
@@ -158,13 +173,16 @@ const FormField = props => {
                 case 'textarea':
                 return(
                     <p>
+                        <Tooltip title='Hello'>
                         <label style={labelStyle}>
-                                {label}&nbsp;{required?<sup style={supStyle}>*</sup>:null}&nbsp;
+                            {label}
+                            &nbsp;{required?<sup style={supStyle}>*</sup>:null}&nbsp;
                         </label>    
+                        </Tooltip>
                         <br/>
                         <textarea 
                             style={styles.textarea}
-                            key={key}
+                            key={fld.name}
                             rows={5} 
                             cols={fld.cols?fld.cols:40} 
                             name={fld.name} 
@@ -177,7 +195,7 @@ const FormField = props => {
                     )    
                 case 'rte':
                     return(
-                        <p>
+                        <p className='content'>
                             <label style={labelStyle}>
                                     {label}&nbsp;{required?<sup style={supStyle}>*</sup>:null}&nbsp;
                             </label>    
@@ -194,12 +212,13 @@ const FormField = props => {
                 
                 case 'draft':
                             return(
-                                <p>
+                                <p className='content'>
                                     <label style={labelStyle}>
                                             {label}&nbsp;{required?<sup style={supStyle}>*</sup>:null}&nbsp;
                                     </label>    
                                     <br/>
                                     <DraftEditor 
+                                                
                                                 style={{cols:50}} 
                                                 required={required} 
                                                 disabled={disabled}
@@ -208,16 +227,16 @@ const FormField = props => {
                                     />
                                 </p>
                                 )    
-                        case 'date':
-
-                return(
+                case 'date':
+                        return(
                         <p>
                             <label style={labelStyle}>
-                                    {label}&nbsp;{required?<sup style={supStyle}>*</sup>:null}&nbsp;
+                                {label}
+                                &nbsp;{required?<sup style={supStyle}>*</sup>:null}&nbsp;
                             </label>    
                             <br/>
                             <input 
-                                key={key}
+                                key={fld.name}
                                 {...fld} 
                                 type={fld.type} 
                                 size={40}
@@ -259,7 +278,7 @@ const FormField = props => {
                     <br/>
                     <input 
                         {...fld} 
-                        key={key}
+                        key={fld.name}
                         type={fld.type}
                         size={40}
                         name={fld.name} style={valueStyle} 

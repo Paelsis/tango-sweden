@@ -10,6 +10,8 @@ import AddEvent from '../components/AddEvent'
 import { BUTTON_STYLE } from '../services/const';
 import { EditorState, ContentState, convertFromHTML } from 'draft-js'
 import Square from '../components/Square'
+import {enhanceValueWithDraftVariables} from '../components//DraftEditor'
+// import { generateEditorStateFromValue, emptyEditorState } from '../components/DraftEditor'
 
 const styles={
     container:{
@@ -124,78 +126,11 @@ const fields = [
         tooltip:'The facebook event id (A long digit number)',
         name:'facebookEventId',
     },
-    /*
-    {
-        type:'checkbox',
-        label:'Update settings for this event',
-        name:'updateSettings',
-        tooltip:'Change colors for this particular event'
-    },
-    {
-        type:'text',
-        label:'Text color',
-        tooltip: 'Text color in text or hex code, Ex 1:red Ex 2:#F6A3BB',
-        name:'color',
-        notHiddenIf:'updateSettings'
-    },
-    {
-        type:'text',
-        label:'Background color light',
-        tooltip: 'Light background color when shifting from dark to light, Ex 1:lightBlue Ex 2:#F6A3BB',
-        name:'backgroundColorLight',
-        notHiddenIf:'updateSettings'
-    },
-    {
-        type:'text',
-        label:'Background color dark',
-        tooltip: 'Dark background color when shifting from dark to light, Ex 1:darkBlue Ex 2:#F6A3BB',
-        name:'backgroundColorDark',
-        notHiddenIf:'updateSettings'
-    },
-    {
-      type:'text',
-      label:'Background image (Use url of image)',
-      tooltip: 'You can use a url to an image stored on internet type https://www.kasandbox.org/programming-images/avatars/marcimus-purple.png',
-      name:'backgroundImage',
-      notHiddenIf:'updateSettings'
-    },
-    { 
-      type:'radio',
-      label:'Border thickness',
-      radioValues:['0px', '1px', '2px', '3px', '4px'],
-      tooltip: 'Thickness of border',
-      name:'borderWidth',
-      notHiddenIf:'updateSettings'
-    },
-    {
-      type:'text',
-      label:'Border color',
-      tooltip: 'Color of border',
-      //disabled:true,
-      name:'borderColor',
-      notHiddenIf:'updateSettings'
-    },
-    /*
-    {
-        type:'checkbox',
-        label:'Use registration button',
-        name:'useRegistrationButton',
-        tooltip:'If you want a registration button and save registrations for the event',
-        styleLabel:{opacity:0.4},
-        disabled:true,
-    },
-    */
 ]
-
-function generateEditorStateFromValue(value) {
-    const blocksFromHTML = convertFromHTML(value)
-    const content = ContentState.createFromBlockArray(blocksFromHTML.contentBlocks, blocksFromHTML.entityMap)
-    return EditorState.createWithContent(content)
-}
 
 
   
-export default props => {
+export default () => {
     const [userSettings, ] = useSharedState()
     const [value, setValue] = useState({})
     const [buttonStyle, setButtonStyle] = useState()
@@ -203,27 +138,22 @@ export default props => {
     const location = useLocation();
 
     const initEvent = () => {
-        const event = location.state?location.state:undefined
-        if (event) {
-            const changeAll = event.changeAll
-
-            return {...event,
-                    startDateTimeOriginal:changeAll?undefined:event.startDateTime.substring(0,16),
-                    startDateTime:changeAll?undefined:event.startDateTime.substring(0,16),
-                    endDateTime:changeAll?undefined:event.endDateTime.substring(0,16),
-                    draft_description: generateEditorStateFromValue(event.description),
+        const event = location.state?location.state:{}
+        const changeAll = event.changeAll
+        const eventWithDraft = enhanceValueWithDraftVariables(fields, event)
+        return( 
+            {
+                ...eventWithDraft,
+                startDateTimeOriginal:changeAll?undefined:event.startDateTime.substring(0,16),
+                startDateTime:changeAll?undefined:event.startDateTime.substring(0,16),
+                endDateTime:changeAll?undefined:event.endDateTime.substring(0,16),
             }
-        } else {
-            // Draft editor init without value
-            const draft_description = EditorState.createEmpty()
-            return {draft_description}
-        }
+        )    
     }
-    const init = initEvent()
 
     useEffect(()=>{
         if (location.state) {
-            setValue(init)
+            setValue(initEvent())
         } else {
             navigate('/home')
         }    
@@ -263,7 +193,7 @@ export default props => {
         serverPost(irl, '', '', data, handleReply)
     }    
 
-    const handleReset = () => {setValue(init)}
+    const handleReset = () => {setValue(initEvent())}
 
     const handleEmpty = () => {setValue({})}
 
@@ -287,7 +217,6 @@ export default props => {
             handleClick:handleEmpty
         },    
     ]
-
             
     return (
         <div style={styles.container}>
