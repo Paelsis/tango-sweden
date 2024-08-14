@@ -1,0 +1,1 @@
+Update tbl_calendar set description = replace(description, '.se/images/', '.se/app/slim4/public/images/') where email like '%rujo%'
