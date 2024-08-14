@@ -8,7 +8,9 @@ import SelectSettings from '../components/SelectSettings'
 import {serverFetchData} from '../services/serverFetch'
 import serverPost from "../services/serverPost"
 import Square from "../components/Square"
-import {BUTTON_STYLE, REGIONS} from '../services/const'
+import {BUTTON_STYLE, REGIONS, DEFAULT_AUTH_LEVEL, STATUSLINE_STYLE, COLORS} from '../services/const'
+import withStatusLine from '../components/withStatusLine'
+
 
 const styles = {
     container:{
@@ -67,36 +69,48 @@ const styles = {
         placeholder:'Please enter your name'
     },
     {
+      type:'comment',
+      label:' ',
+      name:'calendarProps',
+    },
+    {
+      type:'comment',
+      label:'---- The fields below only required by calendar ----',
+      name:'calendarProps',
+    },
+    {
+      type:'comment',
+      label:' ',
+      name:'calendarProps',
+    },
+    {
         type:'text',
         label:'Text color',
-        required:'true', 
         tooltip: 'Text color in text or hex code, Ex 1:red Ex 2:#F6A3BB',
         name:'color',
     },
     {
         type:'text',
-        label:'Background color light',
-        required:'true', 
-        tooltip: 'Light background color when shifting from dark to light, Ex 1:lightBlue Ex 2:#F6A3BB',
-        name:'backgroundColorLight',
-    },
-    {
-        type:'text',
-        label:'Background color dark',
-        required:'true', 
-        tooltip: 'Dark background color when shifting from dark to light, Ex 1:darkBlue Ex 2:#F6A3BB',
+        label:'Background color dark (for calendar)',
+        tooltip: 'Dark background color when shifting background color from dark to light, Ex 1:darkBlue Ex 2:#F6A3BB',
         name:'backgroundColorDark',
     },
     {
       type:'text',
-      label:'Background image (Use url of image)',
+      label:'Background color light (for calendar)',
+      tooltip: 'Light background color when shifting background color from dark to light, Ex 1:lightBlue Ex 2:#F6A3BB',
+      name:'backgroundColorLight',
+  },
+  {
+      type:'text',
+      label:'Background image (Use url of image-background in calendar)',
       tooltip: 'You can use a url to an image stored on internet type https://www.kasandbox.org/programming-images/avatars/marcimus-purple.png',
       name:'backgroundImage',
     },
     { 
       type:'checkbox',
       name:'hasBorder',
-      label:'I want a border',
+      label:'I want a border (for calendar)',
       tooltip: 'I want a border around my event',
     },
     { 
@@ -104,7 +118,7 @@ const styles = {
       name:'borderStyle',
       label:'BorderStyle',
       radioValues:['none', 'solid', 'dotted', 'dashed'],
-      tooltip: 'Border style',
+      tooltip: 'Border style (for calendar)',
       notHiddenIf:'hasBorder'
     },
     { 
@@ -112,7 +126,7 @@ const styles = {
       name:'borderWidth',
       label:'Border thickness',
       radioValues:['1px', '2px', '3px', '4px'],
-      tooltip: 'Thickness of border',
+      tooltip: 'Thickness of border (for calendar)',
       notHiddenIf:'hasBorder'
     },
     {
@@ -133,30 +147,31 @@ const styles = {
 ]
 
 // Settings.js
-export default props => {
+const Func = props => {
     const [email, setEmail] = useState(undefined)
     const [userSettings, setUserSettings] = useSharedState()
     const [buttonStyle, setButtonStyle] = useState(BUTTON_STYLE.DEFAULT)
     const auth = getAuth()
 
+    const navigate = useNavigate();
+
     const handleReply = (email, data) => {
-      // alert('Settings:' + JSON.stringify(reply.result?reply.result:'No result'))
-      if (data.status === 'OK' && !!data.result) {
-          setUserSettings({...userSettings, email, ...data.result})
+      if (data) {
+        if (data.status === 'OK' && !!data.result) {
+            setUserSettings({...userSettings, email, ...data.result})
+        } 
       } else {
-        alert('No user settings found for current user. (email=' + email)
-      }
+        alert('Please enter region, name and save your profile')
+      }  
     }
 
     useEffect(()=>{
       onAuthStateChanged(auth, user => {
-        if (user.email) {
+        if (user?user.email:false) {
           setEmail(user.email);
           const irl = '/getUser?email=' +  user.email
           serverFetchData(irl, '', '', data=>handleReply(email, data))
-        }  else {
-          alert('No email fond when calling onAuthStateChange')
-        }
+        }  
       })
     }, [])
    
@@ -187,7 +202,8 @@ export default props => {
         if (!!email) {
           const backgroundImage = value.backgroundImage?value.backgroundImage:null
           const borderStyle = value.hasBorder?value.borderStyle:'none'
-          const record = {...value, email, backgroundImage, creaTimestamp:undefined, updTimestamp:undefined, authLevel:undefined, borderStyle}
+          const authLevel = value.authLevel?value.authLevel:DEFAULT_AUTH_LEVEL // Set auth level to default value if it is not set before
+          const record = {...value, email, backgroundImage, creaTimestamp:undefined, updTimestamp:undefined, authLevel:undefined, borderStyle, authLevel}
           const data = {tableName:'tbl_user', record, fetchRows:true}
           //alert('Data:' + JSON.stringify(record))
           serverPost('/replaceRow', '', '', data, result=>handleSaveReply(result))
@@ -205,6 +221,7 @@ export default props => {
           validate:true,
           variant:(buttonStyle===BUTTON_STYLE.SAVED)?'contained':'outlined',
           color:'green',
+          tooltip:'Ensire to save your profile before continue',
           handleClick:e=>handleSave(e, userSettings)
       },    
     ]
@@ -212,27 +229,29 @@ export default props => {
     return(  
       <div style={styles.container}>
         {email?
-          <div className='columns m-4 is-centered'>
-            {/*JSON.stringify(allUsers)*/}
-            <div className='column is-4'>
-            <FormTemplate 
-                fields={filterFields} 
-                value={userSettings}
-                setValue={setUserSettings}
-                buttons={buttons}
-            />
-            </div>
-            <div className='column is-2'>
-              <Square settings={userSettings} />
-              <SelectSettings email={email} userSettings={userSettings} setUserSettings={setUserSettings} /> 
-            </div>
-          </div>           
-        :
-            <h1>
-                No access
-            </h1>
+          <>
+            <h4 style={{color:'green', textAlign:'center'}}>Please choose your city, region and enter your name and save</h4>
+            <div className='columns m-4 is-centered'>
+              {/*JSON.stringify(allUsers)*/}
+              <div className='column is-4'>
+              <FormTemplate 
+                  fields={filterFields} 
+                  value={userSettings}
+                  setValue={setUserSettings}
+                  buttons={buttons}
+              />
+              </div>
+              <div className='column is-2'>
+                <Square settings={userSettings} />
+                <SelectSettings email={email} userSettings={userSettings} setUserSettings={setUserSettings} /> 
+              </div>
+            </div>           
+          </>
+        :null
     }    
     </div>
   )  
 }
+
+export default withStatusLine(Func)
 

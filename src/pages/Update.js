@@ -7,7 +7,7 @@ import moment from 'moment-with-locales-es6'
 import { useNavigate } from "react-router-dom";
 import serverPost from '../services/serverPost'
 import AddEvent from '../components/AddEvent'
-import { BUTTON_STYLE } from '../services/const';
+import { BUTTON_STYLE, MAX_LENGTH_DESC } from '../services/const';
 import { EditorState, ContentState, convertFromHTML } from 'draft-js'
 import Square from '../components/Square'
 import {enhanceValueWithDraftVariables} from '../components//DraftEditor'
@@ -39,31 +39,34 @@ const fields = [
         type:'checkbox',
         label:'Change all occurances (default change only single)',
         name:'changeAll',
-        tooltip:'Change all events that was creted with this eventId'
+        tooltip:'Change all repeated  events that was created at the same time (with this eventId)'
     },
     {
         type:'checkbox',
         label:'Update event with latest settings',
         name:'updateWithSettings',
-        tooltip:'Change colors of the latest updated ones in settings'
+        tooltip:'Update this event with colors of the values un Settings'
     },
     {
         type:'text',
         label:'Title',
         name:'title',
         required:true,
+        tooltip:'The event title shown in the calendar',
     },
     {
         type:'checkbox',
         label:'Hide location and time in popup window',
         name:'hideLocationAndTime',
-        tooltip:'Hide the location and time in popup window'
+        tooltip: 'Check this box if you want to hide the location and time in the popup windo when clicking at event'
     },
     {
         type:'text',
         label:'Location',
         name:'location',
-        hiddenIf:'hideLocationAndTime'
+        hiddenIf:'hideLocationAndTime',
+        tooltip: 'Location of the event'
+
     },
     {
         type:'datetime-local',
@@ -71,7 +74,7 @@ const fields = [
         name:'startDateTime',
         required:true,
         hiddenIf:'changeAll',
-        tooltip:'Change start date and time for single event'
+        tooltip:'Start date and time of the single event'
     },
     {
         type:'datetime-local',
@@ -79,7 +82,7 @@ const fields = [
         name:'endDateTime',
         required:true,
         hiddenIf:'changeAll',
-        tooltip:'Change end date and time for single event'
+        tooltip:'End date and time for the single event'
     },
     {
         type:'time',
@@ -87,7 +90,7 @@ const fields = [
         name:'startTime',
         required:true,
         notHiddenIf:'changeAll',
-        tooltip:'Change start time on all events'
+        tooltip:'Change start time in all events of the series created at the same occation'
 
     },
     {
@@ -96,13 +99,13 @@ const fields = [
         name:'endTime',
         required:true,
         notHiddenIf:'changeAll',
-        tooltip:'Change end time on all events'
+        tooltip:'Change end time in all events of the series created at the same occation'
     },
     {
         type:'checkbox',
         label:'Use HTML-editor',
         name:'htmlEditor',
-        tooltip: 'You can use the HTML-editor if you desire to use more advanced featurs with html for you description field'
+        tooltip: 'If you want to write your Description in html instead of using the editor, check this box'
     },
     {
         // type:'rte',
@@ -112,19 +115,34 @@ const fields = [
         draftName:'draft_description',
         required:true,
         hiddenIf:'htmlEditor',
+        tooltip:'The description shown whenever you click at an event in the calendar',
+
     },
     {
-        type:'textarea',
-        label:'Description',
         name:'description',
+        label:'Description',
+        type:'textarea',
         required:false,
         notHiddenIf:'htmlEditor',
+        tooltip:'The description given as html',
+        maxlength:65000,
     },
     {
+        name:'facebookEventLink',
+        label:'Facebook event link',
         type:'text',
-        label:'Facebook event id',
-        tooltip:'The facebook event id (A long digit number)',
+        maxLength:200,
+        tooltip:'The https-link to the facebook event (Ex: https://fb.me/e/1OwKAA8Lm)',
+        hiddenIf:'facebookEventId',
+    },
+    {
+
         name:'facebookEventId',
+        label:'Facebook event id',
+        type:'number',
+        tooltip:'The facebook event id (Ex: 1123264745523165)',
+        maxLength:20,
+        hiddenIf:'facebookEventLink',
     },
 ]
 
@@ -179,6 +197,12 @@ export default () => {
             alert('WARNING: End of the event must be set later than start of the event. Please check dates and times.')
             return
         }
+
+        if (value.description?value.description.length > MAX_LENGTH_DESC:false) {
+            alert('Warning: The length of description field is not allowed to exceed ' + MAX_LENGTH_DESC + ' characters')
+            return
+        }
+
         const backgroundImage = userSettings.backgroundImage?userSettings.backgroundImage:""
         const settings = value.updateWithSettings?{...userSettings, backgroundImage}:{}
         const startDateTime = value.changeAll?undefined:value.startDateTime;

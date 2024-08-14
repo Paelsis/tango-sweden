@@ -1,13 +1,14 @@
-import React, {useEffect, useState} from "react"
-import { SharedStateProvider} from './store';
+import React from "react"
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { SharedStateProvider} from './store';
 import Calendar from "./pages/Calendar";
 import AllCalendars from "./pages/AllCalendars";
 import Home from "./pages/Home";
-import Settings from "./pages/Settings";
+import MyProfile from "./pages/MyProfile";
 import Usage from "./pages/Usage";
 import Privacy from "./pages/Privacy";
 import Service from "./pages/Service";
+import Shoe from "./pages/Shoe";
 import Add from "./pages/Add";
 import EditDj from "./pages/EditDj";
 import Djs from "./pages/Djs";
@@ -15,14 +16,13 @@ import Update from "./pages/Update";
 import Copy from "./pages/Copy";
 import Camera from "./pages/Camera";
 import SetupUser from './pages/SetupUser'
+import EditShoe from './components/EditShoe'
 import AppBar from './components/AppBar'
-import RedirectToMultiple from './pages/RedirectToMultiple'
 import FirebaseAuth from './login/FirebaseAuth'
 import FirebaseSignin from './login/FirebaseSignin';
+import FirebaseSignup from './login/FirebaseSignup';
 import FirebaseResetPassword from './login/FirebaseResetPassword';
 import {COLORS} from './services/const'
-import {STATUSLINE_STYLE} from './services/const'
-import StatusLine, {setStatusLine} from './components/StatusLine'
 
 import 'bulma/css/bulma.min.css';
 import "./App.css"
@@ -50,10 +50,8 @@ const RedirectTo = props =>  {
 const StringifyJSON = json => <h4>{JSON.stringify(json)}</h4>
 
 export default function App() {
-        const [statusLineStyle, setStatusLineStyle] = useState(STATUSLINE_STYLE.DEFAULT)
-        const [statusLineText, setStatusLineText] = useState()
         return (
-        <div className='App'>
+        <div className='App content'>
         <BrowserRouter> 
            <SharedStateProvider>
            <FirebaseAuth>
@@ -68,18 +66,21 @@ export default function App() {
                 <Route path="tangorama" element={<RedirectTo url='https://www.tangorama.se/kalendar' />} />
                 <Route path="halmstad" element={<RedirectTo url='http://www.tangoexperimental.com/sv-SE' />} />
                 <Route path="got" element={<RedirectTo url={"https://teamup.com/ks863ac26a05ed5d28"} />} />
-                <Route path="settings" element={<Settings />} />
+                <Route path="myProfile" element={<MyProfile />} />
                 <Route path="usage" element={<Usage />} />
                 <Route path="privacy" element={<Privacy/>} />
                 <Route path="service" element={<Service />} />
                 <Route path="add" element={<Add />} />
+                <Route path="editShoe" element={<EditShoe />} />
                 <Route path="djs" element={<Djs />} />
                 <Route path="update" element={<Update />} />
                 <Route path="copy" element={<Copy />} />
-                <Route path="editDj" element={<EditDj setStatusLineText={setStatusLineText} setStatusLineStyle={setStatusLineStyle} />} /> 
-                <Route path="camera" element={<Camera setStatusLineText={setStatusLineText} setStatusLineStyle={setStatusLineStyle} />} />
-                <Route path="setupUser" element={<SetupUser setStatusLineText={setStatusLineText} setStatusLineStyle={setStatusLineStyle} />} />
-                <Route path="signin" element={<FirebaseSignin  />} />
+                <Route path="shoe" element={<Shoe />} />
+                <Route path="editDj" element={<EditDj />} /> 
+                <Route path="camera" element={<Camera />} />
+                <Route path="setupUser" element={<SetupUser  />} />
+                <Route path="signin" element={<FirebaseSignin />} />
+                <Route path="signup" element={<FirebaseSignup />} />
                 <Route path="resetPassword" element={<FirebaseResetPassword />} />
                 <Route
                     path="*"
@@ -93,7 +94,6 @@ export default function App() {
            </FirebaseAuth>
            </SharedStateProvider>
         </BrowserRouter>
-        <StatusLine style={statusLineStyle} text={statusLineText} />
         </div>    
     );
   }

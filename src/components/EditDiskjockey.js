@@ -13,6 +13,7 @@ import withStatusLine from './withStatusLine'
 import {STATUSLINE_STYLE} from '../services/const'
 import { emptyEditorState, generateEditorStateFromValue, enhanceValueWithDraftVariables } from './DraftEditor'
 
+const MAX_DESC_LENGTH = 40000
 
 const apiBaseUrl = process.env.REACT_APP_API_BASE_URL
 
@@ -34,18 +35,21 @@ const fields = [
         type:'text',
         label:'Nickname (if this is filled in, your real name is hidden on page)',
         name:'nickname',
+        maxlength:100,
     },
     {
         type:'text',
         label:'First Name',
         name:'firstName',
         required:true,
+        maxlength:100,
     },
     {
         type:'text',
         label:'Last Name',
         name:'lastName',
         required:true,
+        maxlength:100,
     },
     /*
     {
@@ -59,6 +63,7 @@ const fields = [
         type:'text',
         label:'Phone',
         name:'phone',
+        maxlength:16,
     },
     {
         type:'text',
@@ -66,7 +71,8 @@ const fields = [
         name:'city',
         required:true,
         tooltip:'Events with same city is show in same calendar for that city',
-        placeholder:'Please enter your city'
+        placeholder:'Please enter your city',
+        maxlength:80,
     },
     {
         type:'select',
@@ -76,23 +82,27 @@ const fields = [
         selectValues:REGIONS,
         required:true,
         tooltip:'Events with same region is show in same calendar for that region',
-    },
+        maxlength:80,
+
+    },    
     {
         type:'checkbox',
         label:'Active',
         name:'active',
-        tooltip: 'Checked if the DJ is active and want to be seen on the WEB-page'
+        tooltip: 'Checked if the DJ is active and want to be shown on the WEB-page'
     },
     {
         type:'comment',
         label:'Image of DJ',
-        name:'urlImage'
+        name:'urlImage',
+        maxlength:100,
     },
     {
         type:'checkbox',
         label:'HTML-editor',
         name:'htmlEditor',
-        tooltip: 'Event enddate defaults to same as startdate'
+        tooltip: 'Event enddate defaults to same as startdate',
+        maxlength:10,
     },
     {
         // type:'rte',
@@ -102,6 +112,7 @@ const fields = [
         draftName:'draft_description',
         required:false,
         hiddenIf:'htmlEditor',
+        maxlength:200,
     },
     {
         type:'textarea',
@@ -109,6 +120,7 @@ const fields = [
         name:'description',
         required:false,
         notHiddenIf:'htmlEditor',
+        maxlength:40000,
     },
 ]
 
@@ -128,8 +140,13 @@ const Func = props => {
 
     // useEffect(()=>setValue(props.init),[props.init])
     const handleReplyDj = reply => {
-        if (reply.status === 'OK') {
-            setValue(enhanceValueWithDraftVariables(fields, reply.result))
+
+        if (reply?reply.status === 'OK':false) {
+            if (reply.result) {
+                setValue(enhanceValueWithDraftVariables(fields, reply.result))
+            } else {
+                setStatusLine('[EditDj.js] No current info about DJ', STATUSLINE_STYLE.WARNING, 1500) 
+            }    
         } else {
             setValue(enhanceValueWithDraftVariables(fields, undefined))
             setStatusLine('Currently no info regarding DJ', STATUSLINE_STYLE.WARNING, 1500) 
@@ -174,7 +191,11 @@ const Func = props => {
             const active = value.active == 1?1:0
             const record = {...value, active, email, html:undefined, draft_description:undefined, creaTimestamp:undefined, updTimestamp:undefined}
             const data = {tableName:'tbl_dj', record, fetchRows:true}
-            serverPost('/replaceRow', '', '', data, handleSaveReply)
+            if (value.description?value.description.length > MAX_DESC_LENGTH:false) {
+                alert('WARNING: Application doew not does not allow to save text longer than ' + MAX_DESC_LENGTH + ' characthers')
+            } else {
+                serverPost('/replaceRow', '', '', data, handleSaveReply)
+            }    
         } else {
             alert('No valid email when saving')
         }   
@@ -238,36 +259,40 @@ const Func = props => {
 
     return(
         <div style={styles.container}>
-            <div style={{textAlign:'center', margin:'auto'}}>
-                <h1>Add your information about Tango DJ</h1>
-                <h4>Don´t forget to save when you added your photo or text</h4>
-            </div>
             {value?
-                <div className='columns m-6 is-center'>
-                    <div className='column is-8'>
-                        <FormTemplate 
-                                    fields={fields} 
-                                    value={value}
-                                    setValue={setValue}
-                                    setList={setList}
-                                    buttons={buttons}
-                        />
-                    </div>
-                    <div className='column is-4'>
+                <>
+                    <h3 style={{textAlign:'center'}}>If you are a TDJ, please enter your data</h3>
+                    <div className='columns m-6 is-center'>
+                        <div className='column is-8'>
+                            <FormTemplate 
+                                        fields={fields} 
+                                        value={value}
+                                        setValue={setValue}
+                                        setList={setList}
+                                        buttons={buttons}
+                            />
+                        </div>
+                        <div className='column is-4'>
 
-                        <img src={value.urlImage?value.urlImage:''} alt={'No photo (Fill in data before uploading photo'}/>
-                        {email?<AddPhotoSingle 
-                            {...props} 
-                            remove={true}
-                            filename={email} 
-                            matching={email} 
-                            subdir={subdir}
-                            list={list} 
-                            setUrlImage={setUrlImage} />
-                        :null}  
-                    </div> 
-                </div>    
-            :null}    
+                            <img src={value.urlImage?value.urlImage:''} alt={'No photo (Fill in data before uploading photo'}/>
+                            {email?<AddPhotoSingle 
+                                {...props} 
+                                remove={true}
+                                filename={email} 
+                                matching={email} 
+                                subdir={subdir}
+                                list={list} 
+                                setUrlImage={setUrlImage} />
+                            :null}  
+                        </div> 
+                    </div>    
+                </>
+            :
+                <div className='content' style={{textAlign:'center', margin:'auto'}}>
+                    <h4>Please signup/signin to add/edit your TDJ info</h4>
+                    <h4>If you want access to add/update events in calendar, please contact Per Gustav Eskilson at <a href="mailto:paelsis@hotmail.com">paelsis@hotmail.com</a></h4>
+                </div>
+            }    
         </div>
     )
         

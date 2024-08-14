@@ -1,13 +1,10 @@
 import React, {Component} from 'react'
 import axios from 'axios'
-import Tooltip from '@mui/material/Tooltip';
 
 import IconButton from '@mui/material/IconButton';
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
-import withStatusLine from '../components/withStatusLine'
-import {STATUSLINE_STYLE} from '../services/const'
 
 const apiBaseUrl = process.env.REACT_APP_API_BASE_URL
 
@@ -26,7 +23,6 @@ class Comp extends Component {
     constructor(props) {
       super(props);
       this.state = {
-        statusLineText:undefined,
         selectedFiles:[],
         newFileNames:[],
         imagePreviewUrls: [],
@@ -46,9 +42,6 @@ class Comp extends Component {
       return filename + '.' + ext
     }
 
-
-
-
     handleSubmit(event) {
       event.preventDefault();
       
@@ -56,11 +49,8 @@ class Comp extends Component {
         const formData = new FormData()
         //formData.append('rootdir', this.props.rootdir?this.props.rootdir:'')
         if (this.props.subdir) {
-          formData.append('subdir', this.props.subdir?this.props.subdir:'')
+          formData.append('subdir', this.props.subdir?this.props.subdir:'/public/images')
         }
-        if (this.props.setStatusLine) {
-          this.props.setStatusLine('Submitting image to disk ...', STATUSLINE_STYLE.PROCESSING, 10000)
-        }  
         // console.log(Object.fromEntries(formData))
         for(let i=0; i < this.state.selectedFiles.length; i++) {
           let selectedFile = this.state.selectedFiles[i]
@@ -92,10 +82,8 @@ class Comp extends Component {
             }
             if (response.data.status ==='OK') {
               this.props.setList(response.data.result.filter(it=>this.props.matching?it.fname.includes(this.props.matching):true))
-              this.props.setStatusLine('Succerssful load of image', STATUSLINE_STYLE.OK, 1500)
             } else {
-              alert('Posting image failed:' + JSON.stringify(response.data))
-              this.props.setStatusLine('ERROR: Failed to load image', STATUSLINE_STYLE.ERROR, 5000)
+              alert('ERROR: Posting of image failed:' + JSON.stringify(response.data))
             }
         }).catch(error => {
             alert('ERROR: Failed to post image:' + JSON.stringify(error));
@@ -208,9 +196,6 @@ class Comp extends Component {
   }
 }
 
-const FuncSingle = props => <Comp multiple={undefined} {...props}/>
-const FuncMultiple = props => <Comp multiple={true} {...props} />
-
-export const AddPhotoSingle = withStatusLine(FuncSingle)
-export const AddPhotoMultiple = withStatusLine(FuncMultiple) 
+export const AddPhotoSingle = props => <Comp multiple={undefined} {...props}/>
+export const AddPhotoMultiple = props => <Comp multiple={true} {...props} />
   

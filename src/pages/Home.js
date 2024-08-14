@@ -5,10 +5,59 @@ import { useNavigate } from 'react-router-dom';
 import Button from '@mui/material/Button';
 import {serverFetchData} from '../services/serverFetch'
 import {COLORS} from '../services/const'
+import Tooltip from '@mui/material/Tooltip';
+import { createTheme } from '@mui/material/styles';
+
+  
 
 const FONT_SIZE = {
-    BIG:16,
+    BIG:18,
     SMALL:14
+}
+
+const colors = {
+    skane:{
+        color:COLORS.YELLOW,
+        borderColor:COLORS.YELLOW,
+        backgroundColor:'red',
+    },
+    sverige:{
+        color:COLORS.YELLOW,
+        borderColor:'yellow',
+        backgroundColor:'blue',
+    },
+    norge:{    
+        color:COLORS.WHITE,
+        borderColor:COLORS.RED,
+        backgroundColor:COLORS.BLUE,
+    },
+    danmark:{    
+        color:'white',
+        borderColor:'white',
+        backgroundColor:'red'
+    },
+    finland:{    
+        color:'white',
+        borderColor:'white',
+        backgroundColor:'blue'
+    }
+}
+
+const buttons ={
+    regions:{
+        borderWidth:'3px',
+        marginTop:10,
+        marginLeft:5,
+        marginRight:5,
+        fontWeight:900,
+    },
+    cities:{
+        borderWidth:'2px',
+        marginTop:10,
+        marginLeft:5,
+        marginRight:5,
+        fontWeight:900, 
+    },
 }
 
 
@@ -27,12 +76,18 @@ const styles = {
         maxWidth:'100%',
         maxHeight:'calc(80vh - 70px)',
     },
-    buttonContainer:{
+    buttonContainerRegion:{
         backgroundColor:COLORS.BLACK,
         color:COLORS.YELLOW,
         style:'absolute',
         width:'100%',
-        height:'50vh',
+        textAlign:'center',
+},
+    buttonContainerCity:{
+        backgroundColor:COLORS.BLACK,
+        color:COLORS.YELLOW,
+        style:'absolute',
+        width:'100%',
         textAlign:'center',
     },
     djContainer:{
@@ -72,129 +127,34 @@ const styles = {
     },
     region:{
         skane:{
-            fontWeight:'bold', 
-            fontSize:FONT_SIZE.BIG,
-            borderWidth:'3px',
-            marginTop:10,
-            marginLeft:5,
-            marginRight:5,
-            color:COLORS.YELLOW,
-            borderColor:COLORS.RED,
-            backgroundColor:'transparent'
+            ...buttons.regions,
+            ...colors.skane
         },
         danmark:{
-            fontWeight:'bold', 
-            fontSize:FONT_SIZE.BIG,
-            borderWidth:'3px',
-            marginTop:10,
-            marginLeft:5,
-            marginRight:5,
-            color:COLORS.WHITE,
-            borderColor:COLORS.RED,
-            backgroundColor:'transparent'
+            ...buttons.regions,
+            ...colors.danmark
+        },
+        norge:{
+            ...buttons.regions,
+            ...colors.norge
+        },
+        finland:{
+            ...buttons.regions,
+            ...colors.finland
         },
         norr:{
-            fontWeight:'bold', 
-            fontSize:FONT_SIZE.SMALL,
-            borderWidth:'2px',
-            marginTop:10,
-            marginLeft:5,
-            marginRight:5,
-            color:COLORS.WHITE,
-            borderColor:COLORS.BLUE,
-            backgroundColor:'transparent'
+            ...buttons.regions,
+            ...colors.sverige
         }, 
+        sverige:{
+            ...buttons.regions,
+            ...colors.sverige
+        },    
         default:{
-            fontWeight:'bold', 
-            fontSize:FONT_SIZE.BIG,
-            borderWidth:'3px',
-            marginTop:10,
-            marginLeft:5,
-            marginRight:5,
-            color:COLORS.REGION.TEXT,
-            borderColor:COLORS.REGION.TEXT,
-            backgroundColor:'transparent'
+            ...buttons.regions,
+            ...colors.sverige
         }    
     },
-    city:{
-        helsingborg:{
-            fontWeight:'bold', 
-            fontSize:FONT_SIZE.SMALL,
-            borderWidth:'2px',
-            marginTop:10,
-            marginLeft:5,
-            marginRight:5,
-            color:COLORS.HELSINGBORG.TEXT,
-            borderColor:COLORS.HELSINGBORG.BORDER,
-            backgroundColor:'transparent'
-        },
-        malmo:{
-            fontWeight:'bold', 
-            fontSize:FONT_SIZE.SMALL,
-            borderWidth:'2px',
-            marginTop:10,
-            marginLeft:5,
-            marginRight:5,
-            color:COLORS.MALMO.TEXT,
-            borderColor:COLORS.MALMO.BORDER,
-            backgroundColor:'transparent'
-        },
-        stockholm:{
-            fontWeight:'bold', 
-            fontSize:FONT_SIZE.SMALL,
-            borderWidth:'2px',
-            marginTop:10,
-            marginLeft:5,
-            marginRight:5,
-            color:COLORS.STOCKHOLM.TEXT,
-            borderColor:COLORS.STOCKHOLM.BORDER,
-            backgroundColor:'transparent'
-        },
-        gothemburg:{
-            fontWeight:'bold', 
-            fontSize:FONT_SIZE.SMALL,
-            borderWidth:'2px',
-            marginTop:10,
-            marginLeft:5,
-            marginRight:5,
-            color:COLORS.GOTHENBURG.TEXT,
-            borderColor:COLORS.GOTHENBURG,
-            backgroundColor:'transparent'
-        },
-        halmstad:{
-            fontWeight:'bold', 
-            fontSize:FONT_SIZE.SMALL,
-            borderWidth:'2px',
-            marginTop:10,
-            marginLeft:5,
-            marginRight:5,
-            color:COLORS.HALMSTAD.TEXT,
-            borderColor:COLORS.HALMSTAD.BORDER,
-            backgroundColor:'transparent'
-        },
-        sundsvall:{
-            fontWeight:'bold', 
-            fontSize:FONT_SIZE.SMALL,
-            borderWidth:'2px',
-            marginTop:10,
-            marginLeft:5,
-            marginRight:5,
-            color:COLORS.SUNDSVALL.TEXT,
-            borderColor:COLORS.SUNDSVALL.BORDER,
-            backgroundColor:'transparent'
-        },
-        default:{
-            fontWeight:'bold', 
-            fontSize:FONT_SIZE.SMALL,
-            borderWidth:'2px',
-            marginTop:10,
-            marginLeft:5,
-            marginRight:5,
-            color:COLORS.CITY.TEXT,
-            borderColor:COLORS.CITY.BORDER,
-            backgroundColor:'transparent'
-        },    
-    },    
 }
 
 const Home = () => {
@@ -206,67 +166,117 @@ const Home = () => {
     const handleNavigate = lnk => {
         navigate(lnk)
     }
+    const compareRegion = (a,b) => {
+        if (a.region.toLowerCase() === 'norge') {
+            return 1
+        } else if (b.region.toLowerCase() === 'norge') {
+                return -1
+        } else {    
+            a.region.localeCompare(b.region)
+        }    
+    }
+
     useEffect(()=>{
         const irl = '/getCalendarNames'
-        serverFetchData(irl, '', '', reply=>{setCities(reply.cities); setRegions(reply.regions)})
-    }, [])
+        serverFetchData(irl, '', '', reply=>{
+            setCities(reply.cities.sort(compareRegion)); 
+            setRegions(reply.regions.sort(compareRegion))})
+        }, [])
+    const regionStyle = (region, fontSize) => {
+        let style = styles.region[region.toLowerCase()]?styles.region[region.toLowerCase()]
+        :region.toLowerCase()==='skåne'?styles.region.skane
+        :styles.region.default
+        return {...style, fontSize}
+    }
+
     return(
         <div style={styles.container}>
             <img style={styles.img} src={Image} onClick={()=>handleNavigate('/calendar/skåne')}/>
-            <div style={styles.buttonContainer}>
+            <div style={styles.buttonContainerRegion}>
                 <p/>
-                {regions.map(it=>
+                {['skåne', 'mitt', 'sydväst', 'västra götaland', 'väst', 'norr'].map(reg=>regions.filter(it=>it.region.toLowerCase() === reg).map(it=>
                     <Button 
                         key={it.region}
                         variant="outlined" 
                         type="button" 
-                        style={styles.region[it.region]?styles.region[it.region]:styles.region.default}  
+                        style={regionStyle(it.region, FONT_SIZE.BIG)}  
+                        onClick={()=>handleNavigate('/calendar/' + it.region)}
+                    >
+                        {it.region}                    
+                    </Button>    
+                ))}    
+                <Button variant="outlined" type="button" style={regionStyle('danmark', FONT_SIZE.BIG)}  onClick={()=>handleNavigate('/denmark')}>
+                    Danmark                    
+                </Button>                    
+                {regions.filter(it=>it.region.toLowerCase() === 'norge').map(it=>
+                    <Button 
+                        key={it.region}
+                        variant="outlined" 
+                        type="button" 
+                        style={regionStyle(it.region, FONT_SIZE.BIG)}  
                         onClick={()=>handleNavigate('/calendar/' + it.region)}
                     >
                         {it.region}                    
                     </Button>    
                 )}    
-                <Button variant="outlined" type="button" style={styles.region.danmark}  onClick={()=>handleNavigate('/denmark')}>
-                    Danmark                    
-                </Button>    
-
-                <div style={{height:15}}/>
+            {regions.filter(it=>it.region.toLowerCase() === 'finland').map(it=>
+                    <Button 
+                        key={it.region}
+                        variant="outlined" 
+                        type="button" 
+                        style={regionStyle(it.region, FONT_SIZE.BIG)}  
+                        onClick={()=>handleNavigate('/calendar/' + it.region)}
+                    >
+                        {it.region}                    
+                    </Button>    
+                )}    
+            </div>
+            <div style={styles.buttonContainerCity}>
+                <div style={{height:15}} />
                 <h4>Städer</h4>
-                <Button key='Stockholm' variant="outlined" type="button" style={styles.city.stockholm}  onClick={()=>handleNavigate('/calendar/stockholm')}>
+                <Button key='Stockholm' variant="outlined" type="button" style={regionStyle('sverige', FONT_SIZE.SMALL)}  onClick={()=>handleNavigate('/calendar/stockholm')}>
                     Stockholm                    
                 </Button>    
                 <Button 
                     key='Malmoe'
                     variant="outlined" 
                     type="button" 
-                    style={styles.city.malmo}  
+                    style={styles.region.skane}  
                     onClick={()=>handleNavigate('/calendar/malmö')}
                 >
                     Malmö/Lund                    
                 </Button>    
-                <Button key='Gothenburg' variant="outlined" type="button" style={styles.city.gothemburg}  onClick={()=>handleNavigate('/got')}>
-                    Göteborg                    
-                </Button>    
-                {cities.filter(it => !it.city.toLowerCase().includes('malmö')).map(it=>
-                    <Button 
-                        key = {it.city}
-                        variant="outlined" 
-                        type="button" style={styles.city[it.city.toLowerCase()]?styles.city[it.city.toLowerCase()]:styles.city.default}  
-                        onClick={()=>handleNavigate('/calendar/' + it.city)}
-                    >
-                        {it.city}                    
-                    </Button>    
+
+                {['mitt', 'skåne', 'västra götaland', 'väst', 'sydost', 'norr'].map(reg=>
+                    cities.filter(it=>reg===it.region.toLowerCase() && it.city.toLowerCase() !== 'malmö').map(it=>
+                        <Button key = {it.city} variant="outlined" type="button" style={regionStyle(it.region.toLowerCase(), FONT_SIZE.SMALL)}  onClick={()=>handleNavigate('/calendar/' + it.city)}>
+                            {it.city}                    
+                        </Button>    
+                    )
                 )}    
-                <Button key = 'Halmstad' variant="outlined" type="button" style={styles.city.halmstad}  onClick={()=>handleNavigate('/halmstad')}>
+
+                <Button key = 'Halmstad' variant="outlined" type="button" style={regionStyle('sverige', FONT_SIZE.SMALL)}  onClick={()=>handleNavigate('/halmstad')}>
                     Halmstad                    
                 </Button>    
-             </div>
-             <div style={styles.lowerLeftCorner} onClick={()=>handleNavigate('/djs')}>DJs</div>
+
+                <Button key='Gothenburg' variant="outlined" type="button" style={regionStyle('sverige', FONT_SIZE.SMALL)}  onClick={()=>handleNavigate('/got')}>
+                    Göteborg                    
+                </Button>    
+
+                {['norge', 'finland'].map(reg=>
+                    cities.filter(it=>reg===it.region.toLowerCase() && it.city.toLowerCase() !== 'malmö').map(it=>
+                        <Button key = {it.city} variant="outlined" type="button" style={regionStyle(it.region.toLowerCase(), FONT_SIZE.SMALL)}  onClick={()=>handleNavigate('/calendar/' + it.city)}>
+                            {it.city}                    
+                        </Button>    
+                    )
+                )}    
+            </div>    
         </div>
     )
 }
 
 export default Home
 
+// <div style={styles.lowerLeftCorner} onClick={()=>handleNavigate('/djs')}>DJs</div>
 
 //<div style = {{...styles.img, backgroundImage: `url(${Image})`}} />

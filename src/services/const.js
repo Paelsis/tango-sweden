@@ -1,5 +1,7 @@
 import casaBlanca from '../images/VitaHuset.jpg';
 
+export const MAX_LENGTH_DESC = 40000
+export const DEFAULT_AUTH_LEVEL = 1
 
 export const AVA_STATUS = {
     AV:'AV', // Avaiable space
@@ -102,13 +104,15 @@ export const REGIONS =
   'Halland',
   'Sydost',
   'Danmark',
+  'Norge',
+  'Finland',
   'Västra Götaland',
   'Mitt',
   'Norr',
 ] 
 export const BUTTON_STYLE = {
-  DEFAULT:{color:'black', borderColor:'black'},
-  CLICKED:{color:'grey', borderColor:'grey'},
+  DEFAULT:{color:'grey', borderColor:'grey'},
+  CLICKED:{color:'orange', borderColor:'orange'},
   SAVED:{color:'green', borderColor:'green'},
   ERROR:{color:'red', borderColor:'red'},
 }
@@ -118,9 +122,14 @@ export const STATUSLINE_STYLE = {
   PROCESSING:{backgroundColor:'lightGreen', color:'lightYellow'},
   OK:{backgroundColor:'green', color:'white'},
   WARNING:{backgroundColor:'yellow', color:'black'},
-  WARNING:{backgroundColor:'lightGreen', color:'black'},
   ERROR:{backgroundColor:'red', borderColor:'lightYellow'},
 }
+
+export const SHOE_RADIO_VALUES = 
+[
+  {label:'Keep healthy feet', value:'healty'},
+  {label:'Worst misstakes when bying shoes', value:'worst'}
+]
 
 export const ADMINISTRATORS=['tangosmedjan@gmail.com', 'anita.e.dobi@gmail.com', 'admin@tangosweden.se'];
 

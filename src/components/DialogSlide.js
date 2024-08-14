@@ -65,6 +65,7 @@ export default function DialogSlide(props) {
     navigate('/update', {
       state: { 
         eventId:ev.eventId, 
+        facebookEventLink:ev.facebookEventLink,
         facebookEventId:ev.facebookEventId,
         title:ev.title, 
         company:ev.company, 
@@ -91,6 +92,7 @@ export default function DialogSlide(props) {
     navigate('/copy', {
       state: {
         eventId:ev.eventId, 
+        facebookEventLink:ev.facebookEventLink,
         facebookEventId:ev.facebookEventId,
         title:ev.title, 
         company:ev.company, 
@@ -133,9 +135,11 @@ export default function DialogSlide(props) {
 
   const auth = getAuth()
   useEffect(()=>onAuthStateChanged(auth, user => {
+    if (user?user.email:false) {
         setEmail(user.email)
+    }    
   }), [])
-  const linkToFacebook=event.facebookEventId?"https://www.facebook.com/events/" + event.facebookEventId:undefined
+  const linkToFacebook=event.facebookEventLink?event.facebookEventLink:event.facebookEventId?"https://www.facebook.com/events/" + event.facebookEventId:undefined
   return (
     <div style={{maxWidth:'100%'}}>
         <Dialog

@@ -14,10 +14,11 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import {isAndroidOperatingSystem} from '../services/isAndroid'
 import Square from '../components/Square'
 import {serverFetchData} from '../services/serverFetch';
+import { MAX_LENGTH_DESC } from '../services/const';
+
 import { generateEditorStateFromValue, emptyEditorState, enhanceValueWithDraftVariables} from '../components/DraftEditor'
 
 const apiBaseUrl = process.env.REACT_APP_API_BASE_URL
-
 
 const isAndroid = isAndroidOperatingSystem()
 
@@ -106,59 +107,66 @@ const SelectTemplate = ({list, name, value, setValue}) => {
 
 const fields = [
     {
-        type:'text',
-        label:'Title',
         name:'title',
-        required:true,
-    },
-    {
-        type:'checkbox',
-        label:'Hide location and time in popup window',
-        name:'hideLocationAndTime',
-    },
-    {
+        label:'Title',
         type:'text',
-        label:'Location',
-        name:'location',
-        hiddenIf:'hideLocationAndTime'
+        required:true,
+        tooltip:'The event title shown in the calendar',
+
     },
     {
-        type:'date',
-        label:'Startdate',
+        name:'hideLocationAndTime',
+        label:'Hide location and time in popup window',
+        type:'checkbox',
+        tooltip: 'Check this box if you want to hide the location and time in the popup window when clicking at event'
+    },
+    {
+        name:'location',
+        label:'Location',
+        type:'text',
+        hiddenIf:'hideLocationAndTime', 
+        tooltip: 'Location of the event'
+    },
+    {
         name:'startDate',
+        label:'Startdate',
+        type:'date',
+        tooltip: 'Start date of the event',
         required:true
     },
     {
-        type:'time',
-        label:'Starttime',
+        name:'multipleDays',
+        label:'Event ends on another day',
+        type:'checkbox',
+        tooltip: 'Check this box if the event ends on another day'
+    },
+    {
+        name:'endDate',
+        label:'Enddate',
+        type:'date',
+        notHiddenIf:'multipleDays',
+        required:true,
+        tooltip: 'End date of the event. Only required if event ends on other day than it starts',
+    },
+    {
         name:'startTime',
+        label:'Starttime',
+        tooltip:'Endtime of the event (for full day events set to 00:00)',
+        type:'time',
         required:true
     },
     {
         type:'time',
         label:'Endtime',
         name:'endTime',
+        tooltip:'Endtime of the event (for full day events set to 23:59)',
         required:true
     },
     {
         type:'checkbox',
-        label:'Event ends on another day',
-        name:'multipleDays',
-        tooltip: 'Event enddate defaults to same as startdate'
-    },
-    {
-        type:'date',
-        label:'Enddate',
-        name:'endDate',
-        notHiddenIf:'multipleDays',
-        required:true,
-        tooltip: 'Event enddate is filled in when not same as startdate'
-    },
-    {
-        type:'checkbox',
-        label:'HTML-editor (runs better on Android mobiles)',
+        label:'HTML-editor',
         name:'htmlEditor',
-        tooltip: 'Event enddate defaults to same as startdate'
+        tooltip: 'If you want to write your Description in html instead of using the editor, check this box'
     },
     {
         // type:'rte',
@@ -166,6 +174,8 @@ const fields = [
         label:'Description',
         name:'description',
         hiddenIf:'htmlEditor',
+        tooltip:'The text shown in the popup window when you click the event in the calendar',
+        maxlength:65000,
     },
     {
         type:'textarea',
@@ -173,20 +183,33 @@ const fields = [
         name:'description',
         required:false,
         notHiddenIf:'htmlEditor',
+        tooltip:'The description given as html',
+        maxlength:65000,
     },
     {
+        name:'facebookEventLink',
         type:'text',
         style:{width:120},
         width:20,
-        label:'Facebook event id',
-        tooltip:'The facebook event id (A long digit number)',
+        label:'Facebook event link (https-address)',
+        tooltip:'The https-link to the facebook event (Ex: https://fb.me/e/1OwKAA8Lm)',
+        maxLength:200,
+    },
+    {
         name:'facebookEventId',
+        type:'number',
+        style:{width:120},
+        width:200,
+        label:'Facebook event id',
+        tooltip:'The facebook event id (Ex: 1123264745523165)',
+        hiddenIf:'facebookEventLink',
+
     },
     {
         type:'checkbox',
         label:'Repeat',
         name:'repeat',
-        tooltip: 'Repeat the event every N days, N weeks or N monthsweekly, monthly or annualy'
+        tooltip: 'Check this box if you want to repeat the event with a certain frequency'
     },
     {
         type:'number',
@@ -197,7 +220,7 @@ const fields = [
         min:1, 
         max:31,
         required:true,
-        tooltip: 'Offset between the events'
+        tooltip: 'The number of days/weeks/months between repeated events'
     },
     {
         type:'radio',
@@ -206,7 +229,7 @@ const fields = [
         radioValues:['days', 'weeks', 'months'],
         notHiddenIf:'repeat',
         required:true,
-        tooltip: 'The offset between events should be combined with offset unit'
+        tooltip: 'The unit of the field \"Offset between events\" right above' 
     },
     {
         type:'number',
@@ -216,7 +239,7 @@ const fields = [
         notHiddenIf:'repeat',
         min:2, 
         max:52,
-        tooltip: 'Repeat the event a number of times (1 means single event)'
+        tooltip: 'Repeat the event this number of times (Ex: 20 means 20 repeated events with an offset given in units specified above)'
     },
     {
         type:'checkbox',
@@ -398,6 +421,11 @@ export default props => {
             alert('Warning: End time must be later than start time of the event.')
             return
         }
+
+        if (dbEntry.description?dbEntry.description.length > MAX_LENGTH_DESC:false) {
+            alert('Warning: The length of description field is not allowed to exceed ' + MAX_LENGTH_DESC + ' characters')
+            return
+        }
     
         if (value.repeat) {
             let offset = value.offset
@@ -443,6 +471,7 @@ export default props => {
     ]
     return(
         <div style={styles.container}>
+            {userSettings.email && (userSettings.authLevel >= 4)?
                 <>
                     <div className='columns is-centered'>
                         <div className='is-2 column'>
@@ -477,6 +506,11 @@ export default props => {
                         </div>    
                     </div>     
                 </>
+            :
+                <div style={{margin:'auto', top:300, width:'100vw', textAlign:'center'}}>
+                    Please signin first if you want to add events.<p/>
+                </div>
+            }
         </div>
         
     )

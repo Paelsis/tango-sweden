@@ -1,14 +1,9 @@
 
 import React, {useState, useEffect, useRef} from 'react';
 import RteEditor from './RteEditor'
-import DraftEditor, {generateEditorStateFromValue, emptyEditorState} from './DraftEditor'
-
-import { stateToHTML } from "draft-js-export-html";
+import DraftEditor from './DraftEditor'
 import draftToHtml from 'draftjs-to-html'
-import { ContentState, convertToRaw, EditorState } from 'draft-js'
-import Tooltip from '@mui/material/Tooltip';
-import moment from 'moment'
-import { FacebookAuthProvider } from 'firebase/auth';
+import {  convertToRaw } from 'draft-js'
 //import {isAndroidOperatingSystem} from '../services/isAndroid'
 //const isAndroid = isAndroidOperatingSystem()
 
@@ -50,10 +45,13 @@ const FormField = props => {
     const radioValues = fld.radioValues
     const selectValues = fld.selectValues?fld.selectValues.map(it=>it.trim()):[]
     const label = fld.label?fld.label:'No label'
+    const maxLength = fld.maxLength?fld.maxLength:undefined
     const handleChange = e => {
         setValue({...value, [e.target.name]:e.target.type==='checkbox'?e.target.checked?1:0:e.target.value})
     }    
     const handleChangeRte = val => setValue({...value, [fld.name]:val})
+
+    const isObjectArray = fld.type === 'radio' && Array.isArray(fld.radioValues)
 
     useEffect(()=>{
         if (fld.type === 'draft') {
@@ -105,9 +103,7 @@ const FormField = props => {
                 return(
                     <p>
                             <label style={labelStyle}>
-                                    <Tooltip title='Hello'>
-                                        {label}&nbsp;{required?<sup style={supStyle}>*</sup>:null}&nbsp;
-                                    </Tooltip>
+                                {label}&nbsp;{required?<sup style={supStyle}>*</sup>:null}&nbsp;
                             </label>    
                         <br/>
                         {fld.names?fld.names.map(name =>
@@ -133,19 +129,19 @@ const FormField = props => {
                                 {label}&nbsp;{required?<sup style={supStyle}>*</sup>:null}&nbsp;
                         </label>    
                         <br/>
-                        {radioValues.map((val, idx) =>
+                        {radioValues.map((radio, idx) =>
                             <label>
                                 <input 
                                     key={fld.name + idx}
                                     type={fld.type}
-                                    value={val.value?val.value:val} 
+                                    value={radio.value?radio.value:radio} 
                                     name={fld.name} 
                                     required={required}
                                     disabled={disabled}
-                                    checked={value[fld.name] === (val.value?val.value:val)}
+                                    checked={value[fld.name] === (radio.value?radio.value:radio)}
                                     onChange={handleChange}
                                 />
-                                &nbsp;<span>{val.label?val.label:val}</span>&nbsp;
+                                &nbsp;<span>{radio.label?radio.label:radio}</span>&nbsp;
                             </label>
                         )}
                     </p> 
@@ -173,12 +169,10 @@ const FormField = props => {
                 case 'textarea':
                 return(
                     <p>
-                        <Tooltip title='Hello'>
                         <label style={labelStyle}>
                             {label}
                             &nbsp;{required?<sup style={supStyle}>*</sup>:null}&nbsp;
                         </label>    
-                        </Tooltip>
                         <br/>
                         <textarea 
                             style={styles.textarea}
@@ -189,6 +183,7 @@ const FormField = props => {
                             value={value[fld.name]?value[fld.name]:''} 
                             disabled={disabled}
                             onChange={handleChange}
+                            maxLength={maxLength}
                             onKeyPress={handleKeyPress}
                         />
                     </p>
@@ -222,6 +217,7 @@ const FormField = props => {
                                                 style={{cols:50}} 
                                                 required={required} 
                                                 disabled={disabled}
+                                                placeholder={fld.placeholder}
                                                 editorState={value['draft_' + fld.name]?value['draft_' + fld.name]:''} 
                                                 onEditorStateChange={val => onEditorStateChange(val)} 
                                     />
@@ -279,12 +275,13 @@ const FormField = props => {
                     <input 
                         {...fld} 
                         key={fld.name}
-                        type={fld.type}
-                        size={40}
-                        name={fld.name} style={valueStyle} 
+                        size={fld.type==='text'?40:undefined}
+                        style={valueStyle} 
                         value={value[fld.name]?value[fld.name]:''} 
+                        maxLength={maxLength}
                         required={required} 
                         disabled={disabled}
+                        placeholder={fld.placeholder}
                         onChange={handleChange}
                         onKeyPress={handleKeyPress}
                         ref={fld.inputRef?fld.inputRef:undefined}

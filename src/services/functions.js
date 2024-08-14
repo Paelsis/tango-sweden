@@ -48,6 +48,9 @@ export const styleSquare = userSettings=>{
     )
 }        
 
+export const uniqueList = list => {return([...new Set(list)])}
+
+
 // get draft value when you have some fileds thtat uses draft
 
 

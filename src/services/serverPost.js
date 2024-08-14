@@ -15,15 +15,15 @@ const serverPost = (irl, username, password, data, handleReply) => {
             if (response.data.status) {
                 if (response.data.status ==='OK') {
                     // statusMessage(STATUS_OK, 'OK: database modified successfully (response.data.status=' + response.data.status + 'JSON:'+ JSON.stringify(response.data) + ')');
-                    console.log('response', response)
+                    console.log('[serverPost] status=OK, response', response)
                 } else {
-                    console.log('response', response)
+                    console.log('[serverPost] status=ERROR, response', response)
                 }    
             } else {
-                console.log('response', response)
+                console.log('[severPost] status=NO STATUS, response', response)
             }
         } else {    
-            console.log('WARNING: serverPost responed back status code:', response.status);
+            console.log('[serverPost] response status not 200m response.status:', response.status);
         }    
         handleReply(response.data);
     })

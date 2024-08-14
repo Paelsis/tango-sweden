@@ -71,8 +71,6 @@ const styles = {
 
 }
 
-const largeIcons =['Skåne','Västra Götaland', 'Mitt']
-
 const viewDjsForRegion = (djs, region, dj, setDj) => {
     const subdir = 'images/djs'
     const src = dj?dj.urlImage?dj.urlImage.includes('http')?dj.urlImage:(apiBaseUrl + '/' + subdir + '/' + dj.urlImage):undefined:undefined
@@ -81,7 +79,7 @@ const viewDjsForRegion = (djs, region, dj, setDj) => {
     <div >
         <div className='column is-12'>
             <h4 style={{color:COLORS.YELLOW}}>Diskjockeys</h4>
-            {djs.filter(dj=> dj.region === region).map(it=>
+            {djs.filter(dj=>dj.active==1).filter(dj=> dj.region === region).map(it=>
                 <Button 
                 variant={it.email===dj.email?'contained':'outlined'} 
                 type="button" 
@@ -127,7 +125,6 @@ export default () => {
     const handleNavigate = lnk => {
         navigate(lnk)
     }
-    const uniqueList = list => {return([...new Set(list)])}
 
     useEffect(()=>{
         const irl = '/getDjs'
@@ -135,7 +132,8 @@ export default () => {
     }, [])
 
     // const cities = uniqueList(djs.map(it => it['city']))
-    const uniqueRegions = djs.map(it => it.region)
+    const uniqueList = list => {return([...new Set(list)])}
+    const uniqueRegions = uniqueList(djs.filter(it=>it.active).map(it => it.region))
     const regions = REGIONS.filter(it =>uniqueRegions.includes(it))
 
     const handleReply = reply => {

@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useRef } from 'react';
 import { EditorState, ContentState, convertFromHTML } from "draft-js"
 import { Editor } from 'react-draft-wysiwyg';
-import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import "draft-js/dist/Draft.css";
 import '@draft-js-plugins/static-toolbar/lib/plugin.css';
+import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { stateToHTML } from "draft-js-export-html";
+
+
 /*
 const oldFunction = props => {
     const editor = React.useRef(null);
@@ -38,15 +40,9 @@ const oldFunction = props => {
 }
 */
 
-export const enhanceValueWithDraftVariables = (fields, value)  => {
-  let draftValues = value?value:{}
-  fields.forEach(fld => {
-      if (fld.type === 'draft') {
-          draftValues = {...draftValues, ['draft_' + fld.name]:value[fld.name]? generateEditorStateFromValue(value[fld.name]):emptyEditorState()}
-      }
-  })
-  return draftValues
-}    
+export const emptyEditorState = () => {
+  return EditorState.createEmpty()
+} 
 
 export const generateEditorStateFromValue = value => {
   const blocksFromHTML = convertFromHTML(value)
@@ -54,36 +50,45 @@ export const generateEditorStateFromValue = value => {
   return EditorState.createWithContent(content)
 }
 
-export const emptyEditorState = () => {
-  return EditorState.createEmpty()
-} 
+
+
+// Whenever you use the draft editor and you have aq html field you must expand those to a draft values with fields prefixed with draft_
+export const enhanceValueWithDraftVariables = (fields, value)  => {
+  let draftValues = value?value:{}
+  fields.forEach(fld => {
+      if (fld.type === 'draft') {
+          const draftValue = value?value[fld.name]?generateEditorStateFromValue(value[fld.name]):emptyEditorState():emptyEditorState()
+          draftValues = {...draftValues, ['draft_' + fld.name]:draftValue}
+      }
+  })
+  return draftValues
+}    
+
+export const removeAllDraftVariables = value  => {
+  let valueWithoutDraft = {}  
+  Object.entries(value).map(it=> {
+    if (!it[0].includes('draft_')) {
+      valueWithoutDraft = {...valueWithoutDraft, [it[0]]:it[1]}
+    }
+  })
+  return valueWithoutDraft
+}    
+
+
 
 export default props => {
-    const editor = React.useRef(null);
-    //const blocksFromHTML = convertFromHTML(props.value)
-    //const content = ContentState.createFromBlockArray(blocksFromHTML.contentBlocks, blocksFromHTML.entityMap)
-    //const [editorState, setEditorState] = useState(EditorState.createWithContent(content))
-    //const [editorState, setEditorState] = useState(EditorState.createEmpty())
-
-    //useEffect(()=>setEditorState(EditorState.createWithContent(content))
-    //,[props.value.length > 0])
-
-    /*
-    function handleChange(val) {
-        //setEditorState(val)
-        //setHtml(stateToHTML(editorState.getCurrentContent()))
-        //props.onChange(stateToHTML(val.getCurrentContent()))
-        props.onChange(val)
-    }
-    */
-    function focusEditor() {
+    const editor = useRef(null);
+    let editorState = props.editorState
+    
+    const focusEditor = () => {
         editor.current.focus();
     }
 
     return (
     <div onClick={focusEditor} style={{border:'solid 1px'}}>
         <Editor
-            editorState={props.editorState}
+            ref={editor}
+            editorState={editorState}
             onEditorStateChange={props.onEditorStateChange}
             placeholder="The message goes here..."
         />

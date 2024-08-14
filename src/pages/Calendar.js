@@ -229,8 +229,7 @@ export default props => {
                         events={events} 
                         handleEvent={handleEvent} 
                 />
-              }  
-              <Button variant='outlined' onClick={()=>setAgenda(agenda?false:true)}>{agenda?'Normal':'Agenda'}</Button>
+              }
             </OnAtMostPhablet>
             <OnAtLeastTablet>
               <div style={{height:'100vh'}}>
@@ -279,4 +278,8 @@ export default props => {
 
   );
 }
+
+              /*  
+              <Button variant='outlined' onClick={()=>setAgenda(agenda?false:true)}>{agenda?'Normal':'Agenda'}</Button>
+              */
 

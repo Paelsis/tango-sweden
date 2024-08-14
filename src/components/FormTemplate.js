@@ -1,6 +1,8 @@
 import React, {useState, useRef, useEffect} from 'react';
 import Button, { buttonClasses } from '@mui/material/Button';
+import Tooltip from '@mui/material/Tooltip';
 import FormField from './FormField';
+import {COLORS} from '../services/const'
 import getTypeFromColumnType from '../services/getTypeFromColumnType'
 import {isEmail} from '../services/functions'
 const TEXTS={
@@ -46,7 +48,14 @@ export default props => {
                     <div>
                         {props.children}
                         {fields.filter(fld=>!isHidden(fld)).map((fld, index) => 
-                                <FormField inputRef={fld.focus?inputRef:undefined} key={index}  fld={fld} value={value} setValue={setValue} handleKeyPress={handleKeyPress} />
+                            <Tooltip 
+                                title={<h4 style={{textAlign:'left' , fontSize:20, fontWeight:900, color:COLORS.WHITE}}>{fld.tooltip}</h4>}
+                                open={fld.tooltip?undefined:false}
+                            >    
+                                <div>
+                                    <FormField inputRef={fld.focus?inputRef:undefined} key={index}  fld={fld} value={value} setValue={setValue} handleKeyPress={handleKeyPress} />
+                                </div>
+                            </Tooltip>
                         )}
                     </div>
                     {fields && false?
@@ -58,6 +67,11 @@ export default props => {
                     {buttonClasses?
                         <div style={{paddingTop:20, paddingBottom:20}}>
                             {buttons.map(button =>
+                                <Tooltip 
+                                    title={<h2>{button.tooltip}</h2>} 
+                                    enterDelay={500} 
+                                    open={button.tooptip?undefined:false}
+                                >
                                 <span style={button.style}>
                                     {
                                         <Button 
@@ -72,6 +86,7 @@ export default props => {
                                     }                      
                                     &nbsp;
                                 </span>
+                                </Tooltip>
                             )}
                             &nbsp;
                         </div>

@@ -51,8 +51,8 @@ const TEXTS = {
 
 const calcTr = (isToday, durationHours, length) => {
     const border = 'none'
-    const height = durationHours < 4?durationHours*15
-        :(4*15 + Math.min((durationHours-4)*3, 90))
+    const height = durationHours < 4?durationHours*20
+        :(4*20 + Math.min((durationHours-4)*3, 90))
 
     let fontSize = durationHours < 2.5?16
     :durationHours <3.0?18

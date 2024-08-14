@@ -1,4 +1,5 @@
 import React, {useCallback, useContext, useEffect, useState} from "react"
+import { Link } from "react-router-dom";
 import { Navigate, useNavigate } from 'react-router-dom';
 import firebaseApp from '../services/firebaseApp'
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged} from 'firebase/auth';
@@ -51,21 +52,19 @@ const FirebaseSignin = () => {
 
   const handleResult = result => {
     //alert('AppBar 0:' + JSON.stringify(result?result:'No result'))
-    if (result && result.isDiskjockey) {
-      setUserSettings(result)
-      navigate('/editDj');
-    } else if (result && result.region) {
+    if (result && result.region) {
         // alert('AppBar 1' + JSON.stringify(result))
         setUserSettings(result)
         navigate('/calendar/' + result.region);
     } else {
-        navigate('/settings')
+        // No user found in database, redirect to /settings
+        navigate('/myProfile');
     }
   }
 
   const handleSignin = e => {
     e.preventDefault()
-    setButtonColor('yellow')
+    setButtonColor('blue')
     signInWithEmailAndPassword(auth, credentials.email, credentials.password)
     .then(userCredential => {
       // Signed in 
@@ -83,7 +82,12 @@ const FirebaseSignin = () => {
     });
   }  
 
-  const handleSignout = ()=>{setUid(undefined); signOut(auth)}
+  const handleSignout = ()=>{
+    setUid(undefined)
+    signOut(auth)       
+    navigate('/home');
+  }
+
   const handleChange = e =>setCredentials({...credentials, [e.target.name]:e.target.value})
   const inputStyle = styles.input(buttonColor)
   const buttonStyle = styles.button(buttonColor)
@@ -94,7 +98,7 @@ const FirebaseSignin = () => {
             <form  onSubmit={handleSignin}>
                  <p/>  
                 <label>
-                Signin med email och lösenord (enbart för full aukotiserade Späckhuggare)<p/>
+                Signin with email and password<p/>
                 </label>
                 <input style={inputStyle} name='email' type='email' placeholder='Email' onChange={handleChange} />
                 <p/>
@@ -107,9 +111,11 @@ const FirebaseSignin = () => {
                 &nbsp;
                 &nbsp;
                 &nbsp;
-                <Button variant="outlined"  style={buttonStyle} onClick={() => navigate('/resetPassword')}>
-                  Reset Password
-                </Button>          
+                <p/>      
+                <p/>      
+                <p/>      
+                <div style={{fontSize:14}}>Reset your password by double-click <Link to='/resetPassword'>here</Link></div>
+                <div style={{fontSize:14}}>Signup for a free account by double-click <Link to='/signup'>here</Link></div>
             </form>
           </div>
         </>

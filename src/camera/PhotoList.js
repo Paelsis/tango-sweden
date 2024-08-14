@@ -12,8 +12,6 @@ import {STATUSLINE_STYLE} from '../services/const'
 const apiBaseUrl = process.env.REACT_APP_API_BASE_URL
 const BUTTON_COLOR={DEFAULT:'#888', OK:'green', PROCESSING:'lightGreen', WARNING:'orange', ERROR:'red'}
 
-
-
 // PhotoList
 const Func = props => {
         const {subdir, list, setList, matching, setStatusLine} = props; // If matching is among calling parameters, then only files matching this string is is shown

@@ -14,16 +14,21 @@ export function serverFetchDataResult(irl, username, password, handleResult) {
         }
       })
     .then(response => {
-        const result = response.data?response.data.result?response.data.result:undefined:undefined
-        if (response.data === undefined) {
-            alert('No result found in response ' + JSON.stringify(response.data))
-        }
-        handleResult(result);
+        const status = response?response.data?response.data.status?response.data.status:undefined:undefined:undefined
+        if (status?(status === 'OK' || status === 'WARNING'):false) {
+            const result = response?response.data?response.data.result:undefined:undefined
+            handleResult(result);
+        } else {    
+            const message = response.data.message?response.data.message:undefined
+            alert('[serverFetchDataResult]' + status?status:'NO STATUS' + ': No result found in response to ' + irl + ', message:' + message?message:'No message')
+        } 
     })
     .catch(e => {
-        const errorMessage = 'url=' + url + ' e:' + JSON.stringify(e.message)
-        // alert(errorMessage)
-        console.log('[serverFerchDataResult] Error message:', errorMessage);
+        if (e?!!e.message:false) {
+            const errorMessage = 'url=' + url + ' e:' + JSON.stringify(e.message)
+            alert(errorMessage)
+            console.log('[serverFerchDataResult] ERROR: message =' , errorMessage);
+        }
         handleResult(undefined);
     });
 }
@@ -41,18 +46,20 @@ export function serverFetchData(irl, username, password, handleReply) {
         }
       })
     .then(response => {
-        const data = response.data?response.data:undefined
+        const data = response?response.data?response.data:undefined:undefined
         if (data === undefined) {
-            alert('No result found in responsre' + JSON.stringify(response.data))
-        }
-        handleReply(data);
+            alert('[serverFetchData] ERROR: axios get call returned no data')
+        } else {
+            handleReply(data);
+        }    
     })
     .catch(e => {
-        const errorMessage = 'url=' + url + ' e:' + JSON.stringify(e.message)
-        // alert(errorMessage)
-        console.log('[serverFerchData] Error message:', errorMessage);
-        alert('[serverFerchData] Error message:' + errorMessage)
-        handleReply([]);
+        if (e?!!e.message:false) {
+            const errorMessage = 'url=' + url + ' e:' + JSON.stringify(e.message)
+            console.log('[serverFerchData] Error message:', errorMessage);
+            alert('[serverFerchData] ERROR: axios call failed, message:' + errorMessage)
+        }
+        handleReply(undefined);
     });
 }
 
