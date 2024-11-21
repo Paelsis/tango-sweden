@@ -5,7 +5,7 @@ import firebaseApp from '../services/firebaseApp'
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged} from 'firebase/auth';
 import { useSharedState } from '../store';
 import Button from '@mui/material/Button';
-import {serverFetchDataResult} from '../services/serverFetch'
+import {serverFetchData} from '../services/serverFetch'
 
 const styles = {
   container:{
@@ -45,21 +45,22 @@ const FirebaseSignin = () => {
   const navigate = useNavigate()
   const [buttonColor, setButtonColor] = useState('green')
   const [credentials, setCredentials] = useState(undefined)
-  const [uid, setUid] = useState(undefined)
-  const [userSettings, setUserSettings] = useSharedState()
+  const [uid, setUid] = useState()
+  const [sharedState, setSharedState] = useSharedState()
 
   const auth = getAuth()
 
-  const handleResult = result => {
+  const handleReply = reply => {
+    const data = reply.status?reply:reply.data
     //alert('AppBar 0:' + JSON.stringify(result?result:'No result'))
-    if (result && result.region) {
-        // alert('AppBar 1' + JSON.stringify(result))
-        setUserSettings(result)
-        navigate('/calendar/' + result.region);
+    if (data.status !== 'OK') {
+      navigate('/myProfile');
     } else {
-        // No user found in database, redirect to /settings
-        navigate('/myProfile');
-    }
+        // alert('AppBar 1' + JSON.stringify(result))
+
+        setSharedState(data.result)
+        navigate('/calendar/' + data.result.region);
+    } 
   }
 
   const handleSignin = e => {
@@ -72,7 +73,7 @@ const FirebaseSignin = () => {
       setUid(uid)
       setButtonColor('green')
       const irl = '/getUser?email=' +  credentials.email
-      serverFetchDataResult(irl, '', '', result=>handleResult(result))
+      serverFetchData(irl,  reply=>handleReply(reply))
     })
     .catch(error => {
       const errorCode = error.code;

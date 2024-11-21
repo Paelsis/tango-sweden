@@ -11,7 +11,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircleOutline';
 import Tooltip from '@mui/material/Tooltip';
 import { AirlineSeatReclineExtra, Description } from '@mui/icons-material';
-import serverPost from '../services/serverPost'
+import {serverPost} from '../services/serverPost'
 import { getAuth, onAuthStateChanged} from 'firebase/auth';
 
 

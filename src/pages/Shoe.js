@@ -38,7 +38,7 @@ const getLabel = (radioValues, value) => {
 
 // Shoes
 export default () => {
-    const [userSettings, ] = useSharedState()
+    const [sharedState, ] = useSharedState()
     const [value, setValue] = useState()
     const [list, setList] = useState([])
     const [labels, setLabels] = useState([])
@@ -56,8 +56,8 @@ export default () => {
 
     useEffect(()=>{
         const tableName = 'tbl_shoe'
-        const irl = '/fetchRows?tableName=' + tableName // + '&email=' + userSettings.email
-        serverFetchData(irl, '', '', handleReply)
+        const irl = '/fetchRows?tableName=' + tableName // + '&email=' + sharedState.email
+        serverFetchData(irl,  handleReply)
     }, [])
 
     return(

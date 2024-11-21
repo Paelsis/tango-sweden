@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react';
+import { getAuth, onAuthStateChanged} from 'firebase/auth';
 import { useSharedState } from '../store';
 import { useNavigate } from 'react-router-dom';
 import FormTemplate from './FormTemplate';
@@ -9,8 +10,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircleOutline';
 import Tooltip from '@mui/material/Tooltip';
-import serverPost from '../services/serverPost'
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import {serverPost} from '../services/serverPost'
 import {isAndroidOperatingSystem} from '../services/isAndroid'
 import Square from '../components/Square'
 import {serverFetchData} from '../services/serverFetch';
@@ -246,8 +246,25 @@ const fields = [
         label:'Use registration button',
         name:'useRegistrationButton',
         tooltip:'If you want a registration button and save registrations for the event',
-        disabled:'true'
+        notHiddenIf:'useRegistrationButton',
     },    
+    {
+        type:'email',
+        label:'E-mail of respoinsible organizer',
+        name:'email',
+        tooltip:'E-mail that will recieve the confirmation mails from the registrations',
+        notHiddenIf:'useRegistrationButton',
+    },    
+    {
+        type:'number',
+        label:'Maximum number of registrants',
+        style:{width:40},
+        name:'maxLimit',
+        min:1, 
+        max:500,
+        notHiddenIf:'useRegistrationButton',
+        tooltip: 'Maximum number of registrants for this event. Registration not possible when max is reached.'
+    },
 ]
 const fieldsSettings = [
     {
@@ -269,24 +286,24 @@ const fieldsSettings = [
         name:'backgroundColorDark',
     },
     {
-    type:'text',
-    label:'Background image (Use url of image)',
-    tooltip: 'You can use a url to an image stored on internet type https://www.kasandbox.org/programming-images/avatars/marcimus-purple.png',
-    name:'backgroundImage',
+        type:'text',
+        label:'Background image (Use url of image)',
+        tooltip: 'You can use a url to an image stored on internet type https://www.kasandbox.org/programming-images/avatars/marcimus-purple.png',
+        name:'backgroundImage',
     },
     { 
-    type:'radio',
-    label:'Border thickness',
-    radioValues:['0px', '1px', '2px', '3px', '4px'],
-    tooltip: 'Thickness of border',
-    name:'borderWidth',
+        type:'radio',
+        label:'Border thickness',
+        radioValues:['0px', '1px', '2px', '3px', '4px'],
+        tooltip: 'Thickness of border',
+        name:'borderWidth',
     },
     {
-    type:'text',
-    label:'Border color',
-    tooltip: 'Color of border',
-    //disabled:true,
-    name:'borderColor',
+        type:'text',
+        label:'Border color',
+        tooltip: 'Color of border',
+        //disabled:true,
+        name:'borderColor',
     },
 ]
 
@@ -339,11 +356,13 @@ const CandidateTable = ({list, deleteRow, clearAll, handleAddToCalendar, buttonS
     </div>
     :null
                     
+ 
 
 
-export default props => {
-    const [userSettings, ] = useSharedState()
-    const [value, setValue] = useState({})
+export default ({init}) => {
+    const [sharedState, ] = useSharedState()
+    const [email, setEmail] = useState()
+    const [value, setValue] = useState()
     const [templates, setTemplates] = useState([])
     const [buttonStyle, setButtonStyle] = useState(BUTTON_STYLE.DEFAULT)
     const [list, setList] = useState([])
@@ -360,25 +379,30 @@ export default props => {
    }
 
     useEffect(()=>{
-        let url = apiBaseUrl + "/fetchRows?tableName=tbl_template&email=" + userSettings.email
-        serverFetchData(url, '', '', handleFetchTemplate)
-        moment.locale('sv', {week:{dow : 1}})
-        setValue({...props.init, id:undefined})
-        setList([])
-    }, [props.init, userSettings])
+        onAuthStateChanged(auth, user => {
+            setEmail(user?user.email:undefined);
+            setList([])
+            if (user.email) {
+                let url = apiBaseUrl + "/fetchRows?tableName=tbl_template&email=" + user.email
+                serverFetchData(url,  handleFetchTemplate)
+                moment.locale('sv', {week:{dow : 1}})
+                setValue({...init, id:undefined})
+            }    
+        })
+    }, [init])
 
     const deleteRow = index => setList(list.filter((it, idx)=>idx !== index))  
     const handleReply = reply => {
-            if (reply.status==='OK') {
-                setButtonStyle(BUTTON_STYLE.DEFAULT)
-                navigate('/calendar/' + (userSettings.region?userSettings.region:'Skåne'))
-            } else {
-                setButtonStyle(BUTTON_STYLE.ERROR)
-                alert(reply.message?('Error message:' + reply.message):JSON.stringify(reply))
-            }
+        if (reply.status==='OK') {
+            setButtonStyle(BUTTON_STYLE.DEFAULT)
+            navigate('/calendar/' + (sharedState.region?sharedState.region:'Skåne'))
+        } else {
+            setButtonStyle(BUTTON_STYLE.ERROR)
+            alert(reply.message?('Error message:' + reply.message):JSON.stringify(reply))
+        }
     }
     const handleCancel = () => {
-        navigate('/calendar/' + userSettings.region)
+        navigate('/calendar/' + sharedState.region)
     }
 
     const handleReset = () => {
@@ -389,18 +413,15 @@ export default props => {
         const irl = '/addEvents'
         // alert(JSON.stringify(list))
         setButtonStyle(BUTTON_STYLE.CLICKED) 
-        serverPost(irl, '', '', list, handleReply)
+        serverPost(irl, list, handleReply)
     }
 
     const changeToDbEntry = val => ({
-            eventId:val.eventId,
-            title:val.title, 
-            description:val.description?val.description:'No description yet ...',
-            company:val.company,
+            ...val,
+            ...sharedState, // Not all columns in sharedState that has the corresponding column in tbl_calendar will copy this value from tbl_user to tbl_calendar
             startDateTime:val.startDate + 'T' + (val.startTime?val.startTime:'00:00'),
             endDateTime:(val.endDate?val.endDate:val.startDate) + 'T' + (val.endTime?val.endTime:'23:59'),
-            location:val.location,
-            ...userSettings, // Not all columns in userSettings that has the corresponding column in tbl_calendar will copy this value from tbl_user to tbl_calendar
+            authLevel:sharedState.authLevelOverride?sharedState.authLevelOverride:sharedState.stateAuthLevel,
             id:undefined,
     })
 
@@ -471,25 +492,27 @@ export default props => {
     ]
     return(
         <div style={styles.container}>
-            {userSettings.email && (userSettings.authLevel >= 4)?
+            {email?
                 <>
                     <div className='columns is-centered'>
                         <div className='is-2 column'>
-                            <h3>City: {userSettings.city} Region:{userSettings.region}</h3>    
+                            <h3>City: {sharedState?sharedState.city:''} Region:{sharedState?sharedState.region:''}</h3>    
                         </div>
                     </div>    
                     <div className='columns m-2 is-centered'>
-                        <div className='column is-6 is-narrow'>
-                            {templates.length > 0?<SelectTemplate list={templates} name='title' value={value} setValue={setValue} />:null}
-                            <p/>
-                            <FormTemplate 
-                                        fields={fields} 
-                                        value={value}
-                                        setValue={setValue}
-                                        setList={setList}
-                                        buttons={buttons}
-                            />
-                        </div>
+                        {value?
+                            <div className='column is-6 is-narrow'>
+                                {templates.length > 0?<SelectTemplate list={templates} name='title' value={value} setValue={setValue} />:null}
+                                <p/>
+                                <FormTemplate 
+                                            fields={fields} 
+                                            value={value}
+                                            setValue={setValue}
+                                            setList={setList}
+                                            buttons={buttons}
+                                />
+                            </div>
+                        :null}
                         <div className='column is-4 is-narrow'>
                             <CandidateTable 
                                 buttonStyle={buttonStyle} 
@@ -500,9 +523,12 @@ export default props => {
                             />
                         </div>
                         <div className='column is-2 is-narrow'>
-                            <div className="column is-hidden-mobile">
-                                <Square settings={userSettings} />
-                            </div>  
+                            {(sharedState&&!!init)?
+                                <div className="column is-hidden-mobile">
+                                    <Square settings={sharedState} />
+                                    <small>email:{init.email?init.email:'No email'}</small>
+                                </div>  
+                            :null}
                         </div>    
                     </div>     
                 </>

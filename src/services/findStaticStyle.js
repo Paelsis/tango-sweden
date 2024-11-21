@@ -3,7 +3,8 @@ import festivalito from '../images/festivalito_banner.jpg';
 import summer from '../images/summer_banner.jpg';
 import easter from '../images/easter_banner.jpg';
 import maraton from '../images/maraton_banner.jpg';
-import tangokompaniet from '../images/tangokompaniet.jpg';
+import tangokompaniet from '../images/tangokompanietNew.jpg';
+// change 5/9-2024 import tangokompaniet from '../images/tangokompaniet.jpg';
 
   
 const staticStyleIds = [
@@ -15,9 +16,9 @@ const staticStyleIds = [
       color:'white', // #f2e2e9', 
       background: 'linear-gradient(to bottom right, #81185B, #442222)',
       backgroundImage: `url(${tangokompaniet})`,
-      backgroundPosition: 'center center',   
+      backgroundPosition: 'left center',   
       backgroundRepeat:'auto', 
-      backgroundSize:'3000%', 
+      backgroundSize:'200%', // 5000%
       backgroundColor:'#81185B',
     }
   },

@@ -1,11 +1,11 @@
-import React, {Component, useState} from 'react';
-import {AVA_STATUS} from '../services/const.js'
-
+import React, {useState} from 'react';
+import {AVA_STATUS, MAX_LIMIT_UNSET} from '../services/const'
+import { useNavigate } from 'react-router-dom';
 
 //import moment from 'moment';
 import moment from 'moment-with-locales-es6'
-import Button from '@mui/material/Button';
-
+import {IconButton} from '@mui/material';
+import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
 const language = 'SV'
 
 const CULTURE = (language) => language==='SV'?'sv':language==='ES'?'es':'en'
@@ -49,7 +49,9 @@ const TEXTS = {
     }
 }
 
-const calcTr = (isToday, durationHours, length) => {
+const calcTr = ev => {
+    const {style, isToday, durationHours} = ev
+    const length = ev.title.trim().length
     const border = 'none'
     const height = durationHours < 4?durationHours*20
         :(4*20 + Math.min((durationHours-4)*3, 90))
@@ -61,9 +63,9 @@ const calcTr = (isToday, durationHours, length) => {
     :durationHours <48?24
     :26
     
-    fontSize = length > 70?fontSize-2:length > 60?fontSize-1:fontSize    
+    fontSize = length > 40?fontSize-5:length > 60?fontSize-5:fontSize    
 
-    return {height, fontSize, fontWeight:600, verticalAlign:'middle', border}
+    return {...style, height, fontSize, fontWeight:600, verticalAlign:'middle', border}
 }
 
 let styles = {
@@ -77,7 +79,7 @@ let styles = {
     tbody: {
         cellPadding:1,
     },
-    tr: (isToday, durationHours, length) => calcTr(isToday, durationHours, length),
+    tr: ev => calcTr(ev),
     verticalCenter:{
         margin: 0,
         position: 'absolute',
@@ -86,95 +88,78 @@ let styles = {
     }
 };
 
-/**
- * This example allows you to set a date range, and to toggle `autoOk`, and `disableYearSelection`.
- */
-class SmallCalendarView extends Component {
-    constructor(props) {
-        super(props);
+// CalendarSmall
+export default props => {
+    const {events, handleEvent} = props
+    const [fontSize, setFontSize] = useState() 
+    const navigate = useNavigate()
 
-        this.state = {
-            fontSize:'small',
-            events:[],
-            open:false,
-            title:'',
-            location:'',
-            desc:'',
-            name:undefined,
-        };
-        this.onClick = this.onClick.bind(this);
-        this.renderEvent = this.renderEvent.bind(this);
-        this.renderAllEvents = this.renderAllEvents.bind(this);
-    }
- 
+    moment.locale(CULTURE(language))
 
 
-    // invoked immediately after a component is mounted
-    componentDidMount () {
-        moment.locale(CULTURE(language));
+    const onClick = () => {
+        setFontSize(fontSize==='small'?'large':'small')
     }
 
-
-    onClick() {
-        this.setState({fontSize: this.state.fontSize==='small'?'large':'small'})
-    }
-
-    renderEvent = event => {
-        const {handleEvent} = this.props;
+    const renderEvent = event => {
         const mstart = event.mstart
         const mend = event.mend
+        const maxLimit = event.maxLimit?event.maxLimit:MAX_LIMIT_UNSET
         let weekday = mstart.format('dddd')
         let weekdayEnd = mend.format('dddd')
         weekday = weekday.toUpperCase().charAt(0) + weekday.slice(1,3)
         weekdayEnd = weekdayEnd.toUpperCase().charAt(0) + weekdayEnd.slice(1,3)
+        
+        const timeRange = event.timeRange
         const dateRange=event.dateRange
-        const timeRange = moment() <= mend?event.timeRange:(TEXTS.ENDED[language] + ' ' + mend.format('LT'))
-        const noTime = mstart.format('H:mm') + ' - ' +  mend.format('H:mm') === "0:00 - 0:00"
-        const dateTimeRange = noTime?mstart.format('ddd D MMM') + ' - ' +  mend.format('ddd D MMM')
-            :mstart.format('ddd D MMM H:mm') + ' - ' +  mend.format('ddd D MMM H:mm')
         const useRegistrationButton = event.useRegistrationButton
-        const tdStyle = event.style
-        const tdStyleDateTime = {...tdStyle, fontSize:18, fontWeight:600}
+        const trStyle = event.style
+        const tdStyleDateTime = {fontSize:18, fontWeight:600}
+        const tdStyle = {}
         //const forcedSmallFonts= ['milonga', 'practica', 'pratika'].find(it  => event.title.toLowerCase().includes(it)) && event.durationHours >12
         const forceSmallFonts = event.forceSmallFonts
+        const handleRegistration = e => {
+            const eventIdExtended = event.eventId + event.startDate
+            // alert(eventIdExtended)
+            navigate('/registration', {state:{eventIdExtended, maxLimit}})
+        }
 
         return(
 
             <tr 
                 key={'Row' + event.productId} 
-                style={styles.tr(event.isToday, event.durationHours, event.title.trim().length)}
-                onClick={()=>handleEvent(event)}
+                style={styles.tr(event)}
             > 
                 {event.moreThan11Hours && !forceSmallFonts?
-                    <td colSpan={3} style={tdStyle}>  
-                        {event.title}<br/>{dateTimeRange}
+                    <td colSpan={4} onClick={()=>handleEvent(event)}>  
+                        {event.title}<br/>{dateRange}
                     </td>
                 :
                     <>
-                        <td style={tdStyleDateTime}>  
+                        <td style={tdStyleDateTime} onClick={()=>handleEvent(event)}>  
                             <small>{event.sameDate?'':dateRange}</small>
                         </td>
-                        <td style={tdStyleDateTime}>  
+                        <td style={tdStyleDateTime} onClick={()=>handleEvent(event)}>  
                             <small>{timeRange}</small>
                         </td>
-                        <td colspan={useRegistrationButton==1?1:2} style={tdStyle}>  
+                        <td colspan={useRegistrationButton==1?1:2} onClick={()=>handleEvent(event)}>  
                             <small>{event.title}</small>
                         </td>
                     </>
                 }
                 {useRegistrationButton?
-                    <td style={tdStyle} onClick={e=>this.handleRegistration(e, event)}>  
+                    <td style={tdStyle}>  
                         {event.avaStatus=== AVA_STATUS.CC?
                             'Fully Booked'
                         :
-                            <Button 
-                                variant='outlined'
+                            <IconButton 
                                 key={event.productId} 
                                 className="button" 
-                                style={{backgroundColor:'transparent', color:tdStyle.color, borderColor:tdStyle.color, padding:1, fontSize:'small'}}
+                                style={{backgroundColor:'transparent', color:trStyle.color, borderColor:trStyle.color, padding:1, fontSize:'small'}}
+                                onClick = {handleRegistration}
                             >
-                                Registration
-                            </Button>
+                                <AppRegistrationIcon />
+                            </IconButton>
                         }
                     </td>
                 :null}    
@@ -182,21 +167,18 @@ class SmallCalendarView extends Component {
         )
     }    
 
-    renderAllEvents = (events) => {
-        
-        return(events.map(event =>this.renderEvent(event)))
+    const renderAllEvents = events => {
+        return(
+            events.map(ev =>renderEvent(ev))
+        )    
     }
 
-    render() {
-        const {language, events} = this.props
-        return (
+    return (
             <table style={styles.table}>
                 <tbody style={styles.tbody}>
-                    {this.renderAllEvents(events)}
+                    {renderAllEvents(events)}
                 </tbody>
             </table>
-        )
-    }
+    )
 } 
 
-export default SmallCalendarView

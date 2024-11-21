@@ -1,15 +1,34 @@
 import request from 'superagent'
 import moment from 'moment-with-locales-es6'
 import findStaticStyle from './findStaticStyle'
-import {serverFetchDataResult} from './serverFetch'
+import {serverFetchData} from './serverFetch'
 import {replaceChar} from '../services/functions'
 import casaBlanca from '../images/VitaHuset.jpg';
 const apiBaseUrl = process.env.REACT_APP_API_BASE_URL
 
-
-const CULTURE = (language) => language===LANGUAGE_SV?'sv':language===LANGUAGE_ES?'es':'en'
 const LANGUAGE_SV='SV'
-const LANGUAGE_ES='ES'
+
+const CULTURE = (language) => language===LANGUAGE_SV?'sv':'en'
+
+const TEXTS = {
+  ENDED:{
+      SV:'Slutade',
+      EM:'Ended',
+  },
+  WHOLE_DAY:{
+      SV:'hela dagen', 
+      EN:'all day',
+  },
+  NO_LOCATION:{
+    SV:'ingen plats angiven', 
+    EN:'location missing',
+  },
+  NO_CITY:{
+    SV:'ingen plats angiven', 
+    EN:'location missing',
+  }
+}
+
 
 const findParameter = (s, val) => {
   const idx = s.indexOf(val)  
@@ -21,19 +40,48 @@ const findParameter = (s, val) => {
     return undefined
   }  
 }  
+
+function cityForEvent (title, location, language) {
+  if ((title.toLowerCase().indexOf('malmö') !== -1) ||
+      (title.toLowerCase().indexOf('malmö') !== -1) ||
+      (title.toLowerCase().indexOf('lund') !== -1)) {
+      return 'malmö'
+  } else {        
+      return location?(location.toLowerCase().indexOf('malmö') !== -1)?'Malmö'
+             :(location.toLowerCase().indexOf('lund') !== -1)?'Lund'
+             :(location.toLowerCase().indexOf('michael') !== -1)?'Lund'
+             :(location.toLowerCase().indexOf('tangokompaniet') !== -1)?'Malmö'
+             :(location.toLowerCase().indexOf('studio') !== -1)?'Malmö'
+             :TEXTS.NO_CITY[language]:TEXTS.NO_CITY[language]
+  }    
+}    
+
 function _createEvent(props)  {
-  const {start, end, title, description, location, email, staticStyleId, color, backgroundColorLight, backgroundColorDark, backgroundImage, borderStyle, borderWidth, borderColor} = props
+  const {start, end, language, title, description, location, email, staticStyleId, color, backgroundColorLight, backgroundColorDark, backgroundImage, borderStyle, borderWidth, borderColor} = props
   const mnow = moment()
   const mstart=moment(start)
-  const mend=moment(end).add(start.length <= 10?-1:0, 'days')
-  const timeStart = mstart.format('LT')
-  const timeEnd = mend.format('LT')
+  const mend=moment(end).add((end.length <= 10?-1:0), 'minutes')
+
   const dateShift =  moment(end).dayOfYear() - moment(start).dayOfYear() 
-  const fullDay = start.length <= 10 || (timeStart==="00:00" && timeEnd ==="00:00") && dateShift <= 1 || (timeStart==="00:00" && timeEnd ==="23:59")
+  const yearShift = mstart.format('YY') !== mnow.format('YY') 
+  const timeStart = (start.length <= 10)?'00:00':mstart.format('LT')
+  const timeEnd = (end.length <=10)?'23:59':mend.format('LT')
+  const fullDay = (start.length <= 10) || (timeStart==="00:00" && (timeEnd === "00:00" || timeEnd === '23:59'))
   const moreThan11Hours=(mstart.calendar('l') !== mend.calendar('l')) && (mend.diff(mstart, 'hours') > 11) 
   const durationHours = moment.duration(mend.diff(mstart)).asHours()
-  const dateRange=(mstart.format('ddd D/M') + ((dateShift && durationHours > 11)?(' - ' +  mend.format('ddd D/M')):''))
-  const timeUnset =  (timeStart==="00:00" && timeEnd ==="00:00") 
+  const startDate=mstart.format('L')
+  const hasEventEnded = (mnow >= mend)
+  const timeRange = hasEventEnded?(TEXTS.ENDED[language] + ' ' + mend.format('LT'))
+    :fullDay?TEXTS.WHOLE_DAY[language]
+    :(mstart.format('LT') + '-' + mend.format('LT'))
+ 
+  const formatDateRange = moreThan11Hours?(yearShift?'ddd ll':'ddd D MMM'):(yearShift?'ddd D/M/YY':'ddd D/M')
+  // const formatDateRangeTime = yearShift?'ddd D/M/YY LT':'ddd D/M LT'
+  const dateRange=(mstart.format(formatDateRange) 
+    + ((dateShift && durationHours > 11)?(' - ' +  mend.format(formatDateRange)):''))  
+  const dateRangeTime=mstart.format('llll') + ' - ' 
+    + ((dateShift && durationHours > 11)?mend.format('llll'):timeEnd)  
+ 
   const maxPar = Number(findParameter(description, 'MAX_PAR'))
   const maxInd = Number(findParameter(description, 'MAX_IND'))
   const ongoing = (mnow >= mstart) && (mnow < mend)
@@ -41,23 +89,21 @@ function _createEvent(props)  {
   const isToday = mnow.isSame(mstart, 'day')?true:false
   const background = "linear-gradient(to bottom right, " + backgroundColorLight + ", " + backgroundColorDark + ")"
   const border = ongoing?'2px dotted':'0px'
-  const opacity = mnow < mend?1.0:0.4
-  const style = 
-    staticStyle?
-      {...staticStyle, border, opacity}
-    :backgroundImage?
-        {color,
-          backgroundImage:`url(${apiBaseUrl + backgroundImage})`, // Note images is stored in SLIM4 public dir
-          backgroundPosition: 'center center',   
-          backgroundRepeat:'auto', 
-          backgroundSize:'cover', 
-          backgroundColor:backgroundColorLight, 
-          opacity,
-          border
-        }
-
-    :  
-        {color, background, borderStyle:border?undefined:borderStyle, borderWidth:border?undefined:borderWidth, borderColor, border, opacity}
+  const opacity = hasEventEnded?0.4:1.0
+  const style = staticStyle?{...staticStyle, border, opacity}
+  :backgroundImage?
+      {
+        color,
+        backgroundImage:`url(${apiBaseUrl + backgroundImage})`, // Note images is stored in SLIM4 public dir
+        backgroundPosition: 'center center',   
+        backgroundRepeat:'auto', 
+        backgroundSize:'cover', 
+        backgroundColor:backgroundColorLight, 
+        opacity,
+        border
+      }
+  :  
+      {color, background, borderStyle:border?undefined:borderStyle, borderWidth:border?undefined:borderWidth, borderColor, border, opacity}
 
   
   // alert('hours=' + durationHours)
@@ -70,42 +116,24 @@ function _createEvent(props)  {
         mend,
         maxInd,
         maxPar,
-        fullDay, 
-        timeUnset, 
+        startDate,
+        timeRange,
         dateRange,
+        dateRangeTime,
         durationHours, 
         isToday,
         moreThan11Hours,
         ongoing, 
-        isWeekend:mstart.isoWeekday() >=6,
         calendar:mstart.calendar(),
-        location:location?location:'Ingen plats angiven',
-        city: cityForEvent(title, location),
-        weekNumber: mstart.isoWeek(),
-
-        timeRange: fullDay?'Hela dagen':(mstart.format('LT') + '-' + mend.format('LT')),
-        timeRangeWithDay: (dateShift && durationHours > 11)?(mstart.format('ddd LT') + '-' + mend.format('ddd LT'))
-          :(mstart.format('LT') + '-' + mend.format('LT')),
+        location:location?location:TEXTS.NO_LOCATION[language],
+        city: cityForEvent(title, location, language),
+        // weekNumber: mstart.isoWeek(),
         style,
         /* Registration props */
         maxRegistrants : Number(maxInd?maxInd:maxPar?(maxPar*2):500),
     })
 }
 
-function cityForEvent (title, location) {
-  if ((title.toLowerCase().indexOf('malmö') !== -1) ||
-      (title.toLowerCase().indexOf('malmö') !== -1) ||
-      (title.toLowerCase().indexOf('lund') !== -1)) {
-      return 'malmö'
-  } else {        
-      return location?(location.toLowerCase().indexOf('malmö') !== -1)?'Malmö'
-             :(location.toLowerCase().indexOf('lund') !== -1)?'Lund'
-             :(location.toLowerCase().indexOf('michael') !== -1)?'Lund'
-             :(location.toLowerCase().indexOf('tangokompaniet') !== -1)?'Malmö'
-             :(location.toLowerCase().indexOf('studio') !== -1)?'Malmö'
-             :undefined:undefined          
-  }    
-}    
 
 function _forceSmallFonts(event) {
   if ( (typeof _forceSmallFonts.mstartPreviousBigEvent == 'undefined')|| (event === undefined)) {
@@ -152,7 +180,7 @@ export function getEventsFromGoogleCal (calendarId, apiKey, timeMin, timeMax, la
           const location = it.location?it.location.replace(/Tangokompaniet, |, 212 11 |, 224 64|, 223 63|, Sverige|Stiftelsen Michael Hansens Kollegium, /g, ' ').replace('Fredriksbergsgatan','Fredriksbergsg.'):'Plats ej angiven'
           const eventId = it.id
 
-          event = _createEvent({start, end, staticStyleId, title, description, location, eventId, email:'daniel@tangokompaniet.com', hideLocationAndTime:false, useRegistrationButton:false})
+          event = _createEvent({start, end, staticStyleId, title, description, location, eventId, email:'daniel@tangokompaniet.com', hideLocationAndTime:false, useRegistrationButton:false, language})
 
           event = _forceSmallFonts(event)
 
@@ -169,21 +197,24 @@ export function getEventsFromTable (irl, callback, timeMin, timeMax, language) {
   moment.locale(CULTURE(language))
   let event = {}
   const events = []
-  serverFetchDataResult(irl, '', '', list => {
-    if (!!list) {
-      list.forEach(it => {
-        const location = it.location?it.location.replace(/Tangokompaniet, |, 212 11 |, 224 64|, 223 63|, Sverige|Stiftelsen Michael Hansens Kollegium, /g, ' ').replace('Fredriksbergsgatan','Fredriksbergsg.'):'No location given'
+  // Pick where end date of event lies in interval [date of timeMin, date of timeMax].
+  const filterFunc = it => it.end.substring(0,10).localeCompare(timeMin.substring(0,10)) >= 0 && it.end.localeCompare(timeMax) < 0
+  serverFetchData(irl,  data => {
+    if (data.status === 'OK') {
+      const list = data.result
+      list.filter(filterFunc).forEach(it => {
+        const location = it.location?it.location
+          .replace(/Tangokompaniet, |, 212 11 |, 224 64|, 223 63|, Sverige|Stiftelsen Michael Hansens Kollegium, /g, ' ')
+          .replace('Fredriksbergsgatan','Fredriksbergsg.'):'No location given'
+
         const start = replaceChar(it.start, 'T', 10); // Fill in T between date and time in start (to get sorting work with Google Cal start)
         const end = replaceChar(it.end, 'T', 10); // Fill in T between date and time in start (to get sorting work with Google Cal start)
-        // alert(start)
         const staticStyleId = it.city.toUpperCase() === 'STOCKHOLM'?'STOCKHOLM':undefined;
-
-        event = _createEvent({...it, location, start, end, staticStyleId})
+        // alert(timeMin + ' ' + timeMax + ' ' + start + ' ' + end)
+        event = _createEvent({...it, location, start, end, staticStyleId, language})
         events.push(event)
       })
     } 
-
-    // alert(JSON.stringify(events))
     callback(events)
   })
 }

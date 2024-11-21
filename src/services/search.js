@@ -1,4 +1,4 @@
-import {serverFetchDataResult} from './serverFetch';
+import {serverFetchData} from './serverFetch';
 
 // search and pass a list of objects in the callack function handleReply
 export const search = (tableName, value, handleReply) =>
@@ -17,14 +17,17 @@ export const search = (tableName, value, handleReply) =>
     } else {
         alert('No table name')
     }    
-    serverFetchDataResult(link, '', '', list=>{
+    serverFetchData(link, data=>{
         //alert(JSON.stringify(list))
-        if (list.length !== 0) {
+        if (data.status === 'OK') {
+            const list = data.result
             if (!!handleReply) {
                 handleReply(list)
-            }    
-        } else {
-            handleReply([])
+            } else {
+                handleReply([])
+            } 
+        } else {     
+            alert('ERROR:Failed to fetch data in search')
         }   
     })
 }        

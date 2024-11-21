@@ -18,7 +18,7 @@ import ListItemText from '@mui/material/ListItemText';
 import { useNavigate } from 'react-router-dom';
 import { getAuth, signOut, onAuthStateChanged } from 'firebase/auth';
 import {AuthContext} from "../login/FirebaseAuth"
-import {serverFetchDataResult} from '../services/serverFetch'
+import {serverFetchData} from '../services/serverFetch'
 import {COLORS} from '../services/const'
 // AppBar.js
 export default () => {
@@ -26,9 +26,9 @@ export default () => {
   const [email, setEmail] = useState(undefined)
   //const [userSettings, setUserSettings] = useGlobalState('USER_SETTINGS')
   const [anchorEl, setAnchorEl] = useState(null);
+  const auth = getAuth()
   const open = Boolean(anchorEl);
   const navigate = useNavigate()
-  const auth = getAuth()
   const handleClick = (event) => {
     if (event?event.currentTarget:false) {
       setAnchorEl(event.currentTarget);
@@ -38,13 +38,15 @@ export default () => {
     setAnchorEl(null);
   };
 
-  const handleResultUser = result => {
+  const handleResultUser = data => {
     //alert('AppBar 0:' + JSON.stringify(result?result:'No result'))
-    if (result) {
-      if (!!result.region) {
-        setUserSettings({...userSettings, ...result})
+    if (data.status === 'OK') {
+      const list = data.result
+      if (list?.length?list.length > 0:false) {
+        setUserSettings({...userSettings, ...list[0]})
       }  
     } else {
+      alert('ERROR: Failed to get user in AppBar. Navigates to setup user') 
       navigate('/myProfile')
     }
   }
@@ -54,22 +56,15 @@ export default () => {
       setEmail(user?user.email:undefined);
       if (user?user.email:false) {
         const irl = '/getUser?email=' +  user.email
-        serverFetchDataResult(irl, '', '', result=>handleResultUser(result))
+        serverFetchData(irl,  data=>handleResultUser(data))
       } 
     })
   }, [])
 
-  const handleNavigate = route => {
-    navigate(route)
-  }
-
-  const handleSignup = () => {
-    navigate('/signup')
-  }
-  const handleSignin = () => {
-    navigate('/signin')
-  }
-
+  const handleNavigate = route =>  navigate(route)
+  const handleSignup = () => navigate('/signup')
+  const handleSignin = () => navigate('/signin')
+  
   const handleSignout = () => {
     setEmail(undefined)
     signOut(auth)
@@ -77,8 +72,7 @@ export default () => {
     // window.location.reload()
   }
 
-  const authLevel4 = email?userSettings?(userSettings.authLevel>=4)?true:false:false:false
-  const authLevel8 = email?userSettings?(userSettings.authLevel>=8)?true:false:false:false
+  const authLevel = userSettings.authLevel?userSettings.authLevel:0
 
   return (
       <div>
@@ -92,14 +86,13 @@ export default () => {
         }}
       >
         <MenuItem><ListItemText inset></ListItemText></MenuItem>
-        {email?<MenuItem onClick={()=>handleSignout()}>Signout</MenuItem>:<MenuItem onClick={()=>handleSignin()}>Signin</MenuItem>}
-        {!email?<MenuItem onClick={()=>handleSignup()}>Signup</MenuItem>:null}
-        <Divider />
-        {(email&&authLevel4)?<MenuItem onClick={()=>navigate('/add')}>Add Event</MenuItem>:null}
-        {email?<MenuItem onClick={()=>navigate('/editDj')}>My TDJ Info</MenuItem>:null}
-        {userSettings.shoeStories && email?<MenuItem onClick={()=>navigate('/editShoe')}>My Shoe Story</MenuItem>:null}
-        {email?<MenuItem onClick={()=>navigate('/myProfile')}>My Profile</MenuItem>:null}
-        {authLevel8?<MenuItem onClick={()=>navigate('/setupUser')}>Define users</MenuItem>:null}
+        {(email&&authLevel >= 1)?<MenuItem onClick={()=>handleSignout()}>Signout</MenuItem>:<MenuItem onClick={()=>handleSignin()}>Signin</MenuItem>}
+        {email?null:<MenuItem onClick={()=>handleSignup()}>Signup</MenuItem>}
+        {(email && authLevel >= 1)?<Divider />:null}
+        {(email && authLevel >= 1)?<MenuItem onClick={()=>navigate('/editDj')}>My TDJ Info</MenuItem>:null}
+        {(email && authLevel >= 4)?<MenuItem onClick={()=>navigate('/add')}>Add Event</MenuItem>:null}
+        {(email && authLevel >= 1)?<MenuItem onClick={()=>navigate('/myProfile')}>My Profile</MenuItem>:null}
+        {(email && authLevel >= 8)?<MenuItem onClick={()=>navigate('/updateUser')}>Define users</MenuItem>:null}
         <MenuItem onClick={()=>handleNavigate('/usage')}>Usage</MenuItem>
       </Menu>
 

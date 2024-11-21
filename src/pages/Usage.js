@@ -71,9 +71,10 @@ const SwedishUsage = () =>
 
     <h3>Ändra existerande events</h3>
 
-    Logga in på kalendern och gå till eventet du önskar ändra. I fönstret som kommer upp finns längst ned en knapp som ser ut som en <i>Penna</i>. 
-    Klicka på denna och uppdatera de uppgifter du önskar. Klicka därefter på Update knappen längst ned.
-
+    Logga in på kalendern och klicka på eventet du önskar ändra. I fönstret som kommer upp finns längst ned en knapp som ser ut som en <i>Penna</i>. 
+    Klicka på denna och uppdatera de uppgifter du önskar. Klicka därefter på Update knappen längst ned. Om du önskar uppdatera alla events i serien med samma data, 
+    markera översta kryssboxen. En serie är den lista du skapar när du lägger till nya events med <i>Add</i> meny option och som du därefter lägger till kalendern med 
+    
     <h3>Kopiera data till nya events</h3>
 
     Om du vill återanvända samma information som du haft förr kan du använda knappen <i>Kopiera</i>.
@@ -81,6 +82,29 @@ const SwedishUsage = () =>
     <p/>
     Som inloggad klickar du då först på eventet som du vill kopiera data från och sen på knappen <i>Kopiera</i>. I fönstet som poppar upp finns nu förifylda data 
     samt tomma fält för datum och tid. Fyll i ditt nya datum och din nya tid samt eventuell upprepad frekvens med <i>Repeat</i>.
+
+    <h3>Använda registreringsknappen och granska registreringar</h3>
+
+    När du är inloggad kan du lägga till en registreringsknapp så att dansare kan registrera sig till eventet. Du kan sen se och editera de registreringar som folk gjort.
+    En dansare kan även registrera sin danspartner så hen slipper att göra detta själv.
+    <p/>
+    Gör så här för att introducera registreringsknappen i ditt event.
+    <ul>
+        <li>Logga in med din e-post och password uppe i menyn till höger.</li>
+        <li>Klicka på den händelsen du önskar ändra i kalendern</li>
+        <li>Redigera nu händelsen med pennikonen enligt följande</li>
+        <li>Markera rutan "Use registration button"</li>
+        <li>Om du önskar begränsa antalet tillåtna dansare fyller du i "Maximalt antal registrerade". Då går det inte att boka om det är fullbokat</li>
+        <li>Klicka på uppdateringsknappen</li>
+    </ul>
+    <p/>
+    För att granska de registreringar som gjorts gör du enligt följande:
+    <ul>
+        <li>Klicka på händelsen i kalendern (inte på registreringsknappen).</li>
+        <li>Klicka på personikonen (längst ned är det andra iconen från höger)</li>
+        <li>Här är listan på de registreringar som gjorts. </li>
+        <li>Man kan redigera och ta bort dansare från den här listan med knapparna till vänster.</li>
+    </ul>
 
     <h3>Förslagslåda:</h3>
     Om du har några fantastiska förslag på ändringar för viddareutveckling av kalendern, 
@@ -170,6 +194,43 @@ const EnglishUsage = () =>
     In the windo that pops up there is a prefilled template but with date and time fields empty.
     Fill in your new dates and times and any frequency they are to be repeated with <i>Repeat</i>.
     Then you just continue as you did with Add.
+    
+
+ 
+    <h3>Duplicate contents from existing events to upcoming events</h3>
+
+    If you want to create new events with the same data as you had before, use the COPY-button.
+    Typically, you have a milonga or practia that occurs every week during the fall and that you want to continue during the next season.
+    <p/>
+    As logged in, you then first click on the event from which you want to copy data. In the window that appears, click the COPY-button.
+    In the windo that pops up there is a prefilled template but with date and time fields empty.
+    Fill in your new dates and times and any frequency they are to be repeated with <i>Repeat</i>.
+    Then you just continue as you did with Add.
+
+    <h3>Use the registration button and review registrations</h3>
+
+    Once logged in, you can add a registration button so dancers can register for the event. You can then see and edit the registrations that people have made.
+    A dancer can also register his dance partner so he does not have to do this himself.
+    <p/>
+    Follow these steps to introduce the registration button in your event.
+    <ul>
+        <li>Log in with your e-mail and password in the menu on the right.</li>
+        <li>Click on the event you wish to change in the calendar</li>
+        <li>Now edit the pencil icon event as follows</li>
+        <li>Check the box "Use registration button"</li>
+        <li>If you wish to limit the number of permitted dancers, fill in "Maximum number of registered". Then it is not possible to book if it is fully booked</li>
+        <li>Click the refresh button</li>
+    </ul>
+    <p/>
+    To review the registrations that have been made, proceed as follows:
+    <ul>
+        <li>Click on the event in the calendar (not the registration button).</li>
+        <li>Click on the person icon (at the bottom it is the second icon from the right)</li>
+        <li>Here you now have the list of registrations that have been made. </li>
+        <li>You can edit and remove dancers from this list using the edit and remove buttons.</li>
+    </ul>
+
+
 
     <h3>Proposals:</h3>
     If you have suggestions for changes or further development of the calendar, send them by email to per.eskilson@gmail.com or to anita.e.dobi@gmail.com.</div>

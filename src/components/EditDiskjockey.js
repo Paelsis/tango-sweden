@@ -4,15 +4,14 @@ import { useNavigate } from 'react-router-dom';
 import FormTemplate from './FormTemplate';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
-import serverPost from '../services/serverPost'
+import {serverPost} from '../services/serverPost'
 import {serverFetchData} from '../services/serverFetch'
 import { getAuth, onAuthStateChanged} from 'firebase/auth';
 import {REGIONS} from '../services/const'
 import AddPhotoSingle from '../camera/AddPhotoSingle'
 import withStatusLine from './withStatusLine'
 import {STATUSLINE_STYLE} from '../services/const'
-import { emptyEditorState, generateEditorStateFromValue, enhanceValueWithDraftVariables } from './DraftEditor'
-
+import { enhanceValueWithDraftVariables } from './DraftEditor'
 const MAX_DESC_LENGTH = 40000
 
 const apiBaseUrl = process.env.REACT_APP_API_BASE_URL
@@ -125,7 +124,7 @@ const fields = [
 ]
 
 const Func = props => {
-    const [userSettings, ] = useSharedState()
+    const [sharedState, ] = useSharedState()
     const [, forceUpdate] = useReducer(x => x + 1, 0)
     const [email, setEmail] = useState()
     const [value, setValue] = useState()
@@ -160,7 +159,7 @@ const Func = props => {
                 // Get DJ for the email of the logged in user
                 setEmail(user.email);
                 const irl1 = '/getDj?email=' + user.email
-                serverFetchData(irl1, '', '', handleReplyDj)
+                serverFetchData(irl1, handleReplyDj)
             } 
         })
     }, [])
@@ -168,7 +167,7 @@ const Func = props => {
     const deleteRow = index => setList(list.filter((it, idx)=>idx !== index))  
 
     const handleCancel = () => {
-        navigate('/calendar/' + userSettings.region)
+        navigate('/calendar/' + sharedState.region)
     }
 
     const handleReset = () => {
@@ -194,7 +193,7 @@ const Func = props => {
             if (value.description?value.description.length > MAX_DESC_LENGTH:false) {
                 alert('WARNING: Application doew not does not allow to save text longer than ' + MAX_DESC_LENGTH + ' characthers')
             } else {
-                serverPost('/replaceRow', '', '', data, handleSaveReply)
+                serverPost('/replaceRow', data, handleSaveReply)
             }    
         } else {
             alert('No valid email when saving')
@@ -232,7 +231,7 @@ const Func = props => {
             const record = {...value, active, email, urlImage, html:undefined, draft_description:undefined, creaTimestamp:undefined, updTimestamp:undefined}
             const data = {tableName:'tbl_dj', record, fetchRows:true}
             setValue({...value, urlImage: urlImage})
-            serverPost('/replaceRow', '', '', data, result=>handleSaveImage(urlImage, result))
+            serverPost('/replaceRow', data, result=>handleSaveImage(urlImage, result))
         } else {
             alert("ERROR: Image not loaded")
         }

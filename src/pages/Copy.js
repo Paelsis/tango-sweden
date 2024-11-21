@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import { useSharedState } from '../store';
-import {useLocation} from 'react-router-dom'
+import { useLocation, useParams } from 'react-router-dom'
 import { useNavigate } from "react-router-dom";
 import AddEvent from '../components/AddEvent'
 import { EditorState, ContentState, convertFromHTML } from 'draft-js'
@@ -26,20 +26,18 @@ const styles={
 const development = process.env.NODE_ENV === 'development'
 
  
-export default props => {
-    const navigate = useNavigate() 
+export default () => {
     const location = useLocation();
+    const event = location.state
    
-    const initEvent = () => {
-        const event = location.state?location.state:undefined
+    const adjustEvent = () => {
         if (event) {
-            const changeAll = event.changeAll
             return {...event,
-                    startTime:event.startDateTime.substring(11, 16),
-                    endTime:event.endDateTime.substring(11,16),
+                    startTime:event.startDateTime?event.startDateTime.substring(11, 16):undefined,
+                    endTime:event.endDateTime?event.endDateTime.substring(11,16):undefined,
                     // startDateTime:changeAll?undefined:event.startDateTime.substring(0,16),
                     // endDateTime:changeAll?undefined:event.endDateTime.substring(0,16),
-                    draft_description: generateEditorStateFromValue(event.description),
+                    draft_description: event.description?generateEditorStateFromValue(event.description):emptyEditorState(),
             }
         } else {
             // Draft editor init without value
@@ -47,14 +45,14 @@ export default props => {
             return {draft_description}
         }
     }
-    let init = initEvent()
+    let adjustedEvent = adjustEvent()
+
     return (
         <div style={styles.container}>
             <div className='classes m-2 is-centered'>
                 <div className='column is-three-quarters'>
                     <AddEvent 
-                        //{...props}
-                        init={init} 
+                        init={adjustedEvent} 
                     />
                 </div>
             </div>    

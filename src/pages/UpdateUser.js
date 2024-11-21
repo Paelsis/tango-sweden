@@ -1,16 +1,16 @@
 
 import React, {useState, useEffect, useRef} from 'react';
 import {useParams} from 'react-router-dom';
-import serverPost from '../services/serverPost'
+import {serverPost} from '../services/serverPost'
 import {search} from '../services/search'
 import SearchTemplate from '../components/SearchTemplate'
 import FormTemplate from '../components/FormTemplate'
-import EditTable from '../components/EditTable'
+import EditTable from '../components/EditTableUser'
 
 
 const styles = {
     container: {
-        marginTop:80,
+        marginTop:40,
         display:'flex',
         flexDirection:'column',
         width:'100vw',
@@ -100,9 +100,10 @@ const tableName = 'tbl_user'
 const searchView = 'tbl_user'
 
 const searchFields = [
-    {label:'Name:', name:'name'},
+    {label:'Name:', name:'name', autoFocus:'true'},
     {label:'City', name:'city'},
     {label:'Region', name:'region'},
+    {label:'Country', name:'country'},
     {label:'E-mail', name:'email'},
     {label:'Auth level:', name:'authLevel', hiddenInSearch:true},
     {label:'Color:', name:'color', hiddenInSearch:true},
@@ -110,42 +111,50 @@ const searchFields = [
     {label:'Background-color dark:', name:'backgroundColorDark', hiddenInSearch:true},
 ]     	
 
-
+// UpdateUser
 export default () => {
     const params = useParams()
     //const navigate = useNavigate()
-    const [list, setList] = useState([])
-    const [value, setValue] = useState({})
+    const [list, setList] = useState()
+    const [value, setValue] = useState()
 
-    const inputRef = useRef(null)
-   
+    const handleSearchReply = list => {
+        if (list.length === 0) {
+            alert('Not found')    
+        } if (list.length === 1) {
+            const rec = list[0]
+            updateValueAfterSearch(rec)
+        } else {
+            setList(list)
+        }    
+    }
+
     useEffect(()=>{
-        inputRef.current.focus()
-        if (params.id > 0) {
-            search(searchView, {id:params.id}, handleSearchReply) 
-        }
-    }, []) 
-
+        search(searchView, {id:params.id}, handleSearchReply) 
+    }, [params.id]) 
 
     const handleClickLine = rec => {
         updateValueAfterSearch(rec)
     } 
 
     const handleSaveCallback = reply => {
-        const {status, record} = reply
-
-        if (status === 'OK') {
-            const disabledSaveSr = (value.kontaktadAvhamtningAv) ?1:0
-            setValue({...value, disabledSaveSr})
+        if (reply.status === 'OK') {
+            const newList = list.map(it => {
+                if (it.email === value.email) {
+                    return value
+                } else {
+                    return it
+                }
+            })
+            setList(newList)
         } else {
-            const message = 'FELMEDDELANDE: Could not be updated'
+            const message = 'FELMEDDELANDE: Could not be updated ' + reply.message + '\n' + JSON.stringify(value) 
             alert(message)
         }    
     }        
 
     const handleSave = () => {
-            const record = {...value, id:undefined}
-            serverPost('/updateRow', '', '', {tableName, record, id:value.id}, handleSaveCallback)
+            serverPost('/updateRow', {tableName, record:value, id:value.id?value.id:undefined}, handleSaveCallback)
     }
 
     const removeEmptyVal = val => {   
@@ -161,27 +170,15 @@ export default () => {
     const updateValueAfterSearch = rec =>
     {
         setValue(rec)
-        setList([])
     }
 
-    const handleSearchReply = list => {
-        if (list.length === 0) {
-            alert('Not found')    
-        } if (list.length === 1) {
-            const rec = list[0]
-            updateValueAfterSearch(rec)
-        } else {
-            setList(list)
-        }    
-    }
 
     const handleSearch = searchKeys => {
         search(searchView, searchKeys, handleSearchReply) 
     }
 
     const handleReset = () => {
-        setValue({})
-        setList([])
+        setValue()
     }
 
     const buttons=[
@@ -190,7 +187,6 @@ export default () => {
             type:'button',
             label:'Spara',
             required:true,
-            disabled:value.disabledSaveSr?value.disabledSaveSr==1?true:undefined:undefined,
             handleClick:()=>handleSave()
         },    
         {
@@ -203,11 +199,10 @@ export default () => {
 
     // const strValue = JSON.stringify(value)
 
-    const searchFieldsRef = searchFields.map((it, index) => index===0?{...it, inputRef}:it)
     // {JSON.stringify(value)}
     return(
        <>    
-        {value.email?
+        {value?
             <div style={styles.container}>
                 <div style={styles.item}>
                 <FormTemplate
@@ -223,10 +218,11 @@ export default () => {
             </div>
         :
             <div style={styles.container}>
+                <h1 className='title is-4' style={styles.item}>Search for user</h1>
                 <div style={styles.item}>
                     <SearchTemplate 
                         searchView={searchView}
-                        searchFields={searchFieldsRef}
+                        searchFields={searchFields}
                         setValue={setValue} 
                         setList={setList} 
                         handleSearch={handleSearch}
@@ -243,7 +239,7 @@ export default () => {
                     />
                 </div>
             </div>
-    }    
+        }    
     </>
     )
 } 

@@ -8,6 +8,8 @@ import MyProfile from "./pages/MyProfile";
 import Usage from "./pages/Usage";
 import Privacy from "./pages/Privacy";
 import Service from "./pages/Service";
+import Registration from "./pages/Registration";
+import CancelRegistration from './pages/CancelRegistration'
 import Shoe from "./pages/Shoe";
 import Add from "./pages/Add";
 import EditDj from "./pages/EditDj";
@@ -15,9 +17,9 @@ import Djs from "./pages/Djs";
 import Update from "./pages/Update";
 import Copy from "./pages/Copy";
 import Camera from "./pages/Camera";
-import SetupUser from './pages/SetupUser'
-import EditShoe from './components/EditShoe'
+import UpdateUser from './pages/UpdateUser'
 import AppBar from './components/AppBar'
+import ListRegistration  from "./pages/ListRegistration";
 import FirebaseAuth from './login/FirebaseAuth'
 import FirebaseSignin from './login/FirebaseSignin';
 import FirebaseSignup from './login/FirebaseSignup';
@@ -71,14 +73,16 @@ export default function App() {
                 <Route path="privacy" element={<Privacy/>} />
                 <Route path="service" element={<Service />} />
                 <Route path="add" element={<Add />} />
-                <Route path="editShoe" element={<EditShoe />} />
                 <Route path="djs" element={<Djs />} />
                 <Route path="update" element={<Update />} />
                 <Route path="copy" element={<Copy />} />
                 <Route path="shoe" element={<Shoe />} />
                 <Route path="editDj" element={<EditDj />} /> 
                 <Route path="camera" element={<Camera />} />
-                <Route path="setupUser" element={<SetupUser  />} />
+                <Route path="registration" element={<Registration />} />
+                <Route path="cancelRegistration/:token" element={<CancelRegistration />} />
+                <Route path="updateUser" element={<UpdateUser  />} />
+                <Route path="listRegistration" element={<ListRegistration />} />
                 <Route path="signin" element={<FirebaseSignin />} />
                 <Route path="signup" element={<FirebaseSignup />} />
                 <Route path="resetPassword" element={<FirebaseResetPassword />} />

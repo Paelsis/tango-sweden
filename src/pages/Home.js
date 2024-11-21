@@ -1,18 +1,15 @@
 import React, {useState, useEffect} from 'react';
-import { useSharedState} from '../store';
 import Image from '../images/tangosweden.jpg';
 import { useNavigate } from 'react-router-dom';
 import Button from '@mui/material/Button';
 import {serverFetchData} from '../services/serverFetch'
 import {COLORS} from '../services/const'
-import Tooltip from '@mui/material/Tooltip';
-import { createTheme } from '@mui/material/styles';
 
   
 
 const FONT_SIZE = {
     BIG:18,
-    SMALL:14
+    SMALL:12
 }
 
 const colors = {
@@ -158,117 +155,85 @@ const styles = {
 }
 
 const Home = () => {
-    const [userSettings] = useSharedState()
-    const [list, setList] = useState([])
     const [cities, setCities] = useState([])
     const [regions, setRegions] = useState([])
+    const [cityRegionCountry, setCityRegionCountry] = useState([])
     const navigate = useNavigate()
-    const handleNavigate = lnk => {
-        navigate(lnk)
-    }
-    const compareRegion = (a,b) => {
-        if (a.region.toLowerCase() === 'norge') {
-            return 1
-        } else if (b.region.toLowerCase() === 'norge') {
-                return -1
-        } else {    
-            a.region.localeCompare(b.region)
-        }    
-    }
 
     useEffect(()=>{
         const irl = '/getCalendarNames'
-        serverFetchData(irl, '', '', reply=>{
-            setCities(reply.cities.sort(compareRegion)); 
-            setRegions(reply.regions.sort(compareRegion))})
-        }, [])
+        serverFetchData(irl,  reply=>{
+            setCityRegionCountry(reply.cityRegionCountry); 
+            setCities(reply.cities); 
+            setRegions(reply.regions)
+        })
+    }, [])
+
     const regionStyle = (region, fontSize) => {
         let style = styles.region[region.toLowerCase()]?styles.region[region.toLowerCase()]
         :region.toLowerCase()==='skåne'?styles.region.skane
-        :styles.region.default
+        :styles.region.sverige
         return {...style, fontSize}
+    }
+
+    const cityToRegion = city => {
+        const foundRec = cityRegionCountry.find(it=>it.city===city)        
+        if (foundRec) {
+            return foundRec.region
+        } else {
+            return 'sverige'
+        }
+    }
+
+    const handleClickRegion = region => {
+        switch (region.toLowerCase()) { 
+        case 'danmark': 
+            navigate('/denmark')
+            break;
+        default:
+            navigate('/calendar/' + region)
+            break;
+        }
+    }
+
+    const handleClickCity = city => {
+        switch (city.toLowerCase()) { 
+        case 'göteborg': 
+            navigate('/got')
+            break;
+        case 'halmstad': 
+            navigate('/halmstad')
+            break;
+        default:
+            navigate('/calendar/' + city)
+            break;
+        }
     }
 
     return(
         <div style={styles.container}>
-            <img style={styles.img} src={Image} onClick={()=>handleNavigate('/calendar/skåne')}/>
+            <img style={styles.img} src={Image} onClick={()=>handleClickRegion('skåne')}/>
             <div style={styles.buttonContainerRegion}>
                 <p/>
-                {['skåne', 'mitt', 'sydväst', 'västra götaland', 'väst', 'norr'].map(reg=>regions.filter(it=>it.region.toLowerCase() === reg).map(it=>
+                {regions.map((region, idx)=>
                     <Button 
-                        key={it.region}
+                        key={idx}
                         variant="outlined" 
                         type="button" 
-                        style={regionStyle(it.region, FONT_SIZE.BIG)}  
-                        onClick={()=>handleNavigate('/calendar/' + it.region)}
+                        style={regionStyle(region, FONT_SIZE.BIG)}  
+                        onClick={()=>handleClickRegion(region.toLowerCase())}
                     >
-                        {it.region}                    
-                    </Button>    
-                ))}    
-                <Button variant="outlined" type="button" style={regionStyle('danmark', FONT_SIZE.BIG)}  onClick={()=>handleNavigate('/denmark')}>
-                    Danmark                    
-                </Button>                    
-                {regions.filter(it=>it.region.toLowerCase() === 'norge').map(it=>
-                    <Button 
-                        key={it.region}
-                        variant="outlined" 
-                        type="button" 
-                        style={regionStyle(it.region, FONT_SIZE.BIG)}  
-                        onClick={()=>handleNavigate('/calendar/' + it.region)}
-                    >
-                        {it.region}                    
-                    </Button>    
-                )}    
-            {regions.filter(it=>it.region.toLowerCase() === 'finland').map(it=>
-                    <Button 
-                        key={it.region}
-                        variant="outlined" 
-                        type="button" 
-                        style={regionStyle(it.region, FONT_SIZE.BIG)}  
-                        onClick={()=>handleNavigate('/calendar/' + it.region)}
-                    >
-                        {it.region}                    
+                        {region}                    
                     </Button>    
                 )}    
             </div>
             <div style={styles.buttonContainerCity}>
                 <div style={{height:15}} />
                 <h4>Städer</h4>
-                <Button key='Stockholm' variant="outlined" type="button" style={regionStyle('sverige', FONT_SIZE.SMALL)}  onClick={()=>handleNavigate('/calendar/stockholm')}>
-                    Stockholm                    
-                </Button>    
-                <Button 
-                    key='Malmoe'
-                    variant="outlined" 
-                    type="button" 
-                    style={styles.region.skane}  
-                    onClick={()=>handleNavigate('/calendar/malmö')}
-                >
-                    Malmö/Lund                    
-                </Button>    
-
-                {['mitt', 'skåne', 'västra götaland', 'väst', 'sydost', 'norr'].map(reg=>
-                    cities.filter(it=>reg===it.region.toLowerCase() && it.city.toLowerCase() !== 'malmö').map(it=>
-                        <Button key = {it.city} variant="outlined" type="button" style={regionStyle(it.region.toLowerCase(), FONT_SIZE.SMALL)}  onClick={()=>handleNavigate('/calendar/' + it.city)}>
-                            {it.city}                    
-                        </Button>    
-                    )
-                )}    
-
-                <Button key = 'Halmstad' variant="outlined" type="button" style={regionStyle('sverige', FONT_SIZE.SMALL)}  onClick={()=>handleNavigate('/halmstad')}>
-                    Halmstad                    
-                </Button>    
-
-                <Button key='Gothenburg' variant="outlined" type="button" style={regionStyle('sverige', FONT_SIZE.SMALL)}  onClick={()=>handleNavigate('/got')}>
-                    Göteborg                    
-                </Button>    
-
-                {['norge', 'finland'].map(reg=>
-                    cities.filter(it=>reg===it.region.toLowerCase() && it.city.toLowerCase() !== 'malmö').map(it=>
-                        <Button key = {it.city} variant="outlined" type="button" style={regionStyle(it.region.toLowerCase(), FONT_SIZE.SMALL)}  onClick={()=>handleNavigate('/calendar/' + it.city)}>
-                            {it.city}                    
-                        </Button>    
-                    )
+                {cities.map((city, index)=>
+                    <Button key = {index} variant="outlined" type="button" style={regionStyle(cityToRegion(city), FONT_SIZE.SMALL)}  onClick={()=>handleClickCity(city)}>
+                        {city}                    
+                    </Button>    
                 )}    
             </div>    
         </div>

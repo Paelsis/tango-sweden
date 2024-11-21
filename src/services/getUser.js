@@ -5,6 +5,6 @@ import {serverFetchDataResult} from './serverFetchDataResult'
 
 export function getUser (irl, callback) {
   moment.locale(CULTURE(language))
-  serverFetchDataResult(irl, '', '', user => callback(user))
+  serverFetchDataResult(irl,  user => callback(user))
 }
 

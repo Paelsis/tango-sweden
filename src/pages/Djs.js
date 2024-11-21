@@ -128,7 +128,7 @@ export default () => {
 
     useEffect(()=>{
         const irl = '/getDjs'
-        serverFetchData(irl, '', '', handleReply)
+        serverFetchData(irl,  handleReply)
     }, [])
 
     // const cities = uniqueList(djs.map(it => it['city']))

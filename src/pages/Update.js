@@ -5,12 +5,9 @@ import Button from '@mui/material/Button';
 import {useLocation} from 'react-router-dom'
 import moment from 'moment-with-locales-es6'
 import { useNavigate } from "react-router-dom";
-import serverPost from '../services/serverPost'
-import AddEvent from '../components/AddEvent'
+import {serverPost} from '../services/serverPost'
 import { BUTTON_STYLE, MAX_LENGTH_DESC } from '../services/const';
-import { EditorState, ContentState, convertFromHTML } from 'draft-js'
 import Square from '../components/Square'
-import {enhanceValueWithDraftVariables} from '../components//DraftEditor'
 // import { generateEditorStateFromValue, emptyEditorState } from '../components/DraftEditor'
 
 const styles={
@@ -37,9 +34,9 @@ const development = process.env.NODE_ENV === 'development'
 const fields = [
     {
         type:'checkbox',
-        label:'Change all occurances (default change only single)',
+        label:'Change all events in the same group',
         name:'changeAll',
-        tooltip:'Change all repeated  events that was created at the same time (with this eventId)'
+        tooltip:'Change the whole list of events that you established with "Add" + "Send to calender" button'
     },
     {
         type:'checkbox',
@@ -144,45 +141,63 @@ const fields = [
         maxLength:20,
         hiddenIf:'facebookEventLink',
     },
+    {
+        type:'checkbox',
+        label:'Use registration button',
+        name:'useRegistrationButton',
+        tooltip:'If you want a registration button and save registrations for the event',
+        notHiddenIf:'useRegistrationButton',
+    },    
+    {
+        type:'email',
+        label:'E-mail of respoinsible organizer',
+        name:'email',
+        tooltip:'E-mail that will recieve the confirmation mails from the registrations',
+        notHiddenIf:'useRegistrationButton',
+    },    
+    {
+        type:'number',
+        label:'Maximum number of registrants',
+        style:{width:40},
+        name:'maxLimit',
+        min:1, 
+        max:500,
+        notHiddenIf:'useRegistrationButton',
+        tooltip: 'Maximum number of registrants for this event. Registration not possible when max is reached.'
+    },
 ]
 
 
   
 export default () => {
-    const [userSettings, ] = useSharedState()
-    const [value, setValue] = useState({})
+    const [sharedState, ] = useSharedState()
+    const [value, setValue] = useState()
     const [buttonStyle, setButtonStyle] = useState()
     const navigate = useNavigate() 
     const location = useLocation();
+    const event = location.state
 
-    const initEvent = () => {
-        const event = location.state?location.state:{}
-        const changeAll = event.changeAll
-        const eventWithDraft = enhanceValueWithDraftVariables(fields, event)
-        return( 
-            {
-                ...eventWithDraft,
-                startDateTimeOriginal:changeAll?undefined:event.startDateTime.substring(0,16),
-                startDateTime:changeAll?undefined:event.startDateTime.substring(0,16),
-                endDateTime:changeAll?undefined:event.endDateTime.substring(0,16),
-            }
-        )    
+    console.log('Update: value = ', value)
+    const adjustEvent = ev => {
+        if (ev) {
+            const extendedEvent = {
+                ...ev,
+                id:undefined,
+            }    
+            return extendedEvent
+        } 
     }
 
     useEffect(()=>{
-        if (location.state) {
-            setValue(initEvent())
-        } else {
-            navigate('/home')
-        }    
-    }, [location.state])
+        setValue(adjustEvent(event))
+    }, [])
 
     const handleReply = reply => {
         setButtonStyle(BUTTON_STYLE.SAVED)
         if (reply.status==='OK') {
             setButtonStyle(BUTTON_STYLE.SAVED)
             setTimeout(() => {
-                navigate('/calendar/' + userSettings.region)    
+                navigate('/calendar/' + sharedState.region)    
         }, 500);
     
         } else {
@@ -203,21 +218,29 @@ export default () => {
             return
         }
 
-        const backgroundImage = userSettings.backgroundImage?userSettings.backgroundImage:""
-        const settings = value.updateWithSettings?{...userSettings, backgroundImage}:{}
+        const backgroundImage = sharedState.backgroundImage?sharedState.backgroundImage:""
+        const settings = value.updateWithSettings?{
+                ...sharedState, 
+                authLevel:sharedState.authLevelOverride?sharedState.authLevelOverride:sharedState.authLevel,
+                backgroundImage
+            }
+        :
+            {}
+
+
         const startDateTime = value.changeAll?undefined:value.startDateTime;
         const endDateTime = value.changeAll?undefined:value.endDateTime;
-        
+        const startTime = value.changeAll?value.startTime:undefined 
+        const endTime = value.changeAll?value.endTime:undefined
+        const data = {...value, ...settings, startDateTime, endDateTime, startTime, endTime, email:undefined, id:undefined} 
 
-        const data = {...value, ...settings, startDateTime, endDateTime, startTime:undefined, endTime:undefined} 
-
-        // alert('handleUpdate:' + JSON.stringify(data))
+        console.log('Update Just before update with /updateEvent: data =', data)
 
         const irl = '/updateEvent'
-        serverPost(irl, '', '', data, handleReply)
+        serverPost(irl,  data, handleReply)
     }    
 
-    const handleReset = () => {setValue(initEvent())}
+    const handleReset = () => {setValue(adjustEvent(event))}
 
     const handleEmpty = () => {setValue({})}
 
@@ -244,17 +267,27 @@ export default () => {
             
     return (
         <div style={styles.container}>
-            <div className='columns m-2 is-centered is-half'>
-                <div className="column is-three-quarters">
-                <FormTemplate 
-                    fields={fields} 
-                    value={value}
-                    setValue={setValue}
-                    buttons={buttons}
-                />
+            {value?    
+                <div className='columns m-2 is-centered is-half'>
+                    <div className="column is-5">
+                        <FormTemplate 
+                            fields={fields} 
+                            value={value}
+                            setValue={setValue}
+                            buttons={buttons}
+                        />
+                    </div>
+                    <div className='column is-1' >
+                    </div>    
+                    <div className='column is-2'>
+                        <Square settings={value.updateWithSettings?sharedState:value} />
+                        <p/><p/>
+                        <small>email:{event.email}</small>
+                    </div>
                 </div>
-                <Square settings={value.updateWithSettings?userSettings:value} />
-            </div>
+            :
+                null
+            }
         </div>
    )
 }

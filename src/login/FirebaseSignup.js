@@ -44,12 +44,12 @@ const styles = {
 
 const FirebaseSignUp = ({history}) =>  {
   const navigate = useNavigate()
-  const [userSettings, setUserSettings] = useSharedState()
+  const [sharedState, setSharedState] = useSharedState()
   
   
   const handleSignup = useCallback(async e => {
     e.preventDefault()
-    setUserSettings({...setUserSettings, name:undefined, region:undefined, city:undefined})
+    setSharedState({...setSharedState, name:undefined, region:undefined, city:undefined})
     const {email, password} = e.target.elements
     try {
       const auth = getAuth()   

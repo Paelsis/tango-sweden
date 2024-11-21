@@ -2,6 +2,7 @@ import casaBlanca from '../images/VitaHuset.jpg';
 
 export const MAX_LENGTH_DESC = 40000
 export const DEFAULT_AUTH_LEVEL = 1
+export const MAX_LIMIT_UNSET = 1000
 
 export const AVA_STATUS = {
     AV:'AV', // Avaiable space
@@ -110,9 +111,19 @@ export const REGIONS =
   'Mitt',
   'Norr',
 ] 
+
+export const COUNTRIES = 
+[
+  'Sverige',
+  'Danmark',
+  'Norge',
+  'Finland',
+] 
+
+
 export const BUTTON_STYLE = {
-  DEFAULT:{color:'grey', borderColor:'grey'},
-  CLICKED:{color:'orange', borderColor:'orange'},
+  DEFAULT:{color:'black', borderColor:'black'},
+  CLICKED:{color:'grey', borderColor:'grey'},
   SAVED:{color:'green', borderColor:'green'},
   ERROR:{color:'red', borderColor:'red'},
 }

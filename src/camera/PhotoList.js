@@ -4,7 +4,7 @@ import DeleteIcon from '@mui/icons-material/DeleteOutlined'
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever'
 import SaveIcon from '@mui/icons-material/Save';
 import Rotate90DegIcon from '@mui/icons-material/RotateRight'
-import serverPost from '../services/serverPost'
+import {serverPost} from '../services/serverPost'
 import Button, { buttonClasses } from '@mui/material/Button';
 import withStatusLine from '../components/withStatusLine'
 import {STATUSLINE_STYLE} from '../services/const'
@@ -41,7 +41,7 @@ const Func = props => {
                 // Fetch the list of images from subdir in sorted order with latest mdate put first
                 const irl='/listData?subdir=' + (subdir?subdir:'')
                 /* setList([]) */
-                serverFetchData(irl, '', '', handleReplyFetchData)
+                serverFetchData(irl,  handleReplyFetchData)
         },[subdir])
 
         const handleReply = reply =>{
@@ -67,7 +67,7 @@ const Func = props => {
                 })        
                 const url = apiBaseUrl + '/removeOrRotateImages'
                 const files = newList
-                serverPost(url, '', '', {subdir, files}, handleReply)
+                serverPost(url,  {subdir, files}, handleReply)
 
         }
 
@@ -82,7 +82,7 @@ const Func = props => {
                 setButtonColor(BUTTON_COLOR.PROCESSING)
                 const url = apiBaseUrl + '/removeOrRotateImages'
                 const files = newList
-                serverPost(url, '', '', {subdir, files}, handleReply)
+                serverPost(url,  {subdir, files}, handleReply)
         }
 
         const path = apiBaseUrl + (subdir?('/'+subdir+'/'):'/') 

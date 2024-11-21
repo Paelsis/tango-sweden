@@ -1,38 +1,88 @@
 import axios from 'axios'
 
-const apiBaseUrl = process.env.REACT_APP_API_BASE_URL
+const username = process.env.REACT_APP_SLIM_USERNAME
+const password = process.env.REACT_APP_SLIM_PASSWORD
+const auth = {username, password}
 
-const serverPost = (irl, username, password, data, handleReply) => {
+const serverPostApi = (apiBaseUrl, irl,  record, handleReply) => {
     const url = irl.slice(0,4).toLowerCase().localeCompare('http')===0?irl:apiBaseUrl + irl
-    console.log('--- serverPost --- url:', url, ' data:', data);
     const axiosConfig = {
-        // auth: {username, password}
+        auth,
     }
-    axios.post(url, data, axiosConfig)
-    .then(response => {
-        const status = response.status?response.status:'No status'
-        if (response.status === 200) {
-            if (response.data.status) {
-                if (response.data.status ==='OK') {
-                    // statusMessage(STATUS_OK, 'OK: database modified successfully (response.data.status=' + response.data.status + 'JSON:'+ JSON.stringify(response.data) + ')');
-                    console.log('[serverPost] status=OK, response', response)
-                } else {
-                    console.log('[serverPost] status=ERROR, response', response)
-                }    
+    axios.post(url, record, axiosConfig)
+    .then(reply => {
+        const data = reply.data?reply.data:reply
+        if (data) {
+            if (data.status ==='OK') {
+                // Controlled OK reply
+                const message = '[serverPost] status:OK data:' + JSON.stringify(data)
+                // console.log(message)
+            } else if (data.status ==='WARNING'){
+                // Controlled ERROR reply
+                const message = '[serverPost] status:' + data.message?data.message:'No message ???'
+                console.log(message)
+            } else if (data.status ==='ERROR'){
+                // Controlled ERROR reply
+                const message = '[serverPost] status:' + data.message?data.message:'No message ???'
+                console.log(message)
             } else {
-                console.log('[severPost] status=NO STATUS, response', response)
-            }
-        } else {    
-            console.log('[serverPost] response status not 200m response.status:', response.status);
-        }    
-        handleReply(response.data);
+                // Uncontrolled ERROR reply
+                const message = '[serverPost] Uncontrolled error with no status. data:' + JSON.stringify(data) 
+                console.log(message)
+                alert(message)
+            }   
+            handleReply(data);
+        } else {
+            const message = '[serverPost] ERROR: No data in reply from axios.post'
+            console.log(message)
+            alert(message)
+        }
     })
     .catch((e) => {
-        console.log('ERROR: Failed in function serverPost for url ', url);
-        console.log('Error message:', e); // Error
-        handleReply({code:501, status:'ERROR', message:'ERROR: No response when calling irl:' + irl + ' url:' + url});
+        const message = '[serverPost] ERROR: axios.post falied for url:' + url + ' message:' + e?.message
+        console.log(message);
+        alert(message)
     });
 }
 
-export default serverPost;
+export const addRowApi = (apiBaseUrl, tableName, row, handleReply) =>
+{
+    const irl = '/replaceRow'
+    const value = {
+        tableName,
+        table:tableName,
+        data:row,
+    }  
+
+    serverPostApi(apiBaseUrl, irl, value, handleReply)
+}
+
+export const replaceRowApi = (apiBaseUrl, tableName, record, handleReply) =>
+{
+    const irl = '/replaceRow'
+    const value = {
+        tableName,
+        record,
+        fetchRows:true, 
+    }  
+    serverPostApi(apiBaseUrl, irl, value, handleReply)
+}
+
+export const deleteRowApi = (apiBaseUrl, tableName, id, handleReply) =>
+{
+    const url=apiBaseUrl + '/deleteRow'
+    const value = {
+        tableName,
+        table:tableName, 
+        id
+    }  
+    serverPost(url, value, handleReply)
+}
+
+const apiBaseUrl = process.env.REACT_APP_API_BASE_URL
+
+export const serverPost = (irl,  record, handleReply) => serverPostApi(apiBaseUrl, irl, record, handleReply)
+export const replaceRow = (tableName, record, handleReply) => replaceRowApi(apiBaseUrl, tableName, record, handleReply)
+export const deleteRow = (tableName, id, handleReply) => deleteRowApi(apiBaseUrl, tableName, id, handleReply)
+
 

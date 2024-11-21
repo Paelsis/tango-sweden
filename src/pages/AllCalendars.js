@@ -62,7 +62,7 @@ const styles = {
 
 //AllCalendars
 export default () => {
-    const [userSettings] = useSharedState()
+    const [sharedState] = useSharedState()
     const [cities, setCities] = useState([])
     const [regions, setRegions] = useState([])
     const navigate = useNavigate()
@@ -72,7 +72,7 @@ export default () => {
 
     useEffect(()=>{
         const irl = '/getCalendarNames'
-        serverFetchData(irl, '', '', reply=>{setCities(reply.cities); setRegions(reply.regions)})
+        serverFetchData(irl,  reply=>{setCities(reply.cities); setRegions(reply.regions)})
     }, [])
 
 

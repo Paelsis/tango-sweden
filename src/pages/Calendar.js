@@ -20,13 +20,11 @@ import DialogSlide from '../components/DialogSlide'
 import CalendarSmall from './CalendarSmall'
 import { isMobile} from "react-device-detect"
 import ShowTable from "../components/ShowTable"
-import Button from '@mui/material/Button';
-import { transferAnitasCalendar } from '../services/transferAnitasCalendar'
+import IconButton from '@mui/material/IconButton';
+import HistoryIcon from '@mui/icons-material/History'
+// import { transferAnitasCalendar } from '../services/transferAnitasCalendar'
 import { layoutGenerator } from 'react-break';
-import { PropaneSharp } from '@mui/icons-material';
-import { yellow } from '@mui/material/colors';
 import {COLORS} from '../services/const'
-import {replaceSwedishChars} from '../services/functions'
 
 const DeviceDetector = () => (
   <div>I am rendered on: {isMobile ? "Mobile" : "Desktop"}</div>
@@ -110,27 +108,18 @@ export default props => {
   const [open, setOpen] = useState(false)
   const [event, setEvent] = useState({})
   const [agenda, setAgenda] = useState(false) 
+  const [momentStart, setMomentStart] = useState(undefined)
 
   //const OnMobile = layout.is('mobile');
   const OnAtMostPhablet = layout.isAtMost('phablet');
   const OnAtLeastTablet = layout.isAtLeast('tablet');
   //const OnDesktop = layout.is('desktop');
+  const timeMin = momentStart?momentStart:moment().startOf('day')
+  const timeMinStatic = moment().startOf('day')
+  const timeMax = moment().endOf('month').add(24,'months').add(7, 'days')
+  moment.locale('sv');
 
   useEffect(()=>{
-    const timeMin = moment().startOf('day')
-    const timeMax = moment().endOf('month').add(12,'months').add(7, 'days')
-    moment.locale('sv');
-    /*
-    getEvents(
-      calendarId_TS,
-      apiKey_TS,
-      timeMin.format('YYYY-MM-DD') + 'T00:00:00Z', 
-      timeMax.format('YYYY-MM-DD') + 'T23:59:00Z',
-      'SV',
-      '',
-      events => setEvents_TS(events.filter(ev=>ev.description.toUpperCase().indexOf('TANGOKOMPANIET') < 0)),
-    )
-    */
     if (calendarName === 'malmö' || calendarName === 'skåne') {
       const staticStyleId = 'TANGOKOMPANIET'
       getEventsFromGoogleCal(
@@ -157,14 +146,15 @@ export default props => {
       setEventsGoogleCal([])
     }
 
-    getEventsFromTable(
-      '/getEvents?calendarName=' + calendarName,
+    getEventsFromTable('/getEvents?calendarName=' + calendarName,
       events => setEvents_TAB(events),
       timeMin.format('YYYY-MM-DD') + 'T00:00:00Z', 
       timeMax.format('YYYY-MM-DD') + 'T23:59:00Z',
       'SV'
     )
-  }, [calendarName])
+  }, [calendarName, momentStart])
+
+  const toggleHistory = () => setMomentStart(momentStart?undefined:moment().startOf('month').add(-2,'months').add(-7, 'days'))
 
   const dayPropGetter = useCallback(
     (date) => ({
@@ -181,7 +171,11 @@ export default props => {
     []
   )
 
-  const handleEvent = ev=>{setEvent(ev); setOpen(true)}
+  const handleEvent = ev =>{
+    setEvent(ev); 
+    setOpen(true)
+  }
+  
   let previousDateRange = ''
 
   const events = [...eventsGoogleCal, ...events_TAB].sort((a,b)=>a.start.localeCompare(b.start)).map(it => {
@@ -201,6 +195,8 @@ export default props => {
       {
         background:COLORS.LIGHT_YELLOW
       }
+
+
   return (
     <>
     {events?events.length?
@@ -226,7 +222,7 @@ export default props => {
                 />
               :
                 <CalendarSmall 
-                        events={events} 
+                        events={events?events:[]} 
                         handleEvent={handleEvent} 
                 />
               }
@@ -251,6 +247,9 @@ export default props => {
                 style={{...style, height:'100vh'}}
               />
               </div>
+              <IconButton onClick={toggleHistory}>
+                <HistoryIcon />
+              </IconButton> 
           </OnAtLeastTablet>  
 
           <DialogSlide

@@ -1,4 +1,5 @@
 import { generateEditorStateFromValue, emptyEditorState } from '../components/DraftEditor'
+import { makeStyles } from '@mui/styles';
 
 export const labelSwedish = name => {
     switch (name.toLowerCase()) {
@@ -29,24 +30,40 @@ export const replaceChar = (origString, replaceChar, index) => {
 
 export const isEmail = value => {
     var validRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-    return value.toLowerCase().match(validRegex)?true:false 
+    return value?.toLowerCase().match(validRegex)?true:false 
 }    
 
-export const styleSquare = userSettings=>{
-    const color = userSettings.color
-    const background = 'linear-gradient(to bottom right, ' + userSettings.backgroundColorLight + ' ,' + userSettings.backgroundColorDark + ')'
-    const borderWidth = userSettings.borderWidth
-    const borderColor = userSettings.borderColor
-    const backgroundColor = userSettings.backgroundColorLight
-    const backgroundImage = `url(${userSettings.backgroundImage})`
+export const styleSquare = sharedState=>{
+    const color = sharedState.color
+    const background = 'linear-gradient(to bottom right, ' + sharedState.backgroundColorLight + ' ,' + sharedState.backgroundColorDark + ')'
+    const borderWidth = sharedState.borderWidth
+    const borderColor = sharedState.borderColor
+    const backgroundColor = sharedState.backgroundColorLight
+    const backgroundImage = `url(${sharedState.backgroundImage})`
     return(
         
-    userSettings.backgroundImage?
+    sharedState.backgroundImage?
         {textAlign:'center', color, backgroundSize:'50% 100%', backgroundImage:backgroundImage, backgroundColor, borderStyle:'solid', borderWidth, borderColor}
     :
         {width:300, height:150, textAlign:'center', color, background, borderStyle:'solid', borderWidth, borderColor}
     )
-}        
+}       
+
+export const defaultDate = () =>{
+    const today = new Date();
+    const date = today.setDate(today.getDate()); 
+    const defaultValue = new Date(date).toISOString().split('T')[0] // yyyy-mm-dd
+    return defaultValue
+} 
+
+export const useStyles = makeStyles({
+    btn: {
+      // you'll probably want the hex color code below
+      background: 'yellow',
+      // ... other css properties
+    },
+});
+
 
 export const uniqueList = list => {return([...new Set(list)])}
 

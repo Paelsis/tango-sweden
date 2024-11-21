@@ -30,10 +30,10 @@ export default props=> {
                             value={value[fld.name]?value[fld.name]:''} 
                             name={fld.name} 
                             style={fld.style?fld.style:fldStyle} 
+                            autoFoucus={fld.autoFocus}
                             //placeholder={fld.label?fld.label:fld.name} 
                             onChange={handleChange} 
                             onKeyPress={handleKeyPress}
-                            ref={fld.inputRef?fld.inputRef:undefined}
                         />
                 </Tooltip>
             </p>

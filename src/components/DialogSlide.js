@@ -1,11 +1,14 @@
-import * as Reactfrom from 'react';
+import * as React from 'react';
 import {useContext, useState, useEffect} from 'react';
+import {serverFetchData} from '../services/serverFetch'
 import IconButton from '@mui/material/IconButton';
 import Button from '@mui/material/Button';
 import EditIcon from '@mui/icons-material/Edit';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
+import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
+import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
 import CloseIcon from '@mui/icons-material/Close';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -15,10 +18,13 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Tooltip from '@mui/material/Tooltip';
 import {AuthContext} from "../login/FirebaseAuth"
 import { getAuth, onAuthStateChanged} from 'firebase/auth';
-import serverPost from '../services/serverPost'
+import {serverPost} from '../services/serverPost'
 import { useNavigate } from "react-router-dom";
 import {ADMINISTRATORS} from '../services/const'
+import {MAX_LIMIT_UNSET} from '../services/const.js'
+import moment from 'moment'
 
+const TABLE_NAME = 'tbl_registration_calendar'
 
 const styles = {
   textarea:{
@@ -46,33 +52,42 @@ const renderDescription = (description, type, handleClose) => {
 }
 
 
-
-export default function DialogSlide(props) {
+// DialogSlide
+export default props => {
   const {open, setOpen, event} = props
   const  [email, setEmail] = useState(undefined)
   const  [copy, setCopy] = useState(undefined)
   const navigate = useNavigate();
   const handleClose = () => setOpen(false)
   const eventId = event.eventId?event.eventId:'Missing'
+  const eventIdExtended = event.eventId + event.startDate
+  const maxLimit = event.maxLimit?event.maxLimit:MAX_LIMIT_UNSET
+  const tableName = TABLE_NAME
+
   const handleReply = reply => {
     reply.status === 'OK'?window.location.reload():alert(JSON.stringify(reply.message?reply.message:reply))
   }  
-  const irl = '/cancelEvent'
 
-  const handleUpdate = (e, ev) => {
+  const handleUpdate = e => {
     e.preventDefault(); 
     // alert('Update:' + JSON.stringify(ev))
+    const ev = event
+    // alert(JSON.stringify(event))
+    
     navigate('/update', {
       state: { 
+        email:ev.email,
         eventId:ev.eventId, 
-        facebookEventLink:ev.facebookEventLink,
-        facebookEventId:ev.facebookEventId,
         title:ev.title, 
         company:ev.company, 
         description:ev.description, 
         location:ev.location, 
         startDateTime:ev.start, 
         endDateTime:ev.end,
+        startTime:ev.start.substring(11,16),
+        endTime:ev.end.substring(11,16),
+        facebookEventLink:ev.facebookEventLink,
+        facebookEventId:ev.facebookEventId,
         color:ev.color,
         backgroundColorLight:ev.backgroundColorLight,
         backgroundColorDark:ev.backgroundColorDark,
@@ -80,26 +95,32 @@ export default function DialogSlide(props) {
         borderWidth:ev.borderWidth,
         borderColor:ev.borderColor,
         backgroundImage:ev.backgroundImage,
-
+        useRegistrationButton:ev.useRegistrationButton,
+        maxLimit:ev.maxLimit,
       }
     })
   }
 
 
 
-  const handleCopy = (e, ev) => {
+  const handleCopy = e => {
     e.preventDefault(); 
+
+    const ev = event
     navigate('/copy', {
       state: {
+        email:ev.email,
         eventId:ev.eventId, 
-        facebookEventLink:ev.facebookEventLink,
-        facebookEventId:ev.facebookEventId,
         title:ev.title, 
         company:ev.company, 
         description:ev.description, 
         location:ev.location, 
         startDateTime:ev.start, 
         endDateTime:ev.end,
+        startTime:ev.start.substring(11,16),
+        endTime:ev.end.substring(11,16),
+        facebookEventLink:ev.facebookEventLink,
+        facebookEventId:ev.facebookEventId,
         hideLocationAndTime:ev.hideLocationAndTime==1?1:0, 
         useRegistrationButton:ev.useRegistrationButton==1?1:0,
         color:ev.color,
@@ -109,6 +130,8 @@ export default function DialogSlide(props) {
         borderColor:ev.borderColor,
         borderWidth:ev.borderWidth,
         backgroundImage:ev.backgroundImage,
+        useRegistrationButton:ev.useRegistrationButton,
+        maxLimit:ev.maxLimit,
       }
     })
   }
@@ -117,21 +140,55 @@ export default function DialogSlide(props) {
     let text = "Press OK to delete this event (eventId=" + eventId + ")";
     // eslint-disable-next-line no-restricted-globals
     //if (confirm(text) === true) {
-    serverPost(irl, '', '', {eventId, email, startDateTime:event.start}, handleReply)
+      const irl = '/cancelEvent'
+      serverPost(irl,  {eventId, email, startDateTime:event.start}, handleReply)
     // } 
   }  
 
   const handleDeleteAll = () => {
-    let reply = "Press OK to delete all occurrances of this event (eventId=" + eventId + ")";
+    let reply = "Press OK to delete all occurrences of this event (eventId=" + eventId + ")";
     // eslint-disable-next-line no-restricted-globals
     if (confirm(reply) === true) {
-      serverPost(irl, '', '', {eventId, email}, handleReply)
+      const irl = '/cancelEvent'
+      serverPost(irl,  {eventId, email}, handleReply)
     } 
   }
 
-  const handleRegistration = (event) => {
-    alert('Registration - eventId:' + event.eventId)
+  const handleReplyFetchRegistrations = reply => {
+    if (reply.status === 'OK') {
+      alert(JSON.stringify(reply.result))
+    } else {
+      alert('Failed to fetch registrations' + JSON.stringify(reply))
+    } 
   }
+  
+  const handleListRegistrations = e => {
+    navigate('/listRegistration', {state:{eventIdExtended, tableName}})
+  }
+
+    const handleRegistration = e => {
+      const ev = event
+      navigate('/registration', 
+        {state:{
+          tableName,
+          eventId:ev.eventId, 
+          eventIdExtended:eventIdExtended, 
+          maxLimit,
+          email:ev.email,
+          title:ev.title, 
+          company:ev.company, 
+          description:ev.description, 
+          location:ev.location, 
+          startDateTime:ev.start, 
+          endDateTime:ev.end,
+          startDate:ev.start.substring(0,10), 
+          endDate:ev.end.substring(0,10),
+          startTime:ev.start.substring(11,16),
+          endTime:ev.end.substring(11,16),
+        }
+      })
+  }
+
 
   const auth = getAuth()
   useEffect(()=>onAuthStateChanged(auth, user => {
@@ -139,6 +196,9 @@ export default function DialogSlide(props) {
         setEmail(user.email)
     }    
   }), [])
+ 
+  const authorized = ADMINISTRATORS.includes(email) || email === event.email
+
   const linkToFacebook=event.facebookEventLink?event.facebookEventLink:event.facebookEventId?"https://www.facebook.com/events/" + event.facebookEventId:undefined
   return (
     <div style={{maxWidth:'100%'}}>
@@ -150,7 +210,7 @@ export default function DialogSlide(props) {
         >
           {event.hideLocationAndTime==1?null:
           <DialogTitle id="alert-dialog-title">
-            {event.location + ' ' + event.timeRangeWithDay}
+            {event.location + ' ' + event.dateRangeTime}
           </DialogTitle>
           }
           <DialogContent>
@@ -161,14 +221,21 @@ export default function DialogSlide(props) {
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            {ADMINISTRATORS.includes(email) || email === event.email ? 
+            {event.useRegistrationButton?
+                <IconButton variant="outlined" onClick={()=>handleRegistration(event)} autoFokus>
+                  <AppRegistrationIcon />
+                </IconButton>
+            :
+              null
+            }       
+            {authorized ? 
                <>
                 <IconButton
                   size="small"
                   edge="start"
                   color="inherit"
                   sx={{ mr: 0 }}
-                  onClick={e=>handleUpdate(e, event)}
+                  onClick={handleUpdate}
                 >
                   <Tooltip title='Update this event'>
                     <EditIcon />
@@ -179,7 +246,7 @@ export default function DialogSlide(props) {
                   edge="start"
                   color="inherit"
                   sx={{ mr: 0 }}
-                  onClick={e=>handleCopy(e, event)}
+                  onClick={handleCopy}
                 >
                   <Tooltip title='Copy this event to new dates and times'>
                   <ContentCopyIcon />
@@ -207,16 +274,20 @@ export default function DialogSlide(props) {
                   <DeleteSweepIcon />
                   </Tooltip>
                 </IconButton>
+                <IconButton
+                  size="small"
+                  edge="start"
+                  color="inherit"
+                  sx={{ mr: 0 }}
+                  onClick={handleListRegistrations}
+                >
+                  <Tooltip title='list all registrations'>
+                  <PeopleAltIcon />
+                  </Tooltip>
+                </IconButton>
                 </>
             :null
             }   
-            {event.useRegistrationButton?
-                <Button variant="outlined" onClick={()=>handleRegistration(event)} autoFokus>
-                  Registration
-                </Button>
-            :
-              null
-            }       
             <IconButton
               size="small"
               edge="start"

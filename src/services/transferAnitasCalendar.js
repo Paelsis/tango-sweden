@@ -1,9 +1,9 @@
-import serverPost from '../services/serverPost'
+import {serverPost} from '../services/serverPost'
 
 export function transferAnitasCalendar(list) {
     const irl = '/addEvents'
     const handleReply = reply => {alert(reply.message)}
-    const sendListToCalendar = list => {serverPost(irl, '', '', list, handleReply)}
+    const sendListToCalendar = list => {serverPost(irl,  list, handleReply)}
     const changeToDbEntry = ev => ({
         eventId:ev.eventId, 
         title:ev.title, 
