@@ -1,8 +1,8 @@
 import React, {useState, useEffect} from 'react';
 import { getAuth, onAuthStateChanged} from 'firebase/auth';
 import { useSharedState } from '../store';
-import { useNavigate } from 'react-router-dom';
-import FormTemplate from './FormTemplate';
+import { useNavigate, useParams } from 'react-router-dom';
+import FormTemplate from '../components/FormTemplate';
 import Button from '@mui/material/Button';
 import moment from 'moment'
 import IconButton from '@mui/material/IconButton';
@@ -14,7 +14,8 @@ import {serverPost} from '../services/serverPost'
 import {isAndroidOperatingSystem} from '../services/isAndroid'
 import Square from '../components/Square'
 import {serverFetchData} from '../services/serverFetch';
-import { MAX_LENGTH_DESC } from '../services/const';
+import { MAX_LENGTH_DESC, CALENDAR } from '../services/const';
+
 
 import { generateEditorStateFromValue, emptyEditorState, enhanceValueWithDraftVariables} from '../components/DraftEditor'
 
@@ -175,6 +176,7 @@ const fields = [
         name:'description',
         hiddenIf:'htmlEditor',
         tooltip:'The text shown in the popup window when you click the event in the calendar',
+        required:true,
         maxlength:65000,
     },
     {
@@ -246,7 +248,6 @@ const fields = [
         label:'Use registration button',
         name:'useRegistrationButton',
         tooltip:'If you want a registration button and save registrations for the event',
-        notHiddenIf:'useRegistrationButton',
     },    
     {
         type:'email',
@@ -265,7 +266,14 @@ const fields = [
         notHiddenIf:'useRegistrationButton',
         tooltip: 'Maximum number of registrants for this event. Registration not possible when max is reached.'
     },
+    {
+        type:'checkbox',
+        label:'Private',
+        name:'private',
+        tooltip: 'Check this box if you want the event to be private, i.e. only email of owner can modify or delete it'
+    },
 ]
+
 const fieldsSettings = [
     {
         type:'text',
@@ -325,7 +333,7 @@ const offset = {
     YEARS:'years'
 } 
 
-const CandidateTable = ({list, deleteRow, clearAll, handleAddToCalendar, buttonStyle}) =>
+const CandidateTable = ({list, deleteRow, clearAll, submitToCalendar, buttonStyle}) =>
     list.length >0?
     <div>
         <h3 style={{margin:10}}>Candidates for this event</h3>
@@ -333,7 +341,7 @@ const CandidateTable = ({list, deleteRow, clearAll, handleAddToCalendar, buttonS
             <tbody>
                 {list.map((row, idx) => 
                     <tr>
-                        <td>{moment(row.startDateTime).format('ll H:mm')}</td>
+                        <td>{moment(row.startDateTime).format('dddd ll H:mm')}</td>
                         <Tooltip title='Remove single entry from list'>
                             <RemoveCircleIcon onClick={()=>deleteRow(idx)} />
                         </Tooltip>
@@ -342,7 +350,7 @@ const CandidateTable = ({list, deleteRow, clearAll, handleAddToCalendar, buttonS
             <tr>
                 <td colSpan={1} style={{textAlign:'center'}}>
                     <Tooltip title='Push candidates to calendar'>
-                    <Button variant="outlined" className="button" style={buttonStyle} onClick={handleAddToCalendar}>Push to calendar</Button>
+                    <Button variant="outlined" className="button" style={buttonStyle} onClick={submitToCalendar}>Push to calendar</Button>
                     </Tooltip>
                 </td>
                 <td colSpan={1} style={{textAlign:'center'}}>
@@ -358,7 +366,7 @@ const CandidateTable = ({list, deleteRow, clearAll, handleAddToCalendar, buttonS
                     
  
 
-
+// AddEvent
 export default ({init}) => {
     const [sharedState, ] = useSharedState()
     const [email, setEmail] = useState()
@@ -368,8 +376,9 @@ export default ({init}) => {
     const [list, setList] = useState([])
     const navigate = useNavigate()
     const auth = getAuth()
-
-    // useEffect(()=>setValue(props.init),[props.init])
+    const params = useParams()
+    const {calendarType} = params
+    const tableName = CALENDAR[calendarType?calendarType:'DEFAULT'].TBL_CALENDAR
 
     const handleFetchTemplate = reply => {
         if (reply.status === 'OK') {
@@ -395,33 +404,34 @@ export default ({init}) => {
     const handleReply = reply => {
         if (reply.status==='OK') {
             setButtonStyle(BUTTON_STYLE.DEFAULT)
-            navigate('/calendar/' + (sharedState.region?sharedState.region:'Skåne'))
+            navigate('/calendar/' + sharedState.region + (calendarType?'/' + calendarType:null))
         } else {
             setButtonStyle(BUTTON_STYLE.ERROR)
             alert(reply.message?('Error message:' + reply.message):JSON.stringify(reply))
         }
     }
     const handleCancel = () => {
-        navigate('/calendar/' + sharedState.region)
+        navigate('/calendar/' + sharedState.region + (calendarType?'/' + calendarType:null))
     }
 
     const handleReset = () => {
         setValue({})
     }
 
-    const handleAddToCalendar = () => {
+    const submitToCalendar = () => {
         const irl = '/addEvents'
         // alert(JSON.stringify(list))
         setButtonStyle(BUTTON_STYLE.CLICKED) 
-        serverPost(irl, list, handleReply)
+        serverPost(irl, {tableName, list}, handleReply)
     }
 
     const changeToDbEntry = val => ({
             ...val,
-            ...sharedState, // Not all columns in sharedState that has the corresponding column in tbl_calendar will copy this value from tbl_user to tbl_calendar
+            ...sharedState, // Not all fields in sharedState with corresponding field in tbl_calendar be copied tbl_user to tbl_calendar
             startDateTime:val.startDate + 'T' + (val.startTime?val.startTime:'00:00'),
             endDateTime:(val.endDate?val.endDate:val.startDate) + 'T' + (val.endTime?val.endTime:'23:59'),
             authLevel:sharedState.authLevelOverride?sharedState.authLevelOverride:sharedState.stateAuthLevel,
+            private:val.private?val.private:sharedState.private?sharedState.private:0,
             id:undefined,
     })
 
@@ -433,7 +443,7 @@ export default ({init}) => {
         }
     }
 
-    const handleAddList = () => {
+    const createCalendarList = () => {
         let dbEntry = changeToDbEntry(adjustValue(value))
         let myList =[dbEntry]
 
@@ -469,13 +479,19 @@ export default ({init}) => {
         
         setList([...list, ...myList].sort((a,b)=> moment(a.startDateTime)-moment(b.startDateTime)))
     }
+
+    const handleSubmit = e => {
+        e.preventDefault()
+        createCalendarList()
+    }    
+
+
     const buttons=[
         {
-            type:'button',
+            type:'submit',
             label:'Add to list',
             style:buttonStyle,
             validate:true,
-            handleClick:handleAddList
         },    
         {
             type:'button',
@@ -495,7 +511,7 @@ export default ({init}) => {
             {email?
                 <>
                     <div className='columns is-centered'>
-                        <div className='is-2 column'>
+                        <div className='is-3 column'>
                             <h3>City: {sharedState?sharedState.city:''} Region:{sharedState?sharedState.region:''}</h3>    
                         </div>
                     </div>    
@@ -510,6 +526,7 @@ export default ({init}) => {
                                             setValue={setValue}
                                             setList={setList}
                                             buttons={buttons}
+                                            handleSubmit={handleSubmit}
                                 />
                             </div>
                         :null}
@@ -518,7 +535,7 @@ export default ({init}) => {
                                 buttonStyle={buttonStyle} 
                                 list={list} 
                                 deleteRow={deleteRow} 
-                                handleAddToCalendar={handleAddToCalendar} 
+                                submitToCalendar={submitToCalendar} 
                                 clearAll={()=>setList([])}
                             />
                         </div>

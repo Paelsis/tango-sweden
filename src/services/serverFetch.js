@@ -14,10 +14,9 @@ export function serverFetchDataResultApi(apiBaseUrl, irl, handleResult) {
     axios({
         method: 'get',
         url,
-        auth,
       })
     .then(response => {
-        const data = response.data?response.data:response
+        const data = response?response.data?response.data:response:undefined
         const status = data?.status?data.status:undefined
         if (status?(status === 'OK' || status === 'WARNING'):false) {
             handleResult(response?.data?.data.result);
@@ -43,29 +42,28 @@ function serverFetchDataApi(apiBaseUrl, irl, handleReply) {
     axios({
         method: 'get',
         url,
-        auth,
       })
     .then(response => {
-        const data = response?.data?response.data:response
+        const data = response?response.data?response.data:response:undefined
         if (data) {
             if (data.status === 'OK' || data.status === 'true' || data.status) {
                 //const message = '[serverFetchData] status:' + data.status + ' WARNING: data:' + JSON.stringify(data)
             } else {
                 const message = '[serverFetchData] status:' + data.status + ' WARNING: data:' + JSON.stringify(data)
                 alert(message)
-                handleReply(data)
             }
             handleReply(data);
         } else {    
             const message = '[serverFetchData] No data for request url:' + url
+            console.log(message)
             alert(message)
         } 
     })
     .catch(e => {
         if (e?!!e.message:false) {
             const errorMessage = 'url=<' + url + '> message:' + JSON.stringify(e.message)
-            console.log('[serverFerchData] Error message:', errorMessage);
-            alert('[serverFerchData] ERROR: axios call failed, message:' + errorMessage)
+            console.log('[serverFerchDataApi] Error message:', errorMessage);
+            alert('[serverFerchDataApi] ERROR: axios call failed, message:' + errorMessage)
         }
     });
 }

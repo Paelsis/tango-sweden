@@ -188,7 +188,7 @@ const Func = props => {
     const handleSave = () => {
         if (!!email) {
             const active = value.active == 1?1:0
-            const record = {...value, active, email, html:undefined, draft_description:undefined, creaTimestamp:undefined, updTimestamp:undefined}
+            const record = {...value, active, email, authLevel:undefined, html:undefined, draft_description:undefined, creaTimestamp:undefined, updTimestamp:undefined}
             const data = {tableName:'tbl_dj', record, fetchRows:true}
             if (value.description?value.description.length > MAX_DESC_LENGTH:false) {
                 alert('WARNING: Application doew not does not allow to save text longer than ' + MAX_DESC_LENGTH + ' characthers')

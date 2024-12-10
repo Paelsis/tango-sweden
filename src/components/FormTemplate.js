@@ -16,7 +16,6 @@ const getField = column => {
 }    
 
 // FormTemplate.js
-// FormTemplate.js
 export default props => {
     const {fields, buttons, value, handleSubmit, setValue} = props
     const handleKeyPress = e => {
@@ -79,7 +78,7 @@ export default props => {
                                         type={button.type} 
                                         variant={button.variant?button.variant:"outlined"}
                                         color={"inherit"}
-s                                       onClick={button.submit?undefined:button.handleClick}
+s                                       onClick={button.onClick?button.onClick:undefined}
                                     >
                                         {button.label}
                                     </Button>

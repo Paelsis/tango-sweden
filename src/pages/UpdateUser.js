@@ -1,6 +1,7 @@
 
 import React, {useState, useEffect, useRef} from 'react';
 import {useParams} from 'react-router-dom';
+import { useSharedState } from '../store';
 import {serverPost} from '../services/serverPost'
 import {search} from '../services/search'
 import SearchTemplate from '../components/SearchTemplate'
@@ -74,6 +75,26 @@ const formFields = [
     },
     {
         type:'text',
+        label:'Phone',
+        name:'phone',
+    },
+    {
+        type:'text',
+        label:'Phone',
+        name:'phone',
+    },
+    {
+        // type:'rte',
+        type:'draft',
+        label:'Description of DJ',
+        name:'description',
+        draftName:'draft_description',
+        required:false,
+        hiddenIf:'htmlEditor',
+        maxLength:200,
+    },
+    {
+        type:'text',
         label:'Color',
         name:'color',
     },
@@ -117,6 +138,7 @@ export default () => {
     //const navigate = useNavigate()
     const [list, setList] = useState()
     const [value, setValue] = useState()
+    const [sharedState, ] = useSharedState()
 
     const handleSearchReply = list => {
         if (list.length === 0) {
@@ -198,11 +220,13 @@ export default () => {
     ]
 
     // const strValue = JSON.stringify(value)
-
+    const authLevel = sharedState?.authLevel?sharedState.authLevel:0
     // {JSON.stringify(value)}
     return(
-       <>    
-        {value?
+       <>   
+        {authLevel<16?
+            <h1>No access</h1>
+        :value?
             <div style={styles.container}>
                 <div style={styles.item}>
                 <FormTemplate

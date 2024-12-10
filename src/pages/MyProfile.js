@@ -4,7 +4,7 @@ import { Navigate, useNavigate } from 'react-router-dom'
 import firebaseApp from '../services/firebaseApp'
 import { getAuth, onAuthStateChanged} from 'firebase/auth'
 import FormTemplate from '../components/FormTemplate'
-import SelectSettings from '../components/SelectSettings'
+import SelectUser from '../components/SelectUser'
 import {serverFetchData} from '../services/serverFetch'
 import {replaceRow} from "../services/serverPost"
 import Square from "../components/Square"
@@ -92,6 +92,27 @@ const styles = {
 
 const fieldsCAL = [
   {
+      type:'text',
+      label:'Full name',
+      name:'name',
+      required:'true', 
+      tooltip:'First and last name of the logged in user',
+      placeholder:'Please enter your name'
+  },
+  {
+    type:'text',
+    label:'Nickname',
+    name:'nickname',
+    tooltip:'First and last name of the logged in user',
+    placeholder:'Only for DJs and Private teachers'
+  },
+  {
+    type:'text',
+    label:'Phone',
+    name:'phone',
+    tooltip:'Phone number of the user',
+  },
+  {
     type:'text',
     label:'City:',
     name:'city',
@@ -116,12 +137,43 @@ const fieldsCAL = [
     tooltip:'Events from same country will have button in the color of the country',
   },
   {
-      type:'text',
-      label:'User name',
-      name:'name',
-      required:'true', 
-      tooltip:'First and last name of the logged in user',
-      placeholder:'Please enter your name'
+    type:'checkbox',
+    label:'Is diskjockey',
+    tooltip: 'If you are a DJ you will after login be directly redirected to Add/Update DJ page',
+    //disabled:true,
+    name:'isDiskjockey',
+  },
+  {
+    type:'checkbox',
+    label:'Is private teacher',
+    tooltip: 'If you are a DJ you will after login be directly redirected to Add/Update DJ page',
+    //disabled:true,
+    name:'isPrivateTeacher',
+  },
+  {
+    type:'checkbox',
+    label:'HTML-editor',
+    name:'htmlEditor',
+    tooltip: 'Use HTML-editor',
+    maxlength:10,
+  },
+  {
+    // type:'rte',
+    type:'draft',
+    label:'Description of DJ/Private teacher',
+    name:'description',
+    draftName:'draft_description',
+    required:false,
+    hiddenIf:'htmlEditor',
+    maxlength:200,
+  },
+  {
+    type:'textarea',
+    label:'Description of DJ/Private teacher',
+    name:'description',
+    required:false,
+    notHiddenIf:'htmlEditor',
+    maxlength:40000,
   },
   {
       type:'text',
@@ -130,18 +182,18 @@ const fieldsCAL = [
       name:'color',
   },
   {
-      type:'text',
-      label:'Background color dark (for calendar)',
-      tooltip: 'Dark background color when shifting background color from dark to light, Ex 1:darkBlue Ex 2:#F6A3BB',
-      name:'backgroundColorDark',
+    type:'text',
+    label:'Background color top left (for calendar)',
+    tooltip: 'Background color shift from top left to bottom right. This is the top left color',
+    name:'backgroundColorLight',
   },
   {
     type:'text',
-    label:'Background color light (for calendar)',
-    tooltip: 'Light background color when shifting background color from dark to light, Ex 1:lightBlue Ex 2:#F6A3BB',
-    name:'backgroundColorLight',
-},
-{
+    label:'Background color bottom right (for calendar)',
+    tooltip: 'Background color shift from top left to bottom right. This is the bottom right color',
+    name:'backgroundColorDark',
+  },
+  {
     type:'text',
     label:'Background image (Use url of image-background in calendar)',
     tooltip: 'You can use a url to an image stored on internet type https://www.kasandbox.org/programming-images/avatars/marcimus-purple.png',
@@ -184,6 +236,13 @@ const fieldsCAL = [
     //disabled:true,
     name:'isDiskjockey',
   },
+  {
+    type:'checkbox',
+    label:'Private',
+    tooltip: 'If this box is checked, you are the only person who can change your events, i.e. your events are completely private',
+    //disabled:true,
+    name:'private',
+  },
 ]
 
 
@@ -194,13 +253,14 @@ const Func = props => {
     const [buttonStyle, setButtonStyle] = useState(BUTTON_STYLE.DEFAULT)
     const auth = getAuth()
 
-    const navigate = useNavigate();
-
     const handleReply = (data) => {
       if (data.status === 'OK') {
         setSharedState({...sharedState, ...data.result})
+        if (data.message) {
+            console.log('Message:' + data.message)
+        }
       } else {
-        alert('NOTE: Please fill in your personal data and preferenses and then save')
+        console.log('ERROR: data.status = ' + data.status + ' message:' + data.message)
       }  
     }
 
@@ -221,7 +281,7 @@ const Func = props => {
         // alert('RESULT value :' +  JSON.stringify(rec) + ' email:' + email)
         setButtonStyle(BUTTON_STYLE.SAVED)
         if (rec.namn) {
-          setSharedState(rec)
+          setSharedState({...rec, authLevel:sharedState.authLevel})
         }  
         setTimeout(() => 
           {
@@ -234,14 +294,13 @@ const Func = props => {
       }
     }
 
-    const handleSave = (e, value) => {
-
+    const handleSubmit = e => {
         e.preventDefault()
         setButtonStyle(BUTTON_STYLE.CLICKED)
         if (!!email) {
-          const backgroundImage = value.backgroundImage?value.backgroundImage:null
-          const borderStyle = value.hasBorder?value.borderStyle:'none'
-          const record = {...value, email, backgroundImage,  borderStyle, creaTimestamp:undefined, updTimestamp:undefined, authLevel:undefined}
+          const backgroundImage = sharedState.backgroundImage?sharedState.backgroundImage:null
+          const borderStyle = sharedState.hasBorder?sharedState.borderStyle:'none'
+          const record = {...sharedState, email, backgroundImage,  borderStyle, creaTimestamp:undefined, updTimestamp:undefined, authLevel:sharedState.authLevel}
           const tableName = 'tbl_user'
           const data = {...record, fetchRows:true}
           //alert('Data:' + JSON.stringify(record))
@@ -253,14 +312,13 @@ const Func = props => {
 
     const buttons=[
       {
-          type:'button',
+          type:'submit',
           label:'Save',
           style:buttonStyle,
           validate:true,
           variant:(buttonStyle===BUTTON_STYLE.SAVED)?'contained':'outlined',
           color:'green',
-          tooltip:'Ensire to save your profile before continue',
-          handleClick:e=>handleSave(e, sharedState)
+          tooltip:'Save your profile',
       },    
     ]
 
@@ -278,11 +336,12 @@ const Func = props => {
                         value={sharedState}
                         setValue={setSharedState}
                         buttons={buttons}
+                        handleSubmit={handleSubmit}
                     />
                   </div>
                   <div className='column is-3'>
                     <Square settings={sharedState} />
-                    <SelectSettings email={email} sharedState={sharedState} setSharedState={setSharedState} /> 
+                    <SelectUser email={email} sharedState={sharedState} setSharedState={setSharedState} /> 
                   </div>
                 </div>
               :
@@ -293,6 +352,7 @@ const Func = props => {
                       value={sharedState}
                       setValue={setSharedState}
                       buttons={buttons} 
+                      handleSubmit={handleSubmit}
                     />
                   </div>  
                 </div>  

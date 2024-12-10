@@ -13,8 +13,7 @@ import {serverPost, replaceRow} from '../services/serverPost'
 import { getAuth, onAuthStateChanged} from 'firebase/auth';
 import { BUTTON_STYLE } from '../services/const';
 import {serverFetchData} from '../services/serverFetch'
-import {MAX_LIMIT_UNSET} from '../services/const.js'
-
+import {MAX_LIMIT_UNSET, CALENDAR} from '../services/const.js'
 
 
 const TABLE_NAME = 'tbl_registration_calendar'
@@ -146,7 +145,7 @@ const fields = [
     },
     {
         // type:'rte',
-        type:'draft',
+        type:'TextArea',
         label:'Message to organizer',
         name:'message',
     },
@@ -158,24 +157,22 @@ const fields = [
 export default () => {
     const location = useLocation();
     const event = location?.state?location.state:{}
-    const {eventIdExtended, maxLimit} = location?.state?location.state:{}
+    const {eventIdExtended, maxLimit, calendarType, title, dateRangeTime} = location?.state?location.state:{}
     const [sharedState, ] = useSharedState()
     const [value, setValue] = useState()
     const [mailSubject, setMailSubject] = useState()
     const [mailBody, setMailBody] = useState()
-    const [numberOfRegistrations, setNumberOfRegistrations] = useState(0)
+    const [list, setList] = useState([])
     const [buttonStyle, setButtonStyle] = useState(BUTTON_STYLE.DEFAULT)
     const navigate = useNavigate()
-    const tableName = TABLE_NAME
-
-    
+    const tableName = CALENDAR[calendarType?calendarType:'DEFAULT'].TBL_REGISTRATION
 
     // useEffect(()=>setValue(props.init),[props.init])
+    const numberOfRegistrations = list?.length?list.length:0
 
     const handleReply = (data, url) => {
         if (data.status === 'OK') {
-            const registrations = data.result
-            setNumberOfRegistrations(registrations.length)
+            setList(data.result) 
         } else {
             console.log('ERROR: Failed to fetch with url: ' + url)
         }
@@ -197,11 +194,6 @@ export default () => {
         setValue({})
     }
 
-
-    const changeToDbValue = val => ({
-            ...val, 
-    })
-
     const handleMailReply = reply => {
         if (reply.status === 'OK') {
             alert('Check your mailbox for a confirmation mail')
@@ -216,7 +208,7 @@ export default () => {
         if (reply.status === 'OK') {
             setButtonStyle(BUTTON_STYLE.SAVED)
             setTimeout(() => {
-                setNumberOfRegistrations(numberOfRegistrations + 1)
+                setList([...list, value])
                 if (process.env.NODE_ENV === 'production') {
                     const data = {
                         email:value.email, 
@@ -242,10 +234,9 @@ export default () => {
         }
     }
 
-
     const registrationRegistrant = token => {
         if (!!value.email) {
-            const reg = {...event, ...value}
+           const reg = {...event, ...value}
             // alert('handleReg record:' + JSON.stringify(record))
            serverPost('/registration', {tableName, reg, token}, handleRegReply)
         }   
@@ -267,7 +258,7 @@ export default () => {
             // alert('handleReg record:' + JSON.stringify(record))
             serverPost('/registration', {tableName, reg:regPartner}, reply=>{
                 if (reply.status === 'OK') {
-                    setNumberOfRegistrations(numberOfRegistrations + 1)
+                    setList([...list, regPartner])
 
                     // Make registration with same cancellation token
                     registrationRegistrant(reply.token)
@@ -318,10 +309,12 @@ export default () => {
                 :    
                     <div className='columns m-2 is-centered'>
                         <div className='column is-6 is-narrow'>
+                            <h3 className='title is-3'>Registration for {title?title:'No title'}</h3>
+                            <h4 className='title is-4'>{dateRangeTime?dateRangeTime:'No date info'}</h4>
                             {maxLimit === MAX_LIMIT_UNSET?
                                 null
                             :    
-                                <h5 className='title is-5'>Number of booked dancers on this event is {numberOfRegistrations}   (max limit is {maxLimit})</h5>
+                                <h5 className='title is-5'>Number of booked dancers on this event is {list?.length?list.length:0}   (max limit is {maxLimit})</h5>
                             }    
                             <FormTemplate 
                                         fields={fields} 

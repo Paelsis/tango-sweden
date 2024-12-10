@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 import { useSharedState } from '../store';
 import { useLocation, useParams } from 'react-router-dom'
 import { useNavigate } from "react-router-dom";
-import AddEvent from '../components/AddEvent'
+import AddEvent from './AddEvent'
 import { EditorState, ContentState, convertFromHTML } from 'draft-js'
 import { generateEditorStateFromValue, emptyEditorState } from '../components/DraftEditor'
 

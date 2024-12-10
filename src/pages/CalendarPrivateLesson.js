@@ -24,7 +24,7 @@ import IconButton from '@mui/material/IconButton';
 import HistoryIcon from '@mui/icons-material/History'
 // import { transferAnitasCalendar } from '../services/transferAnitasCalendar'
 import { layoutGenerator } from 'react-break';
-import {COLORS, CALENDAR} from '../services/const'
+import {COLORS} from '../services/const'
 
 const DeviceDetector = () => (
   <div>I am rendered on: {isMobile ? "Mobile" : "Desktop"}</div>
@@ -100,10 +100,9 @@ const ListData = ({list}) => {
   )
 }
 
-export default () => {
+export default props => {
   const params = useParams()
-  const {calendarName, calendarType, email} = params
-  const [eventsGoogleCal, setEventsGoogleCal] = useState([])
+  const calendarName=params?.calendarName?params.calendarName.toLowerCase():'skåne'
   const [events_TAB, setEvents_TAB] = useState([])
   const [open, setOpen] = useState(false)
   const [event, setEvent] = useState({})
@@ -112,7 +111,7 @@ export default () => {
   const [view, setView] = useState(Views.WEEK);
   const [date, setDate] = useState(new Date());
 
-  const tableName = calendarType?CALENDAR[calendarType].TBL_CALENDAR:CALENDAR.DEFAULT.TBL_CALENDAR
+
 
   //const OnMobile = layout.is('mobile');
   const OnAtMostPhablet = layout.isAtMost('phablet');
@@ -123,63 +122,9 @@ export default () => {
   const timeMax = moment().endOf('month').add(24,'months').add(7, 'days')
   moment.locale('sv');
 
-
   useEffect(()=>{
-    if (!calendarName || calendarName === 'skåne') {
-      const staticStyleId = 'TANGOKOMPANIET'
-      getEventsFromGoogleCal(
-        calendarId_TK,
-        apiKey_TK,
-        timeMin.format('YYYY-MM-DD') + 'T00:00:00Z', 
-        timeMax.format('YYYY-MM-DD') + 'T23:59:00Z',
-        'SV',
-        staticStyleId,
-        events => setEventsGoogleCal(events),
-      )
-    } else if (calendarName === 'malmö') {
-      const staticStyleId = 'TANGOKOMPANIET'
-      getEventsFromGoogleCal(
-        calendarId_TK,
-        apiKey_TK,
-        timeMin.format('YYYY-MM-DD') + 'T00:00:00Z', 
-        timeMax.format('YYYY-MM-DD') + 'T23:59:00Z',
-        'SV',
-        staticStyleId,
-        events => setEventsGoogleCal(events.filter(ev=>ev.location.includes('Malmö'))),
-      )
-    } else if (calendarName === 'lund') {
-      const staticStyleId = 'TANGOKOMPANIET'
-      getEventsFromGoogleCal(
-        calendarId_TK,
-        apiKey_TK,
-        timeMin.format('YYYY-MM-DD') + 'T00:00:00Z', 
-        timeMax.format('YYYY-MM-DD') + 'T23:59:00Z',
-        'SV',
-        staticStyleId,
-        events => setEventsGoogleCal(events.filter(ev=>ev.location.includes('Lund'))),
-      )
-/*      
-    } else if (calendarName === 'stockholm' || calendarName === 'mitt') {
-        const staticStyleId = 'STOCKHOLM'
-        getEventsFromGoogleCal(
-          calendarId_STO,
-          apiKey_TS,
-          timeMin.format('YYYY-MM-DD') + 'T00:00:00Z', 
-          timeMax.format('YYYY-MM-DD') + 'T23:59:00Z',
-          'SV',
-          staticStyleId,
-          events => setEventsGoogleCal(events),
-        )
-*/          
-    } else {
-      setEventsGoogleCal([])
-    }
-
-    const url = '/getEvents?calendarName=' + (calendarName?calendarName:'skåne') 
-      + (tableName?'&tableName=' + tableName:'')
-      + (email?'&email=' + email:'')
-    
-    getEventsFromTable(url,
+    getEventsFromTable('/getEvents?calendarName=' + calendarName 
+      + '&tableName=' + tableName,
       timeMin.format('YYYY-MM-DD') + 'T00:00:00Z', 
       timeMax.format('YYYY-MM-DD') + 'T23:59:00Z',
       'SV',
@@ -211,7 +156,7 @@ export default () => {
   
   let previousDateRange = ''
 
-  const events = [...eventsGoogleCal, ...events_TAB].sort((a,b)=>a.start.localeCompare(b.start)).map(it => {
+  const events = [...events_TAB].sort((a,b)=>a.start.localeCompare(b.start)).map(it => {
     if (it.dateRange === previousDateRange) {
       return {...it, sameDate:true}
     } else {
@@ -228,6 +173,7 @@ export default () => {
       {
         background:COLORS.LIGHT_YELLOW
       }
+
 
   return (
     <>
@@ -256,7 +202,7 @@ export default () => {
                 <CalendarSmall 
                         events={events?events:[]} 
                         handleEvent={handleEvent} 
-                        calendarType={calendarType}
+                        tableNameRegistration='tbl_registration_private_lesson'
                 />
               }
             </OnAtMostPhablet>
@@ -273,7 +219,7 @@ export default () => {
                   {style:{...ev.style, height:30}})} 
                 defaultView={'week'}
                 min={moment('12:00am', 'h:mma').toDate()}
-                showMultiDayTimes={true}  
+                showMultiDayTimes={false}  
                 showAllEvents={true}              
                 views={['day', 'week', 'month', 'agenda']}
                 view={view} // Include the view prop
@@ -292,10 +238,10 @@ export default () => {
           </OnAtLeastTablet>  
 
           <DialogSlide
+            tableNameRegistration='tbl_registration_private_lesson'
             open={open}
             setOpen={setOpen}
             event={event}
-            calendarType={calendarType}
             aria-labelledby="alert-dialog-title"
             aria-describedby="alert-dialog-description"
           />    

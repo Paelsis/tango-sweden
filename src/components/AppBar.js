@@ -9,6 +9,8 @@ import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/MoreVert';
 import HomeIcon from '@mui/icons-material/Home';
+import PersonIcon from '@mui/icons-material/Person';
+import SchoolIcon from '@mui/icons-material/School';
 import { TbVinyl } from "react-icons/tb";
 import { PiHighHeelLight } from "react-icons/pi";
 import Menu from '@mui/material/Menu';
@@ -22,9 +24,9 @@ import {serverFetchData} from '../services/serverFetch'
 import {COLORS} from '../services/const'
 // AppBar.js
 export default () => {
-  const [userSettings, setUserSettings] = useSharedState()
+  const [sharedState, setSharedState] = useSharedState()
   const [email, setEmail] = useState(undefined)
-  //const [userSettings, setUserSettings] = useGlobalState('USER_SETTINGS')
+  //const [sharedState, setSharedState] = useGlobalState('USER_SETTINGS')
   const [anchorEl, setAnchorEl] = useState(null);
   const auth = getAuth()
   const open = Boolean(anchorEl);
@@ -41,12 +43,14 @@ export default () => {
   const handleResultUser = data => {
     //alert('AppBar 0:' + JSON.stringify(result?result:'No result'))
     if (data.status === 'OK') {
-      const list = data.result
-      if (list?.length?list.length > 0:false) {
-        setUserSettings({...userSettings, ...list[0]})
-      }  
+      if (data.message) {
+        alert(data.message)
+      }
+      // getUser returns an sharedState object in data.result 
+      const obj = data.result;
+      setSharedState({...sharedState, ...obj})
     } else {
-      alert('ERROR: Failed to get user in AppBar. Navigates to setup user') 
+      setSharedState({...sharedState, authLevel:4, productLevel:1, city:'Ankeborg', region:'Skåne', userName:'Kalle Anka'}) 
       navigate('/myProfile')
     }
   }
@@ -72,7 +76,8 @@ export default () => {
     // window.location.reload()
   }
 
-  const authLevel = userSettings.authLevel?userSettings.authLevel:0
+  const authLevel = sharedState?.authLevel?sharedState.authLevel:0
+  const productLevel = sharedState?.productLevel?sharedState.productLevel:0
 
   return (
       <div>
@@ -90,16 +95,17 @@ export default () => {
         {email?null:<MenuItem onClick={()=>handleSignup()}>Signup</MenuItem>}
         {(email && authLevel >= 1)?<Divider />:null}
         {(email && authLevel >= 1)?<MenuItem onClick={()=>navigate('/editDj')}>My TDJ Info</MenuItem>:null}
-        {(email && authLevel >= 4)?<MenuItem onClick={()=>navigate('/add')}>Add Event</MenuItem>:null}
+        {(email && authLevel >= 4)?<MenuItem onClick={()=>navigate('/addEvent')}>Add Event</MenuItem>:null}
+        {(email && authLevel >= 8 && productLevel >= 2)?<MenuItem onClick={()=>navigate('/addPrivateLesson')}>Add Private Lesson</MenuItem>:null}
         {(email && authLevel >= 1)?<MenuItem onClick={()=>navigate('/myProfile')}>My Profile</MenuItem>:null}
-        {(email && authLevel >= 8)?<MenuItem onClick={()=>navigate('/updateUser')}>Define users</MenuItem>:null}
+        {(email && authLevel >= 16)?<MenuItem onClick={()=>navigate('/updateUser')}>Define users</MenuItem>:null}
         <MenuItem onClick={()=>handleNavigate('/usage')}>Usage</MenuItem>
       </Menu>
 
       <Box sx={{ flexGrow: 2}}>
         <AppBar position="static" sx={{color:COLORS.YELLOW,  backgroundColor:'#232323'}}>
           <Toolbar>
-            <Tooltip title={<h1 style={{color:COLORS.YELLOW, fontSize:20}}>Go to Home</h1>}>
+            <Tooltip title={<h1 style={{color:COLORS.YELLOW, fontSize:14}}>Go to Home {productLevel}</h1>}>
             <IconButton
               size="large"
               edge="start"
@@ -120,7 +126,7 @@ export default () => {
             <Typography variant="h5" component="div" sx={{ flexGrow: 1 }}  onClick={()=>handleNavigate('/home')}>
             </Typography>
             <Typography variant="h8" component="div" sx={{ flexGrow: 4 }}  onClick={()=>handleNavigate('/home')}>
-              {email?'Signed in ' + (userSettings.city?userSettings.city:'') + ' ' +  (userSettings.region?userSettings.region:'') + ' ' + (email?email:null):null}
+              {email?('Signed in as ' + (email?email:null) + ' ' + (authLevel >=16?'Administrator':authLevel>=8?'Superuser':'')):''}
             </Typography>
             <Tooltip title={<h1 style={{color:COLORS.YELLOW, fontSize:20}}>List of Tango Diskjockeys</h1>}>
             <IconButton
@@ -129,17 +135,17 @@ export default () => {
               color="inherit"
               aria-label="menu"
               sx={{ mr: 0 }}
+              onClick={()=>handleNavigate('/djs')}
             >
               <TbVinyl 
                     id="basic-button"
                     aria-controls={open ? 'basic-menu' : undefined}
                     aria-haspopup="true"
                     aria-expanded={open ? 'true' : undefined}
-                    onClick={()=>handleNavigate('/djs')}
               />
             </IconButton>
             </Tooltip>
-            {userSettings.shoeStories?
+            {sharedState.shoeStories?
             <Tooltip title={<h1 style={{color:COLORS.YELLOW, fontSize:20}}>Discussion about tango shoes</h1>}>
             <IconButton
               size="large"
@@ -182,4 +188,24 @@ export default () => {
   );
 }
 
-/* {email?ADMINISTRATORS.includes(email)?<small>{JSON.stringify(userSettings)}</small>:null:null} */
+/* {email?ADMINISTRATORS.includes(email)?<small>{JSON.stringify(sharedState)}</small>:null:null} */
+/*
+
+<Tooltip title={<h1 style={{color:COLORS.YELLOW, fontSize:20}}>Book a private lesson</h1>}>
+<IconButton
+  size="large"
+  edge="start"
+  color="inherit"
+  aria-label="menu"
+  sx={{ mr: 0 }}
+  onClick={()=>handleNavigate('/privateLessons')}
+>
+  <PersonIcon 
+        id="basic-button"
+        aria-controls={open ? 'basic-menu' : undefined}
+        aria-haspopup="true"
+        aria-expanded={open ? 'true' : undefined}
+  />
+</IconButton>
+</Tooltip>
+*/

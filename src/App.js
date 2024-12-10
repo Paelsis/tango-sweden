@@ -11,9 +11,11 @@ import Service from "./pages/Service";
 import Registration from "./pages/Registration";
 import CancelRegistration from './pages/CancelRegistration'
 import Shoe from "./pages/Shoe";
-import Add from "./pages/Add";
+import AddEvent from "./pages/AddEvent";
+import AddPrivateLesson from "./pages/AddPrivateLesson";
 import EditDj from "./pages/EditDj";
 import Djs from "./pages/Djs";
+import PrivateLessons from "./pages/PrivateLessons";
 import Update from "./pages/Update";
 import Copy from "./pages/Copy";
 import Camera from "./pages/Camera";
@@ -62,6 +64,8 @@ export default function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="home" element={<Home />} />
                 <Route path="/calendar/:calendarName" element={<Calendar />} />
+                <Route path="/calendar/:calendarName/:calendarType" element={<Calendar />} />
+                <Route path="/calendar/:calendarName/:calendarType/:email" element={<Calendar />} />
                 <Route path="calendars" element={<AllCalendars />} />
                 <Route path="denmark" element={<RedirectTo url='https://www.brownbearsw.com/cal/tangodk_mil_kbh' />} />
                 <Route path="fortuna" element={<RedirectTo url='https://www.tangofortuna.com/' />} />
@@ -72,8 +76,11 @@ export default function App() {
                 <Route path="usage" element={<Usage />} />
                 <Route path="privacy" element={<Privacy/>} />
                 <Route path="service" element={<Service />} />
-                <Route path="add" element={<Add />} />
+                <Route path="addEvent" element={<AddEvent />} />
+                <Route path="addEvent/:calendarType" element={<AddEvent />} />
+                <Route path="addPrivateLesson" element={<AddPrivateLesson />} />
                 <Route path="djs" element={<Djs />} />
+                <Route path="privateLessons" element={<PrivateLessons />} />
                 <Route path="update" element={<Update />} />
                 <Route path="copy" element={<Copy />} />
                 <Route path="shoe" element={<Shoe />} />

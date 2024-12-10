@@ -20,11 +20,9 @@ import {AuthContext} from "../login/FirebaseAuth"
 import { getAuth, onAuthStateChanged} from 'firebase/auth';
 import {serverPost} from '../services/serverPost'
 import { useNavigate } from "react-router-dom";
-import {ADMINISTRATORS} from '../services/const'
-import {MAX_LIMIT_UNSET} from '../services/const.js'
+import {ADMINISTRATORS, MAX_LIMIT_UNSET, CALENDAR} from '../services/const'
+import { useSharedState } from '../store';
 import moment from 'moment'
-
-const TABLE_NAME = 'tbl_registration_calendar'
 
 const styles = {
   textarea:{
@@ -54,15 +52,16 @@ const renderDescription = (description, type, handleClose) => {
 
 // DialogSlide
 export default props => {
-  const {open, setOpen, event} = props
+  const {open, setOpen, event, calendarType} = props
   const  [email, setEmail] = useState(undefined)
+  const  [sharedState,] = useSharedState()
   const  [copy, setCopy] = useState(undefined)
   const navigate = useNavigate();
   const handleClose = () => setOpen(false)
   const eventId = event.eventId?event.eventId:'Missing'
   const eventIdExtended = event.eventId + event.startDate
   const maxLimit = event.maxLimit?event.maxLimit:MAX_LIMIT_UNSET
-  const tableName = TABLE_NAME
+  const tableName = CALENDAR[calendarType?calendarType:'DEFAULT'].TBL_REGISTRATION
 
   const handleReply = reply => {
     reply.status === 'OK'?window.location.reload():alert(JSON.stringify(reply.message?reply.message:reply))
@@ -77,6 +76,7 @@ export default props => {
     navigate('/update', {
       state: { 
         email:ev.email,
+        private:ev.private,
         eventId:ev.eventId, 
         title:ev.title, 
         company:ev.company, 
@@ -86,6 +86,7 @@ export default props => {
         endDateTime:ev.end,
         startTime:ev.start.substring(11,16),
         endTime:ev.end.substring(11,16),
+        authLevel:ev.authLevel,
         facebookEventLink:ev.facebookEventLink,
         facebookEventId:ev.facebookEventId,
         color:ev.color,
@@ -97,6 +98,7 @@ export default props => {
         backgroundImage:ev.backgroundImage,
         useRegistrationButton:ev.useRegistrationButton,
         maxLimit:ev.maxLimit,
+        calendarType:calendarType?calendarType:'DEFAULT',
       }
     })
   }
@@ -104,90 +106,97 @@ export default props => {
 
 
   const handleCopy = e => {
-    e.preventDefault(); 
+      e.preventDefault(); 
 
-    const ev = event
-    navigate('/copy', {
-      state: {
-        email:ev.email,
-        eventId:ev.eventId, 
-        title:ev.title, 
-        company:ev.company, 
-        description:ev.description, 
-        location:ev.location, 
-        startDateTime:ev.start, 
-        endDateTime:ev.end,
-        startTime:ev.start.substring(11,16),
-        endTime:ev.end.substring(11,16),
-        facebookEventLink:ev.facebookEventLink,
-        facebookEventId:ev.facebookEventId,
-        hideLocationAndTime:ev.hideLocationAndTime==1?1:0, 
-        useRegistrationButton:ev.useRegistrationButton==1?1:0,
-        color:ev.color,
-        backgroundColorLight:ev.backgroundColorLight,
-        backgroundColorDark:ev.backgroundColorDark,
-        borderStyle:ev.borderStyle,
-        borderColor:ev.borderColor,
-        borderWidth:ev.borderWidth,
-        backgroundImage:ev.backgroundImage,
-        useRegistrationButton:ev.useRegistrationButton,
-        maxLimit:ev.maxLimit,
-      }
-    })
-  }
-
-  const handleDeleteSingle = () =>  {
-    let text = "Press OK to delete this event (eventId=" + eventId + ")";
-    // eslint-disable-next-line no-restricted-globals
-    //if (confirm(text) === true) {
-      const irl = '/cancelEvent'
-      serverPost(irl,  {eventId, email, startDateTime:event.start}, handleReply)
-    // } 
-  }  
-
-  const handleDeleteAll = () => {
-    let reply = "Press OK to delete all occurrences of this event (eventId=" + eventId + ")";
-    // eslint-disable-next-line no-restricted-globals
-    if (confirm(reply) === true) {
-      const irl = '/cancelEvent'
-      serverPost(irl,  {eventId, email}, handleReply)
-    } 
-  }
-
-  const handleReplyFetchRegistrations = reply => {
-    if (reply.status === 'OK') {
-      alert(JSON.stringify(reply.result))
-    } else {
-      alert('Failed to fetch registrations' + JSON.stringify(reply))
-    } 
-  }
-  
-  const handleListRegistrations = e => {
-    navigate('/listRegistration', {state:{eventIdExtended, tableName}})
-  }
-
-    const handleRegistration = e => {
       const ev = event
-      navigate('/registration', 
-        {state:{
-          tableName,
-          eventId:ev.eventId, 
-          eventIdExtended:eventIdExtended, 
-          maxLimit,
+      navigate('/copy', {
+        state: {
           email:ev.email,
+          private:ev.private,
+          eventId:ev.eventId, 
           title:ev.title, 
           company:ev.company, 
           description:ev.description, 
           location:ev.location, 
           startDateTime:ev.start, 
           endDateTime:ev.end,
-          startDate:ev.start.substring(0,10), 
-          endDate:ev.end.substring(0,10),
           startTime:ev.start.substring(11,16),
           endTime:ev.end.substring(11,16),
+          authLevel:ev.authLevel,
+          facebookEventLink:ev.facebookEventLink,
+          facebookEventId:ev.facebookEventId,
+          hideLocationAndTime:ev.hideLocationAndTime==1?1:0, 
+          useRegistrationButton:ev.useRegistrationButton==1?1:0,
+          color:ev.color,
+          backgroundColorLight:ev.backgroundColorLight,
+          backgroundColorDark:ev.backgroundColorDark,
+          borderStyle:ev.borderStyle,
+          borderColor:ev.borderColor,
+          borderWidth:ev.borderWidth,
+          backgroundImage:ev.backgroundImage,
+          useRegistrationButton:ev.useRegistrationButton,
+          maxLimit:ev.maxLimit,
+          calendarType:calendarType?calendarType:'DEFAULT',
         }
       })
   }
+
+  const handleDeleteSingle = () =>  {
+      let text = "Press OK to delete this event (eventId=" + eventId + ")";
+      // eslint-disable-next-line no-restricted-globals
+      //if (confirm(text) === true) {
+        const irl = '/cancelEvent'
+        serverPost(irl,  {eventId, email, startDateTime:event.start}, handleReply)
+      // } 
+  }  
+
+  const handleDeleteAll = () => {
+      let reply = "Press OK to delete all occurrences of this event (eventId=" + eventId + ")";
+      // eslint-disable-next-line no-restricted-globals
+      if (confirm(reply) === true) {
+        const irl = '/cancelEvent'
+        serverPost(irl,  {eventId, email}, handleReply)
+      } 
+  }
+
+  const handleReplyFetchRegistrations = reply => {
+      if (reply.status === 'OK') {
+        alert(JSON.stringify(reply.result))
+      } else {
+        alert('Failed to fetch registrations' + JSON.stringify(reply))
+      } 
+  }
+  
+  const handleListRegistrations = e => {
+      navigate('/listRegistration', {state:{eventIdExtended, tableName}})
+  }
+
+    const handleRegistration = e => {
+        const ev = event
+        alert(calendarType)
+        navigate('/registration', 
+        {
+          state:{
+            tableName,
+            eventId:ev.eventId, 
+            eventIdExtended:eventIdExtended, 
+            maxLimit,
+            email:ev.email,
+            title:ev.title, 
+            company:ev.company, 
+            description:ev.description, 
+            location:ev.location, 
+            startDateTime:ev.start, 
+            endDateTime:ev.end,
+            startDate:ev.start.substring(0,10), 
+            endDate:ev.end.substring(0,10),
+            startTime:ev.start.substring(11,16),
+            dateRangeTime:ev.dateRangeTime, 
+            endTime:ev.end.substring(11,16),
+            calendarType:calendarType?calendarType:'DEFAULT',
+          }
+        })
+    }
 
 
   const auth = getAuth()
@@ -196,8 +205,13 @@ export default props => {
         setEmail(user.email)
     }    
   }), [])
+
+  const authLevel = sharedState.authLevel
+  const privateEvent = event.private==1?true:false
+
  
-  const authorized = ADMINISTRATORS.includes(email) || email === event.email
+  // You are authorized if you own event or (authLevel is 8 and not private) or authLevel=16
+  const authorized = (email === event.email) || (authLevel === 16) || ((authLevel === 8) && !privateEvent)
 
   const linkToFacebook=event.facebookEventLink?event.facebookEventLink:event.facebookEventId?"https://www.facebook.com/events/" + event.facebookEventId:undefined
   return (
@@ -228,7 +242,7 @@ export default props => {
             :
               null
             }       
-            {authorized ? 
+            {authorized===true? 
                <>
                 <IconButton
                   size="small"

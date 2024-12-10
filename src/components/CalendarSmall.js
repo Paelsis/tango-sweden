@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
-import {AVA_STATUS, MAX_LIMIT_UNSET} from '../services/const'
+import {AVA_STATUS, MAX_LIMIT_UNSET, TBL_REGISTRATION_CALENDAR} from '../services/const'
 import { useNavigate } from 'react-router-dom';
+import { CALENDAR } from '../services/const'
 
 //import moment from 'moment';
 import moment from 'moment-with-locales-es6'
@@ -50,7 +51,7 @@ const TEXTS = {
 }
 
 const calcTr = ev => {
-    const {style, isToday, durationHours} = ev
+    const {style, durationHours} = ev
     const length = ev.title.trim().length
     const border = 'none'
     const height = durationHours < 4?durationHours*20
@@ -65,11 +66,13 @@ const calcTr = ev => {
     
     fontSize = length > 40?fontSize-5:length > 60?fontSize-5:fontSize    
 
-    return {...style, height, fontSize, fontWeight:600, verticalAlign:'middle', border}
+    const display = 'table-row'
+    return {...style, height, fontSize, fontWeight:600, verticalAlign:'middle', border, display}
 }
 
 let styles = {
     table: {
+        display:'table',
         width:'100%',
         marginRight:'auto',
         marginLeft:'auto',
@@ -85,17 +88,30 @@ let styles = {
         position: 'absolute',
         top: '50%',
         transform: 'translateY(-50%)'
+    },
+    tdDateTime:{
+        display:'table-cell',
+        fontSize:18, 
+        fontWeight:600
+    },
+    td:{
+        display:'table-cell',
+        fontSize:18, 
+        fontWeight:600
     }
+
 };
 
 // CalendarSmall
 export default props => {
-    const {events, handleEvent} = props
+    const {events, handleEvent, calendarType} = props
     const [fontSize, setFontSize] = useState() 
     const navigate = useNavigate()
 
     moment.locale(CULTURE(language))
 
+    const tblRegistration = CALENDAR[calendarType?calendarType:'DEFAULT'].TBL_REGISTRATION
+  
 
     const onClick = () => {
         setFontSize(fontSize==='small'?'large':'small')
@@ -109,19 +125,19 @@ export default props => {
         let weekdayEnd = mend.format('dddd')
         weekday = weekday.toUpperCase().charAt(0) + weekday.slice(1,3)
         weekdayEnd = weekdayEnd.toUpperCase().charAt(0) + weekdayEnd.slice(1,3)
-        
+        const startDate = event.startDate
         const timeRange = event.timeRange
         const dateRange=event.dateRange
+        const title=event.title
+        const dateRangeTime=event.dateRangeTime
         const useRegistrationButton = event.useRegistrationButton
         const trStyle = event.style
-        const tdStyleDateTime = {fontSize:18, fontWeight:600}
-        const tdStyle = {}
         //const forcedSmallFonts= ['milonga', 'practica', 'pratika'].find(it  => event.title.toLowerCase().includes(it)) && event.durationHours >12
         const forceSmallFonts = event.forceSmallFonts
         const handleRegistration = e => {
             const eventIdExtended = event.eventId + event.startDate
             // alert(eventIdExtended)
-            navigate('/registration', {state:{eventIdExtended, maxLimit}})
+            navigate('/registration', {state:{eventIdExtended, maxLimit, tblRegistration, title, dateRangeTime}})
         }
 
         return(
@@ -131,24 +147,24 @@ export default props => {
                 style={styles.tr(event)}
             > 
                 {event.moreThan11Hours && !forceSmallFonts?
-                    <td colSpan={4} onClick={()=>handleEvent(event)}>  
+                    <td colSpan={useRegistrationButton?4:4} onClick={()=>handleEvent(event)}>  
                         {event.title}<br/>{dateRange}
                     </td>
                 :
                     <>
-                        <td style={tdStyleDateTime} onClick={()=>handleEvent(event)}>  
+                        <td style={styles.tdDateTime} onClick={()=>handleEvent(event)}>  
                             <small>{event.sameDate?'':dateRange}</small>
                         </td>
-                        <td style={tdStyleDateTime} onClick={()=>handleEvent(event)}>  
+                        <td style={styles.tdDateTime} onClick={()=>handleEvent(event)}>  
                             <small>{timeRange}</small>
                         </td>
-                        <td colspan={useRegistrationButton==1?1:2} onClick={()=>handleEvent(event)}>  
+                        <td style={styles.td} colSpan={useRegistrationButton==1?2:2} onClick={()=>handleEvent(event)}>  
                             <small>{event.title}</small>
                         </td>
                     </>
                 }
-                {useRegistrationButton?
-                    <td style={tdStyle}>  
+                {useRegistrationButton==1?
+                    <td style={styles.td}>  
                         {event.avaStatus=== AVA_STATUS.CC?
                             'Fully Booked'
                         :
@@ -162,7 +178,7 @@ export default props => {
                             </IconButton>
                         }
                     </td>
-                :null}    
+                :<td style={styles.td} />}    
             </tr>
         )
     }    

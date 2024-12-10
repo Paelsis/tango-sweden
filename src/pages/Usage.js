@@ -13,25 +13,30 @@ const SwedishUsage = () =>
 
     <h3>Lägga till, ta bort och ändra händelser</h3>
 
-    <h4>Login</h4>
+    <h4>Registrera dig som användare</h4>
 
-    För att lägga ut ett event måste ha login-uppgifter som du erhåller genom att skicka ett mail till Per Eskilson på email per.eskilson@gmail.com
-    eller Anita Dobi på anita.e.dobi@gmail.com. De enda uppgifter vi behöver från dig är den email-adress ni vill nyttja för att logga in när ni
-    lägger till events i kalendern. Föreningar med många administratörer bör ha en gemensam email för föreningen så att alla administratörer
-    kan ändra eller ta bort events. När vi erhållit er email skickar vi dig ett initialt password som ni själva därefter kan ändra på login sidan. 
-    När ni loggat in första gången skall ni gå in i menyn <i>Settings</i> och sätta värden på stad, region och färger så att dina events. 
+    För att kunna lägga ut event måste du först ha ett konto. Detta får du genom att göra "Signup" i menyn uppe till höger.
+    Vid Signup anger du din email och ett lösenord. Föreningar med många administratörer bör ha en gemensam email eftersom 
+    eventen ägs av email-adressen, dvs endast den email som loggat in kan ändra eller ta bort event för denna email.  
+    Önskar man ändra password för en given email gör man det via länken som finns på sidan "Signin".
     
-    <h3>Settings</h3>
+    <h4>Logga in</h4>
+.
+    När man har skapat ett konto med Signin kan man logga in på tangosweden.se. Som inloggad har du tillgång till att registrera lägga till events 
+    för din region och stad. Om du är DJ kan du ladda upp bild och skriva information om din själv.
+    När ni loggat in första gången skall ni gå in i menyn <i>Settings</i>.
+    
+    <h3>Inställningar</h3>
 
-    I menyn uppe till höger finns där en menypunkt Settings. I denna fyller du i stad och region (Skåne, Väst, Mitt eller Norr).
-    Det finns för nuvarande bara 4 regioner men detta kan ändras. Det finns ingen begränsning på antalet städer.  
+    I menyn uppe till höger finns där en meny option "Settings". Här fyller du i stad och region (Skåne, Väst, Mitt eller Norr).
+    Det finns ingen begränsning på antalet städer.  
     På förstasidan hos tangosweden.se finns knappar för regioner och städer.
-    Städer eller regioner som för tillfället saknar uppkommande arrangemang visas ej med knappar i kalendern.
+    Endast städer och regioner som lagt in events visas med knappar.
     <p/>
-    På Settings sidan gör du även färgval för text och bakgrund för dina händelser. 
+    På Settings sidan gör du även färgval för text och bakgrund för dina händelser (Detta gäller ej användare i Stockholm som valt fixt färgschema). 
     Tanken är att varje arrangör gör sina egna unika färgval som representerar företaget/föreningen.
-    Du skall göra 3 färgval: color, backgroundColorLight och backgroundColorDark. Värdet <i>color</i> anger färgen på texten. 
-    Bakgrundsfärgen tonas från backgroundColorLight i vänster hörn till backgroundColorDark i höger hörn.
+    Man knn göra 3 färgval: text-färg, bakgrundsfärg övre vänstra hörnet, backgroundsfärg nedre högra hörnet. 
+    Bakgrundsfärgen tonas succesivt från färgen i övre högre ned till färgen i nedre vänstra hörnet.
 
     Värden på färgerna anges med text (ex red, green, blue, lightYellow), eller med ett hexadeimalt värde. 
     Hexasdecimala färg-värden består av ett #-tecken följt av 6 siffror 0-9 eller bokstäverna a-f (eller A-F), ex #fa23e8. 
@@ -50,7 +55,7 @@ const SwedishUsage = () =>
 
     <h3>Lägga till events</h3>
 
-    Gå in i menyn uppe till höger och klicka på "Add Event". Fyll sen i dina data.
+    För att lägga till ett event går du som in i menyn uppe till höger och klickar på "Add Event". Fyll sen i dina data.
     Om du önskar lägga in repeterade händelser med en viss frekvens kryssar du i Repeat. Då visas 3 nya värden för offset, enhet och antal repetitioner. 
     Sättes tex <i>offset</i> till 2 och enhet till <i>weeks</i> betyder det varannan vecka. Fältet <i>repeat number of times</i> anger det antalet repetitioner med den angivna frekvensen.
     När du därefter klickar på knappen <i>Add to list</i>, så visas en lista på genererade datumen. 
@@ -62,48 +67,61 @@ const SwedishUsage = () =>
 
     <h3>Ta bort events</h3>
 
-    Om du som inloggad klickar på eventet i kalendern finns där två knappar för att ta bort ditt/dina event/s i kalendern, <i>Spann</i> och <i>Spann med streck</i>.
-    Den första knappen <i>Spann</i> knappen tar bort enbart det event du klickat på. Den andra knappen <i>Spann med streck</i> tar bort hela serien du skapat då du använd <i>Repeat</i> 
-    Du har bara möjlighet att ta bort de events som skapats under din email-adress (som ägs av emailen du loggat in med). Detta för att undvika att man av misttag 
-    tar bort någon annan arrangörs events. Om ni är en förening med många   administratörer så är det lämpligt att använda föreningens gemensamma email
-    som login eftersom alla då kan ändra eller ta bort existerande events.
-
-
+    Den som är inloggad kan ändra eller ta bort sina event genom att klicka på eventet. Du kan endast ta bort events som din email äger, dvs events som skapats under den email du loggat på med.
+    Det finns 2 typer av ta birt <i>En Spann</i> och <i>En spann med streck</i>.
+    Den första <i>Spann</i>-knappen tar endast bort edet event du klickat på. 
+    Den andra, <i>Spann med streck</i> knappen, tar bort hela listan som du skapade med <i>Add Event</i> och eventuellt <i>Repeat/Frequency</i>.
+    
     <h3>Ändra existerande events</h3>
 
-    Logga in på kalendern och klicka på eventet du önskar ändra. I fönstret som kommer upp finns längst ned en knapp som ser ut som en <i>Penna</i>. 
-    Klicka på denna och uppdatera de uppgifter du önskar. Klicka därefter på Update knappen längst ned. Om du önskar uppdatera alla events i serien med samma data, 
-    markera översta kryssboxen. En serie är den lista du skapar när du lägger till nya events med <i>Add</i> meny option och som du därefter lägger till kalendern med 
+    Du kan ändra ditt event. Om du skapat en hel serie och vill ändra alla på samma sätt är det ochså möjligt.
+    I fönstret som kommer upp finns längst ned en knapp som ser ut som en <i>Penna</i>. 
+    Klicka på denna och uppdatera de uppgifter du önskar. Om du vill att samtliga events i serien skall uppdateras kryssar du i översta krysset på sidan.
+    När du är klar med dina nya uppgifter klicka på <i>Update</i> knappen längst ned på settingssidan. Om du önskar uppdatera alla events i serien med samma data, 
+    markera översta kryssboxen (Change all events in same group). En serie är den lista du skapar när du lägger till nya events med meny option
+    <i>Add Event</i>. Här skapar du först en lista och som sen du sendan uppdaterar kalendern med. Alla envents som tillhör en lista får samma eventId.
+    Detta eventId användes sedan om vi väljer att ta bort en hel serie. 
     
     <h3>Kopiera data till nya events</h3>
 
-    Om du vill återanvända samma information som du haft förr kan du använda knappen <i>Kopiera</i>.
-    Typiskt har du en milonga eller praktika som återkommer varje vecka under hösten och som vill skall fortsätta under nästa säsong.
+    För den som vill återanvända samma information från tidigare events till nya använda knappen <i>Kopiera</i>.
+    Det typiska exemplet är att du har en återkommande milonga eller praktika under hösten som vill skall fortsätta med nästa säsong.
     <p/>
     Som inloggad klickar du då först på eventet som du vill kopiera data från och sen på knappen <i>Kopiera</i>. I fönstet som poppar upp finns nu förifylda data 
     samt tomma fält för datum och tid. Fyll i ditt nya datum och din nya tid samt eventuell upprepad frekvens med <i>Repeat</i>.
+    För att underlätta för dem som glömt kopiera finns där kalender-historik bakåt i tiden. Dessa kalnder data nås om man klickar på klockan längst ned till vänster under kalendern.
+    Historik finns för cirka 6 månader tillbaka. 
 
-    <h3>Använda registreringsknappen och granska registreringar</h3>
+    <h3>Anmälan via knapp i kalendern</h3>
 
     När du är inloggad kan du lägga till en registreringsknapp så att dansare kan registrera sig till eventet. Du kan sen se och editera de registreringar som folk gjort.
     En dansare kan även registrera sin danspartner så hen slipper att göra detta själv.
     <p/>
-    Gör så här för att introducera registreringsknappen i ditt event.
+    Gör så här för att introducera anmälan-knappen i ditt event.
     <ul>
         <li>Logga in med din e-post och password uppe i menyn till höger.</li>
         <li>Klicka på den händelsen du önskar ändra i kalendern</li>
-        <li>Redigera nu händelsen med pennikonen enligt följande</li>
+        <li>Redigera nu händelsen med penn-ikonen enligt följande</li>
         <li>Markera rutan "Use registration button"</li>
-        <li>Om du önskar begränsa antalet tillåtna dansare fyller du i "Maximalt antal registrerade". Då går det inte att boka om det är fullbokat</li>
-        <li>Klicka på uppdateringsknappen</li>
+        <li>Om du önskar begränsa antalet tillåtna anmälningar fyller du i fältet "Maximalt antal anmälningar". Då går det inte att anmäla sig när eventet är fullbokat
+        </li>.
+        <li>Klicka till sist på uppdaterings-knappen</li>
     </ul>
     <p/>
-    För att granska de registreringar som gjorts gör du enligt följande:
+    För att granska de anmälningar som gjorts gör du enligt följande:
     <ul>
         <li>Klicka på händelsen i kalendern (inte på registreringsknappen).</li>
         <li>Klicka på personikonen (längst ned är det andra iconen från höger)</li>
         <li>Här är listan på de registreringar som gjorts. </li>
         <li>Man kan redigera och ta bort dansare från den här listan med knapparna till vänster.</li>
+    </ul>
+    Det sändes även svars-mails vid anmälan.
+    <ul>
+            <li>När någon anmäler sig via registreringsknappen i kalendern så sändes ett svars-mail ut till anmälarens email-adress (inte dans-partners)</li>
+            <li>Det sändes även en kopia av mailet till organisatörens email-adress, dvs den som ni loggat in med.</li>
+            <li>I mailet som sändes till kund finns även en cancellerings-länk med vilken kunden enkelt kan ta bort sin anmälan.</li>
+            <li>Om någon så önskar kan vi lägga ändra funktionaliteten så att det inte går att cancellera sin anmälan 
+            14 dagar efter anmälan gjorts efetersom då anses lagmässigt anmälan vara bindande.</li>
     </ul>
 
     <h3>Förslagslåda:</h3>
@@ -115,53 +133,54 @@ const EnglishUsage = () =>
 <div>
     <h1 style={{textAlign:'center', color:'red'}}>Manual for administrators</h1>
 
-    <h3>Manual for tangosweden.se</h3>
+    <h3>Manual tangosweden.se</h3>
 
-    The website tangosweden.se is open to all oranizers in Sweden/Denmark/Norway/Finland that wish to have their own tango calendar for their locality or region.
-    On the front page there are direct-buttons for all the regions and cities that are in the loaded  calendar. Denmark, Gothenburg and Halmstad have their own 
-    calenders. The buttons for those redirect you to their home pages or calendars.
-    
-    <h3>Add, change and remove events</h3>
+    The website tangosweden.se is open to all organizers in Sweden/Denmark/Norway/Finland who wish to have a tango calendar for their locality or region.
+    On the front page there are buttons for the regions and cities that are active in the calendar. Helsingborg, Gothenburg and Denmark have their own calendars 
+    as these are also accessed via buttons on the front page.
 
-    <h4>Login</h4>
+    <h3>Add, remove and modify events</h3>
 
-    To post an event, you must first receive login details such as
-    organizer. You can obtain these by sending an email to Per Eskilson at email per.eskilson@gmail.com
-    or Anita Dobi at anita.e.dobi@gmail.com. The information we need from you is the email address that you want to use for login to the tangosweden.se when you
-    want to add events for your organisation. Please use a commona common email for the whole organization so that different actors are able to change/delete events.
-    After we received your email, we will send you an initial password, which you can change on the login page. When you log in for the first time, you must
-    go to the <i>Settings</i> menu and initialize values ​for region and city.
-    Here you also set the color for text and background for your events in the calendar.
+    <h4>Signup</h4>
+    In order to post events, you must first have an account. You get this by doing "Signup" in the menu at the top right.
+    At Signup, you enter your email and a password. Associations with many administrators should have a common email because 
+    the events are owned by the email address, i.e. only the email that logged in can change or delete events for this email.  
+    If you wish to change the password for a given email, you do so via the link on the "Signin" page.
+
+    <h4>Signin</h4>
+    Once you have created an account with Signin, you can log in to tangosweden.se. As logged in, you have access to register and add events 
+    for your region and city. If you are a DJ, you can upload a picture and write information about yourself.
+    When you log in for the first time, you must enter the <i>Settings</i> menu.
 
     <h3>Settings</h3>
-
-    In the menu at the top right there is a menu item Settings. In this you fill in the city and region. 
-    Currently there are 4 regions, Skåne, West, Middle or North. There is no limitations on the number of cities.
-    On the front page of tangosweden.se there are buttons for all active regions and cities.
-    Cities or regions that with no upcoming events are not shown with buttons in the calendar.
+    I menyn uppe till höger finns där en meny option Settings. Här fyller du i stad och region (Skåne, Väst, Mitt eller Norr).
+    Det finns ingen begränsning på antalet städer.  
+    På förstasidan hos tangosweden.se finns knappar för regioner och städer.
+    Endast städer och regioner med events visas med knappar.
     <p/>
-    On the Settings page, you make color choices for text and background for your events in the calendar.
-    The idea is that each organizer uses their own unique colors.
-    You must make 3 color choices: color, backgroundColorLight and backgroundColorDark. The <i>color</i> value specifies the color of the text.
-    The background color fades from backgroundColorLight in the upper left corner to backgroundColorDark in the lower right corner.
-
-    The values ​​of the colors are specified with text or as a hexadecimal value. For example, you can choose simple text colors such as yellow, blue, organge, green, brow, lightBlue, lightYellow, etc.
-    You can also use hexadecimal color values ​​consisting of a # sign followed by 6 numbers 0-9 or the letters A-F (alternatively the same result with lowercase letters a-f), eg #A322F5.
-    You can find hexadecimal colors by googling something like "hex color wine red". Then you will get lots of hex codes for shades of burgundy as a search response.
-    In total, you can choose from roughly 16 million colors with hex codes. On the settings page
-    your color choices shown in a square. You also have theoption to chose a solid frame with variable a particular thickness and color.
-    Another option is to use an image as a background (you give an url to the image).
-    If you use images, no frame will be displayed for images.
-
-    Don't forget to press <i>Save</i> when you have finished testing your choices in settings (Settings).
-    If you changed your color choices in settings, they will only change on new events. If you also want to change the color of an already existing event, you must
-    go in and update the event and check the checkbox "Change colors to latest settings".
-    This will ensure to update the color from the latest values in the settings meny.
-    New events created under the menu item <i>Add Event</i> will always take the color choices from the Settings menu.
+    På Settings sidan gör du även färgval för text och bakgrund för dina händelser (Detta gäller ej användare i Stockholm som valt fixt färgshema). 
+    Tanken är att varje arrangör gör sina egna unika färgval som representerar företaget/föreningen.
+    Man knn göra 3 färgval: text-färg, bakgrundsfärg övre vänstra hörnet, backgroundsfärg nedre högra hörnet. 
+    Bakgrundsfärgen tonas succesivt från färgen i övre högre ned till färgen i nedre vänstra hörnet.
+    <p/>
+    The values ​​of the colors are specified with text (eg red, green, blue, lightYellow), or with a hexadecimal value. 
+    Hexadecimal color values ​​consist of a # sign followed by 6 numbers 0-9 or the letters a-f (or A-F), eg #fa23e8. 
+    You can find hexadecimal colors by googling something like "hex color wine red". Then you will get lots of hex codes for shades of burgundy as a search response. 
+    In total, you have access to roughly 16 million colors with hex codes. On the settings page
+    your color choices are previewed. You can also choose a frame of variable thickness and color. Another option is to use an image as a background,
+    but then the image must be posted online with a given url (eg: https://tangokompaniet.com/images/anna.jpg).
+    If you use images, no frame will appear.
+    <p/>
+    Press the <i>Save</i> button when you agree with your choices in settings (Settings). 
+    If you changed your color choices in settings, they only change on new events because each event in the calendar gets its colors saved when you add them. 
+    If you want to change the color of already existing events, you must 
+    check the box "Change colors to latest settings" when you update the event (with the pen).
+    This is so that you can update the color of new events without changing the color of previously created events. 
+    New events always automatically get the color c
   
     <h3>Add new events</h3>
 
-    Click on the menu (the hamburger menu at the top right) and click on the menu item "Add Event". Then you will see a website that is relatively easy to understand.
+    Click on the menu (the menu at the top right corner) and click on the menu item "Add Event". Then you will see a website that is relatively easy to understand.
     If you wish to enter repeated events with a certain frequency, check repeat. Then 3 new values ​​for offset, unit and number of repetitions appear.
     This means that if this is set to 1 and the radio button below is set to weeks, the event is repeated every week.
     An offset of 2 and a unit set to 'weeks' is translated to every two weeks. The field <i>repeat number of times</i> specifies the number of times the event is to be repeated.
@@ -171,70 +190,76 @@ const EnglishUsage = () =>
     This is suitable for weekend events, festivals and marathons that span more than one day. For events longer than 11 hours and which
     extends over several days, the text becomes larger in the mobile calendar. This is to give a little promotion to those who take the trouble to
     create multi-day events.
+
+    hoices defined on the Settings page.
+
     <h3>Remove events</h3>
 
-    If you click on the event in the calendar as logged in, there are two buttons to delete your event(s) in the calendar.
-    The first delete button deletes only the single event you clicked on. The second button (Sweep delete) deletes the entire series of events you created
-    if you checked <i>Repeat</i> button when adding a series of events. Then the whole series is deleted. You can only delete the events created owned by your logi email address
-    This is to avoid other organizer by mistake removing your events. For oragnizations with many
-    administratiors it is good that all users use the same email to login. Then all administrations can  
-    handle change or delete all evetns for the organization.
+    Those who are logged in can change or delete their events by clicking on the event. You can only delete events that your email owns, i.e. events that were created under the email you signed in with.
+    There are 2 types of ta birt <i>A Spann</i> and <i>A spann with dash</i>.
+    The first <i>Span</i> button only removes the event you clicked on. 
+    The second, the <i>Span with dashes</i> button, removes the entire list you created with <i>Add Event</i> and possibly <i>Repeat/Frequency</i>.
+
 
     <h3>Modify existing events</h3>
 
-    Log in to the calendar and go to the event you wish to change. In the window that appears, there is an PEN-button at the bottom.
-    Click on this and change the information you want. Then click on the Update button at the bottom.
-     
-    <h3>Duplicate contents from existing events to upcoming events</h3>
-
-    If you want to create new events with the same data as you had before, use the COPY-button.
-    Typically, you have a milonga or practia that occurs every week during the fall and that you want to continue during the next season.
-    <p/>
-    As logged in, you then first click on the event from which you want to copy data. In the window that appears, click the COPY-button.
-    In the windo that pops up there is a prefilled template but with date and time fields empty.
-    Fill in your new dates and times and any frequency they are to be repeated with <i>Repeat</i>.
-    Then you just continue as you did with Add.
-    
-
+    You can change your existing events. If you have created a whole series and want to change them all in the same way, that is also possible.
+    In the window that appears, at the bottom there is a button that looks like a <i>Pen</i>. 
+    Click on this and update the information you want.
+    When you are done with your new information, click the <i>Update</i> button at the bottom of the settings page. 
+    If you want all events in the series to be updated, check the top checkbox with name
+     <i>Change all events in same group</i>). A series is the list you create when you add new events with the menu option
+    <i>Add Event</i>. Here you first create a list which you when ready the calendar with. All events that belong to a list get the same eventId.
+    This eventId was then used if we choose to delete an entire series.
  
-    <h3>Duplicate contents from existing events to upcoming events</h3>
+    <h3>Duplicate existing events to upcoming events</h3>
 
-    If you want to create new events with the same data as you had before, use the COPY-button.
-    Typically, you have a milonga or practia that occurs every week during the fall and that you want to continue during the next season.
+    For those who want to reuse the same information from previous events for new ones, use the <i>Copy</i> button.
+    The typical example is that you have a recurring milonga or practika during the fall that you want to continue with next season.
     <p/>
-    As logged in, you then first click on the event from which you want to copy data. In the window that appears, click the COPY-button.
-    In the windo that pops up there is a prefilled template but with date and time fields empty.
-    Fill in your new dates and times and any frequency they are to be repeated with <i>Repeat</i>.
-    Then you just continue as you did with Add.
+    As logged in, you then first click on the event you want to copy data from and then on the <i>Copy</i> button. In the window that pops up there is now pre-filled data 
+    as well as empty fields for date and time. Fill in your new date and time as well as any repeat frequency with <i>Repeat</i>.
+    To make it easier for those who forgot to copy, there is a calendar history going back in time. These calendar data can be accessed by clicking on the 
+    clock at the bottom left under the calendar.
+    History is available for about 6 months back.
 
-    <h3>Use the registration button and review registrations</h3>
+    <h3>Registration button</h3>
 
-    Once logged in, you can add a registration button so dancers can register for the event. You can then see and edit the registrations that people have made.
+    Once logged in, you can turn on a registration button so dancers can register for the event. You can then see and edit the registrations that people have made.
     A dancer can also register his dance partner so he does not have to do this himself.
     <p/>
-    Follow these steps to introduce the registration button in your event.
+    Do this to introduce the registration button in your event.
     <ul>
-        <li>Log in with your e-mail and password in the menu on the right.</li>
+        <li>Log in with your e-mail and password in the menu on the right</li>
         <li>Click on the event you wish to change in the calendar</li>
-        <li>Now edit the pencil icon event as follows</li>
+        <li>Now edit the event with the pen icon as follows</li>
         <li>Check the box "Use registration button"</li>
-        <li>If you wish to limit the number of permitted dancers, fill in "Maximum number of registered". Then it is not possible to book if it is fully booked</li>
-        <li>Click the refresh button</li>
+        <li>
+            If you wish to limit the number of permitted entries, fill in the "Maximum number of entries" field. Then it is not possible to register when the event is fully booked
+        </li>
+        <li>Finally click on the update button</li>
     </ul>
     <p/>
-    To review the registrations that have been made, proceed as follows:
+    To review the reports that have been made, proceed as follows:
     <ul>
-        <li>Click on the event in the calendar (not the registration button).</li>
+        <li>Click on the event in the calendar (not the registration button)</li>
         <li>Click on the person icon (at the bottom it is the second icon from the right)</li>
-        <li>Here you now have the list of registrations that have been made. </li>
-        <li>You can edit and remove dancers from this list using the edit and remove buttons.</li>
+        <li>Here is the list of the registrations that have been made</li>
+        <li>You can edit and remove dancers from this list using the buttons on the left</li>
+    </ul>
+    Response emails were also sent upon registration.
+    <ul>
+        <li>When someone registers via the registration button in the calendar, a response email is sent to the email address of the applicant (not dance partners)</li>
+        <li>A copy of the email was also sent to the organizer's email address, i.e. the one you logged in with</li>
+        <li>In the email that was sent to the customer, there is also a cancellation link with which the customer can easily remove their registration</li>
+        <li>If someone so wishes, we can change the functionality so that it is not possible for customer to cancel 
+        14 days after the registration was been made, since then the notification is legally considered to be binding</li>
     </ul>
 
-
-
-    <h3>Proposals:</h3>
-    If you have suggestions for changes or further development of the calendar, send them by email to per.eskilson@gmail.com or to anita.e.dobi@gmail.com.</div>
-
+    <h3>Suggestion box:</h3>
+    If you have any great suggestions for changes to further develop the calendar,
+    send these in an email to per.eskilson@gmail.com or to anita.e.dobi@gmail.com.
+</div> 
 
 
 export default () => {

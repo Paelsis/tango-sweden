@@ -1,13 +1,13 @@
 import React, { createContext, useState, useContext } from 'react';
 
 const initialState = {
-  city:'Malmö',
-  name:'- Unknown -',
-  region:'Skåne',
-  color:'blue',
-  authLevel:4, // Default auth level is 4
-  backgroundColorLight:'transparent',
-  backgroundColorDark:'transparent',
+  authLevel:4,
+  city:'Unset',
+  region:'Unset',
+  country:'Sverige',
+  color:'orange',
+  backgroundColorLight:'grey',
+  backgroundColorDark:'black',
   // shoeStories:true,
 };
 

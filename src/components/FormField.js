@@ -56,6 +56,7 @@ const FormField = props => {
     const labelStyle={fontWeight:700, ...props.labelStyle?props.labelStyle:{}}
     const supStyle = {color:'red', fontWeight:700, ...props.subStyle?props.subStyle:{}}
     const valueStyle = props.valueStyle?props.valueStyle:{}
+    const placeholder = fld.placeholder
 
         switch (fld.type) {
             case 'checkbox':
@@ -321,6 +322,7 @@ const FormField = props => {
                         value={value[fld.name]?value[fld.name]:''} 
                         required={required} 
                         disabled={disabled}
+                        placeholder={placeholder}
                         maxlength={fld.maxlength}
                         onChange={handleChange}
                         onKeyPress={handleKeyPress}

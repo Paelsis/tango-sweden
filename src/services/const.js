@@ -101,15 +101,15 @@ export const backgroundImages = {
 
 export const REGIONS = 
 [
+  'Mitt',
   'Skåne',
   'Halland',
   'Sydost',
+  'Västra Götaland',
+  'Norr',
   'Danmark',
   'Norge',
   'Finland',
-  'Västra Götaland',
-  'Mitt',
-  'Norr',
 ] 
 
 export const COUNTRIES = 
@@ -142,5 +142,23 @@ export const SHOE_RADIO_VALUES =
   {label:'Worst misstakes when bying shoes', value:'worst'}
 ]
 
+export const PRODUCT_LEVEL = {
+  CALENDAR:1,
+  PRIVATE_CLASSES:2,
+  COURSE:4,
+  FESTIVAL:8
+}
+
 export const ADMINISTRATORS=['tangosmedjan@gmail.com', 'anita.e.dobi@gmail.com', 'admin@tangosweden.se'];
 
+
+export const CALENDAR={
+  PRIVATE_LESSON:{
+    TBL_CALENDAR:'tbl_calendar_private_lesson',
+    TBL_REGISTRATION:'tbl_registration_private_lesson'
+  }, 
+  DEFAULT:{
+    TBL_CALENDAR:'tbl_calendar',
+    TBL_REGISTRATION:'tbl_registration_calendar'
+  },
+}  

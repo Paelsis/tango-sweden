@@ -6,7 +6,7 @@ import {useLocation} from 'react-router-dom'
 import moment from 'moment-with-locales-es6'
 import { useNavigate } from "react-router-dom";
 import {serverPost} from '../services/serverPost'
-import { BUTTON_STYLE, MAX_LENGTH_DESC } from '../services/const';
+import { BUTTON_STYLE, MAX_LENGTH_DESC, CALENDAR } from '../services/const';
 import Square from '../components/Square'
 // import { generateEditorStateFromValue, emptyEditorState } from '../components/DraftEditor'
 
@@ -43,6 +43,12 @@ const fields = [
         label:'Update event with latest settings',
         name:'updateWithSettings',
         tooltip:'Update this event with colors of the values un Settings'
+    },
+    {
+        type:'checkbox',
+        label:'Private',
+        name:'private',
+        tooltip:'No-one but owner of event can update event (not even the superuser)'
     },
     {
         type:'text',
@@ -146,7 +152,6 @@ const fields = [
         label:'Use registration button',
         name:'useRegistrationButton',
         tooltip:'If you want a registration button and save registrations for the event',
-        notHiddenIf:'useRegistrationButton',
     },    
     {
         type:'email',
@@ -176,6 +181,7 @@ export default () => {
     const navigate = useNavigate() 
     const location = useLocation();
     const event = location.state
+    const calendarType = event?.calendarType?event.calendarType:'DEFAULT'
 
     console.log('Update: value = ', value)
     const adjustEvent = ev => {
@@ -194,10 +200,11 @@ export default () => {
 
     const handleReply = reply => {
         setButtonStyle(BUTTON_STYLE.SAVED)
+        // alert(JSON.stringify(reply))
         if (reply.status==='OK') {
             setButtonStyle(BUTTON_STYLE.SAVED)
             setTimeout(() => {
-                navigate('/calendar/' + sharedState.region)    
+                navigate('/calendar/' + sharedState.region + '/' + calendarType)    
         }, 500);
     
         } else {
@@ -205,7 +212,9 @@ export default () => {
             setTimeout(() => alert('ERROR:' + reply.message), 5000);
         }     
     }
-    const handleUpdate = () => {
+    const handleSubmit = e => {
+        e.preventDefault()
+        alert('[handleSubmit]:calendarType:' + calendarType)
         setButtonStyle(BUTTON_STYLE.CLICKED)
 
         if (moment(value.startDateTime) > moment(value.endDateTime)) {
@@ -232,10 +241,10 @@ export default () => {
         const endDateTime = value.changeAll?undefined:value.endDateTime;
         const startTime = value.changeAll?value.startTime:undefined 
         const endTime = value.changeAll?value.endTime:undefined
-        const data = {...value, ...settings, startDateTime, endDateTime, startTime, endTime, email:undefined, id:undefined} 
+        const tableName = CALENDAR[calendarType].TBL_CALENDAR
+        const data = {...value, ...settings, startDateTime, endDateTime, startTime, endTime, email:undefined, id:undefined, tableName} 
 
         console.log('Update Just before update with /updateEvent: data =', data)
-
         const irl = '/updateEvent'
         serverPost(irl,  data, handleReply)
     }    
@@ -246,10 +255,9 @@ export default () => {
 
     const buttons=[
         {
-            type:'button',
+            type:'submit',
             label:'Update',
             style:buttonStyle,
-            handleClick:handleUpdate
         },    
         {
             type:'button',
@@ -275,6 +283,7 @@ export default () => {
                             value={value}
                             setValue={setValue}
                             buttons={buttons}
+                            handleSubmit={handleSubmit}
                         />
                     </div>
                     <div className='column is-1' >
