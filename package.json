@@ -9,6 +9,7 @@
     "@emotion/styled": "^11.9.3",
     "@mui/icons-material": "^5.8.4",
     "@mui/material": "^5.8.7",
+    "@mui/styles": "^6.1.7",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.3.0",
     "@testing-library/user-event": "^13.5.0",
@@ -20,6 +21,7 @@
     "draftjs-to-html": "^0.9.1",
     "es6-shim": "^0.35.8",
     "firebase": "^9.9.0",
+    "html-to-draftjs": "^1.5.0",
     "i": "^0.3.7",
     "moment": "^2.29.3",
     "moment-with-locales-es6": "^1.0.1",
@@ -38,6 +40,7 @@
     "react-router-dom": "^6.3.0",
     "react-rte": "^0.16.5",
     "react-scripts": "^5.0.1",
+    "react-textarea-autosize": "^8.5.4",
     "react-to-print": "^2.14.7",
     "react-tooltip": "^5.26.0",
     "src": "^1.1.2",
@@ -51,7 +54,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "build:production": "REACT_APP_ENV=production npm run build",
-    "build:production2": "REACT_APP_ENV=production2 npm run build"
+    "build:pl": "REACT_APP_ENV=pl npm run build"
   },
   "eslintConfig": {
     "extends": [
