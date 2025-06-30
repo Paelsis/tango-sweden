@@ -78,17 +78,11 @@ export const removeAllDraftVariables = value  => {
 
 
 export default props => {
-    const editor = useRef(null);
     let editorState = props.editorState
     
-    const focusEditor = () => {
-        editor.current.focus();
-    }
-
     return (
-    <div onClick={focusEditor} style={{border:'solid 1px'}}>
+    <div style={{border:'solid 1px'}}>
         <Editor
-            ref={editor}
             editorState={editorState}
             onEditorStateChange={props.onEditorStateChange}
             placeholder="The message goes here..."

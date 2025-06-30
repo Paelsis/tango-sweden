@@ -9,8 +9,14 @@ import { TbMessage } from 'react-icons/tb'
 
 const apiBaseUrl = process.env.REACT_APP_API_BASE_URL
 const LANGUAGE_SV='SV'
+const apiKey_TK=process.env.REACT_APP_CALENDAR_API_KEY_TK
+const calendarId_TK=process.env.REACT_APP_CALENDAR_ID_TK
 
-const CULTURE = (language) => language===LANGUAGE_SV?'sv':'en'
+const apiKey_TS=process.env.REACT_APP_CALENDAR_API_KEY_TS
+const calendarId_STO=process.env.REACT_APP_CALENDAR_ID_STO
+
+
+const CULTURE = language => language===LANGUAGE_SV?'sv':'en'
 
 const TEXTS = {
   ENDED:{
@@ -43,8 +49,8 @@ const findParameter = (s, val) => {
   }  
 }  
 
-function _createEvent(props)  {
-  const {start, end, language, description, location, email, staticStyleId, color, backgroundColorLight, backgroundColorDark, backgroundImage, borderStyle, borderWidth, borderColor} = props
+const _createEvent = props => {
+  const {start, end, language, description, location, ava, email, guessStyleKey, color, backgroundColorLight, backgroundColorDark, backgroundImage, borderStyle, borderWidth, borderColor} = props
   const mnow = moment()
   const mstart=moment(start)
   const mend=moment(end).add((end.length <= 10?-1:0), 'minutes')
@@ -56,28 +62,30 @@ function _createEvent(props)  {
   const fullDay = (start.length <= 10) || (timeStart==="00:00" && (timeEnd === "00:00" || timeEnd === '23:59'))
   const moreThan11Hours=(mstart.calendar('l') !== mend.calendar('l')) && (mend.diff(mstart, 'hours') > 11) 
   const durationHours = moment.duration(mend.diff(mstart)).asHours()
-  const startDate=mstart.format('L')
+  const startDate=mstart.format('YYYY-MM-DD')
   const hasEventEnded = (mnow >= mend)
-  const timeRange = hasEventEnded?(TEXTS.ENDED[language] + ' ' + mend.format('LT'))
-    :fullDay?TEXTS.WHOLE_DAY[language]
-    :(mstart.format('LT') + '-' + mend.format('LT'))
- 
   const formatDateRange = moreThan11Hours?(yearShift?'ddd ll':'ddd D MMM'):(yearShift?'ddd D/M/YY':'ddd D/M')
   // const formatDateRangeTime = yearShift?'ddd D/M/YY LT':'ddd D/M LT'
   const dateRange=(mstart.format(formatDateRange) 
     + ((dateShift && durationHours > 11)?(' - ' +  mend.format(formatDateRange)):''))  
   const dateRangeTime=mstart.format('llll') + ' - ' 
     + ((dateShift && durationHours > 11)?mend.format('llll'):timeEnd)  
+  const timeRange = hasEventEnded?(TEXTS.ENDED[language] + ' ' + mend.format('LT'))
+    :fullDay?TEXTS.WHOLE_DAY[language]
+    :(mstart.format('LT') + '-' + mend.format('LT'))
  
   
   const maxPar = description?Number(findParameter(description, 'MAX_PAR')):99999
   const maxInd = description?Number(findParameter(description, 'MAX_IND')):99999
   const ongoing = (mnow >= mstart) && (mnow < mend)
-  const staticStyle = staticStyleId?findStaticStyle(staticStyleId):undefined
+
+  const cityUpperCase = props?.city?props.city.trim().toUpperCase():undefined
+  const styleKeyActive = cityUpperCase?cityUpperCase:guessStyleKey?guessStyleKey:'DEFAULT'
+  const staticStyle = findStaticStyle(styleKeyActive)
   const isToday = mnow.isSame(mstart, 'day')?true:false
   const background = "linear-gradient(to bottom right, " + backgroundColorLight + ", " + backgroundColorDark + ")"
   const border = ongoing?'2px dotted':'0px'
-  const opacity = hasEventEnded?0.4:1.0
+  const opacity = (hasEventEnded || (ava <= 0))?0.4:1.0
   const style = staticStyle?{...staticStyle, border, opacity}
   :backgroundImage?
       {
@@ -141,14 +149,26 @@ function _forceSmallFonts(event) {
   }  
 }  
 
+const guessStyleKeyFunc = (location, title, description) => (
+    location?
+    location.toUpperCase().indexOf('LUND') !== -1?'LUND'
+    :location.toUpperCase().indexOf('MALMÖ') !== -1?'MALMÖ'
+    :title.toUpperCase().indexOf('LUND') !== -1?'LUND'
+    :title.toUpperCase().indexOf('MALMÖ') !== -1?'MALMÖ'
+    :description.toUpperCase().indexOf('LUND') !== -1?'LUND'
+    :description.toUpperCase().indexOf('MALMÖ') !== -1?'MALMÖ'
+    :'MALMÖ':'MALMÖ')
+
 // export means that this function will be available to any module that imports this module
-export function getEventsFromGoogleCal (calendarId, apiKey, timeMin, timeMax, language, staticStyleId, handleReply) {
+const _getEventsFromGoogleCalendar = (calendarId, apiKey, timeMin, timeMax, language, handleReply) => {
   const handleReplyReplaceRow = reply => {
     const data = reply
     if (data.status !== 'OK') {
       alert('ERROR: in replaceRow in tblCalendar, status =' + data.status + ' message = ' + data.message)
     }
   }
+
+
 
   const url = `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?key=${apiKey}&timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=${true}&orderBy=startTime`
   request
@@ -166,17 +186,36 @@ export function getEventsFromGoogleCal (calendarId, apiKey, timeMin, timeMax, la
         moment.locale(CULTURE(language))
         _forceSmallFonts(undefined)
 
-        JSON.parse(resp.text).items.forEach(it => {
+        const itemsRaw = JSON.parse(resp.text).items
+
+        itemsRaw.forEach(it => {
+
+
           const start = it.start.dateTime?it.start.dateTime:it.start.date
           const end = it.end.dateTime?it.end.dateTime:it.end.date
-          const title = it.summary?it.summary:'No Title'
-          const description = it.description?it.description:''
-          const location = it.location
+          const title = it.summary?it.summary:'No summary given in google calendar'
+          const description = it.description?it.description:'No description given in google calendar'
+          const location = it.location?it.location:'No location given in google calendar'
           const eventId = it.id
-          
-          event = _createEvent({start, end, staticStyleId, title, description, location, eventId, email:'daniel@tangokompaniet.com', hideLocationAndTime:false, useRegistrationButton:false, language})
+          const guessStyleKey = guessStyleKeyFunc(location, title, description)     
+
+          /*
+          if (!it.location) {
+            console.log('[getEventsFromGoogleCal]: Event has empty location title=' + title + ' start=' + start)
+          } 
+          if (!it.summary) {
+            console.log('[getEventsFromGoogleCal]: Event has empty summary description=' + description + ' start=' + start)
+          }
+          if (!it.description) {
+            console.log('[getEventsFromGoogleCal]: Event has empty description title=' + title + ' start=' + start)
+          }
+          */
+
+          event = _createEvent({start, end, title, description, location, eventId, email:'daniel@tangokompaniet.com', hideLocationAndTime:false, useRegistrationButton:false, guessStyleKey, language})
+
 
           event = _forceSmallFonts(event)
+
 
           // Insert into database, but no dupicates
          
@@ -192,10 +231,7 @@ export function getEventsFromGoogleCal (calendarId, apiKey, timeMin, timeMax, la
           }
           */  
           
-          if (calendarId !== process.env.REACT_APP_CALENDAR_ID_STO) {
-            events.push(event)
-          }  
-
+          events.push(event)
           let previousEnd = end
         })
 
@@ -206,10 +242,53 @@ export function getEventsFromGoogleCal (calendarId, apiKey, timeMin, timeMax, la
           )
         }
         */  
-
         handleReply(events)
       } 
     })
+}
+
+export const getEventsFromGoogleCalendar = (calendarName, timeMin, timeMax, handleResult) => { 
+  if (!calendarName || calendarName.toUpperCase() === 'SKÅNE') {
+    _getEventsFromGoogleCalendar(
+      calendarId_TK,
+      apiKey_TS,
+      timeMin.format('YYYY-MM-DD') + 'T00:00:00Z', 
+      timeMax.format('YYYY-MM-DD') + 'T23:59:00Z',
+      'SV',
+      events => handleResult(events),
+    )
+  } else if (calendarName.toUpperCase() === 'MALMÖ') {
+    _getEventsFromGoogleCalendar(
+      calendarId_TK,
+      apiKey_TS,
+      timeMin.format('YYYY-MM-DD') + 'T00:00:00Z', 
+      timeMax.format('YYYY-MM-DD') + 'T23:59:00Z',
+      'SV',
+      events => handleResult(events.filter(ev=>ev.location.includes('Malmö'))),
+    )
+  } else if (calendarName.toUpperCase() === 'LUND') {
+    _getEventsFromGoogleCalendar(
+      calendarId_TK,
+      apiKey_TS,
+      timeMin.format('YYYY-MM-DD') + 'T00:00:00Z', 
+      timeMax.format('YYYY-MM-DD') + 'T23:59:00Z',
+      'SV',
+      events => handleResult(events.filter(ev=>ev.location.includes('Lund'))),
+    )
+  } 
+    /*      
+  } else if (calendarName === 'stockholm' || calendarName === 'mitt') {
+      staticStyleId = 'STOCKHOLM'
+      getEventsFromGoogleCal(
+        calendarId_STO,
+        apiKey_TS,
+        timeMin.format('YYYY-MM-DD') + 'T00:00:00Z', 
+        timeMax.format('YYYY-MM-DD') + 'T23:59:00Z',
+        'SV',
+        events => handleResult(events),
+      )
+  */          
+   
 }
 
 // getEventsFromTable
@@ -221,15 +300,15 @@ export function getEventsFromTable (irl, timeMin, timeMax, language, handleReply
   const filterFunc = it => it.end.substring(0,10).localeCompare(timeMin.substring(0,10)) >= 0 && it.end.localeCompare(timeMax) < 0
   serverFetchData(irl,  data => {
     if (data.status === 'OK') {
+      // alert(JSON.stringify(data))
+      // If there is a result2 use this, otherwise use result, and if this does not exist return empty list
       const list = data.result?data.result:[]
       list.filter(filterFunc).forEach(it => {
         const location = it.location?it.location:''
         const start = replaceChar(it.start, 'T', 10); // Fill in T between date and time in start (to get sorting work with Google Cal start)
         const end = replaceChar(it.end, 'T', 10); // Fill in T between date and time in start (to get sorting work with Google Cal start)
-        const staticStyleId = it.city?.toUpperCase() === 'STOCKHOLM'?'STOCKHOLM':undefined;
-        // alert(timeMin + ' ' + timeMax + ' ' + start + ' ' + end)
-        //alert(JSON.stringify(it))
-        event = _createEvent({...it, location, start, end, staticStyleId, language})
+
+        event = _createEvent({...it, location, start, end, language})
         events.push(event)
       })
     } else {
@@ -237,6 +316,7 @@ export function getEventsFromTable (irl, timeMin, timeMax, language, handleReply
       alert(message)
       console.log(message)
     } 
+
     handleReply(events)
   })
 }

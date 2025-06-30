@@ -11,8 +11,7 @@ import Service from "./pages/Service";
 import Registration from "./pages/Registration";
 import CancelRegistration from './pages/CancelRegistration'
 import Shoe from "./pages/Shoe";
-import AddEvent from "./pages/AddEvent";
-import AddPrivateLesson from "./pages/AddPrivateLesson";
+import Add from "./pages/Add";
 import EditDj from "./pages/EditDj";
 import Djs from "./pages/Djs";
 import PrivateLessons from "./pages/PrivateLessons";
@@ -61,24 +60,33 @@ export default function App() {
            <FirebaseAuth>
            <AppBar />
             <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="home" element={<Home />} />
+                {process.env.REACT_APP_ENVIRONMENT==='pl'?
+                    <>
+                        <Route path="/" element={<PrivateLessons />} />
+                        <Route path="/home" element={<PrivateLessons />} />
+                    </>
+                :    
+                    <>
+                        <Route path="/" element={<Home />} />
+                        <Route path="home" element={<Home />} />
+                        <Route path="calendars" element={<AllCalendars />} />
+                        <Route path="denmark" element={<RedirectTo url='https://www.brownbearsw.com/cal/tangodk_mil_kbh' />} />
+                        <Route path="fortuna" element={<RedirectTo url='https://www.tangofortuna.com/' />} />
+                        <Route path="tangorama" element={<RedirectTo url='https://www.tangorama.se/kalendar' />} />
+                        <Route path="halmstad" element={<RedirectTo url='http://www.tangoexperimental.com/sv-SE' />} />
+                        <Route path="got" element={<RedirectTo url={"https://teamup.com/ks863ac26a05ed5d28"} />} />
+                    </>
+                }    
                 <Route path="/calendar/:calendarName" element={<Calendar />} />
                 <Route path="/calendar/:calendarName/:calendarType" element={<Calendar />} />
-                <Route path="/calendar/:calendarName/:calendarType/:email" element={<Calendar />} />
-                <Route path="calendars" element={<AllCalendars />} />
-                <Route path="denmark" element={<RedirectTo url='https://www.brownbearsw.com/cal/tangodk_mil_kbh' />} />
-                <Route path="fortuna" element={<RedirectTo url='https://www.tangofortuna.com/' />} />
-                <Route path="tangorama" element={<RedirectTo url='https://www.tangorama.se/kalendar' />} />
-                <Route path="halmstad" element={<RedirectTo url='http://www.tangoexperimental.com/sv-SE' />} />
-                <Route path="got" element={<RedirectTo url={"https://teamup.com/ks863ac26a05ed5d28"} />} />
+                <Route path="/calendar/:calendarName/:calendarType/:calendarEmail" element={<Calendar />} />
+            
                 <Route path="myProfile" element={<MyProfile />} />
                 <Route path="usage" element={<Usage />} />
                 <Route path="privacy" element={<Privacy/>} />
                 <Route path="service" element={<Service />} />
-                <Route path="addEvent" element={<AddEvent />} />
-                <Route path="addEvent/:calendarType" element={<AddEvent />} />
-                <Route path="addPrivateLesson" element={<AddPrivateLesson />} />
+                <Route path="add" element={<Add />} />
+                <Route path="add/:calendarType" element={<Add />} />
                 <Route path="djs" element={<Djs />} />
                 <Route path="privateLessons" element={<PrivateLessons />} />
                 <Route path="update" element={<Update />} />

@@ -153,12 +153,26 @@ export const ADMINISTRATORS=['tangosmedjan@gmail.com', 'anita.e.dobi@gmail.com',
 
 
 export const CALENDAR={
-  PRIVATE_LESSON:{
+  PRIVATE_LESSON:{ // calendarType
     TBL_CALENDAR:'tbl_calendar_private_lesson',
-    TBL_REGISTRATION:'tbl_registration_private_lesson'
+    TBL_REGISTRATION:'tbl_registration_private_lesson',
+    EVENT_DEFAULT:{
+      maxLimit:1, // Max number of allowed registrations
+    }
   }, 
-  DEFAULT:{
+  DJ:{ // calendarType
+    TBL_CALENDAR:'tbl_calendar_dj',
+    TBL_REGISTRATION:'tbl_registration_dj',
+    EVENT_DEFAULT:{
+      maxLimit:1, // Max number of allowed registrations
+    }
+  }, 
+  DEFAULT:{ // calendarType
     TBL_CALENDAR:'tbl_calendar',
-    TBL_REGISTRATION:'tbl_registration_calendar'
+    TBL_REGISTRATION:'tbl_registration_calendar',
   },
 }  
+
+export const isProduction = process.env.REACT_APP_ENVIRONMENT==='production'
+export const isDevelopment = process.env.REACT_APP_ENVIRONMENT==='development'
+export const isPL = process.env.REACT_APP_ENVIRONMENT==='pl'

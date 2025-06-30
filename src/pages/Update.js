@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import {serverPost} from '../services/serverPost'
 import { BUTTON_STYLE, MAX_LENGTH_DESC, CALENDAR } from '../services/const';
 import Square from '../components/Square'
+import FORM_FIELDS from '../services/formFields'
 // import { generateEditorStateFromValue, emptyEditorState } from '../components/DraftEditor'
 
 const styles={
@@ -31,12 +32,13 @@ const styles={
 
 const development = process.env.NODE_ENV === 'development'
   
+/*
 const fields = [
     {
         type:'checkbox',
-        label:'Change all events in the same group',
+        label:'Change all events in list',
         name:'changeAll',
-        tooltip:'Change the whole list of events that you established with "Add" + "Send to calender" button'
+        tooltip:'Change the whole list of events you created with "Send List To Calendar" + "Send to calender" button'
     },
     {
         type:'checkbox',
@@ -171,6 +173,7 @@ const fields = [
         tooltip: 'Maximum number of registrants for this event. Registration not possible when max is reached.'
     },
 ]
+*/
 
 
   
@@ -179,9 +182,11 @@ export default () => {
     const [value, setValue] = useState()
     const [buttonStyle, setButtonStyle] = useState()
     const navigate = useNavigate() 
-    const location = useLocation();
+    const location = useLocation()
     const event = location.state
-    const calendarType = event?.calendarType?event.calendarType:'DEFAULT'
+    const {calendarType, email} = event
+    const calendarEmail = email
+    const fields = FORM_FIELDS[calendarType].UPDATE
 
     console.log('Update: value = ', value)
     const adjustEvent = ev => {
@@ -204,7 +209,7 @@ export default () => {
         if (reply.status==='OK') {
             setButtonStyle(BUTTON_STYLE.SAVED)
             setTimeout(() => {
-                navigate('/calendar/' + sharedState.region + '/' + calendarType)    
+                navigate('/calendar/' + sharedState.region + '/' + calendarType + (calendarEmail?'/' + calendarEmail:''))   
         }, 500);
     
         } else {
@@ -214,7 +219,7 @@ export default () => {
     }
     const handleSubmit = e => {
         e.preventDefault()
-        alert('[handleSubmit]:calendarType:' + calendarType)
+        // alert('[handleSubmit]:calendarType:' + calendarType)
         setButtonStyle(BUTTON_STYLE.CLICKED)
 
         if (moment(value.startDateTime) > moment(value.endDateTime)) {
@@ -236,15 +241,17 @@ export default () => {
         :
             {}
 
-
+            
         const startDateTime = value.changeAll?undefined:value.startDateTime;
         const endDateTime = value.changeAll?undefined:value.endDateTime;
         const startTime = value.changeAll?value.startTime:undefined 
         const endTime = value.changeAll?value.endTime:undefined
         const tableName = CALENDAR[calendarType].TBL_CALENDAR
-        const data = {...value, ...settings, startDateTime, endDateTime, startTime, endTime, email:undefined, id:undefined, tableName} 
+        const email = undefined // Do not update email
+        const id = undefined  // Do not update id, i.e. use the same 
+        const data = {...value, ...settings, startDateTime, endDateTime, startTime, endTime, email, tableName, id} 
 
-        console.log('Update Just before update with /updateEvent: data =', data)
+        console.log('[Update]formulär Just before update with /updateEvent: data =', data)
         const irl = '/updateEvent'
         serverPost(irl,  data, handleReply)
     }    

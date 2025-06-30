@@ -40,13 +40,13 @@ const styles = {
 }
 
 const FirebaseResetPassword = () =>  {
-  const [email, setEmail] = useState(undefined)
+  const [signinEmail, setSigninEmail] = useState(undefined)
   const [mailSent, setMailSent] = useState(undefined)
   const auth = getAuth()
-  const handleChange = e => setEmail(e.target.value)
+  const handleChange = e => setSigninEmail(e.target.value)
   const handleSubmit = e => {
     e.preventDefault()
-    sendPasswordResetEmail(auth, email).then(() => {
+    sendPasswordResetEmail(auth, signinEmail).then(() => {
         setMailSent(true)
     }).catch((error) => {
         const errorCode = error.code;

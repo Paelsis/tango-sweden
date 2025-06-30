@@ -164,7 +164,7 @@ const _RenderView = ({list, colObjList, buttons, handleAdd, search, setSearch, f
                     {buttons.map(but=>
                         <td style={styles.td}>
                             <Tooltip title={<h2>{but.tooltip}</h2>}>
-                                <IconButton onClick={()=>but.onClick(row)}>
+                                <IconButton onClick={()=>but.handleClick(row)}>
                                         {but.icon}
                                 </IconButton>
                             </Tooltip>

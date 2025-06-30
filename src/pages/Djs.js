@@ -1,8 +1,11 @@
 import React, {useEffect, useState} from 'react';
+import { getAuth, onAuthStateChanged} from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
-import Button from '@mui/material/Button';
+import {Button, IconButton, Tooltip} from '@mui/material';
 import {serverFetchData} from '../services/serverFetch'
-import { COLORS, REGIONS} from '../services/const'
+import { COLORS, REGIONS, CALENDAR} from '../services/const'
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import AddIcon from '@mui/icons-material/Add';
 // import './Djs.css';
 
 const apiBaseUrl = process.env.REACT_APP_API_BASE_URL
@@ -71,40 +74,71 @@ const styles = {
 
 }
 
-const viewDjsForRegion = (djs, region, dj, setDj) => {
-    const subdir = 'images/djs'
-    const src = dj?dj.urlImage?dj.urlImage.includes('http')?dj.urlImage:(apiBaseUrl + '/' + subdir + '/' + dj.urlImage):undefined:undefined
-    const alt = dj?dj.urlImage?('File ' + dj.urlImage + ' not found'):'No url for image':'No dj'
+const viewUsersForRegion = (region, users, selectedUser, setSelectedUser, navigate) => {
+    const subdir = 'images/users'
+    const src = selectedUser?.urlImage?selectedUser.urlImage.includes('http')?selectedUser.urlImage:(apiBaseUrl + '/' + subdir + '/' + selectedUser.urlImage):undefined
+    const alt = selectedUser?.urlImage?('File ' + selectedUser.urlImage + ' not found'):'No image'
+    const calendarType = 'DJ'
+    const description = selectedUser?.descriptionDJ?selectedUser.descriptionDJ:selectedUser?.description?selectedUser.description:''
+    const email = selectedUser?.email?selectedUser.email:'No email'
+    
+    const goToCalendar = () => {
+        if (selectedUser?.email?selectedUser.email:undefined) {
+            navigate('/calendar/' + region + '/' + calendarType  + '/' + email)
+        } else {
+            alert('[PrivateLesson]:No email given for selected user')
+        }   
+    }
+    const addToCalendar = () => {
+        if (selectedUser?.email?selectedUser.email:undefined) {
+            const link = '/add/' + calendarType
+            alert(link)
+            navigate(link)
+        } else {
+            alert('[viewUsersForRegion]: WARNING: No selected user')
+        }   
+    }
     return(
     <div >
         <div className='column is-12'>
-            <h4 style={{color:COLORS.YELLOW}}>Diskjockeys</h4>
-            {djs.filter(dj=>dj.active==1).filter(dj=> dj.region === region).map(it=>
-                <Button 
-                variant={it.email===dj.email?'contained':'outlined'} 
-                type="button" 
-                style={it.email===dj.email?styles.buttonContained:styles.buttonOutlined}  
-                onClick={()=>setDj(it)}>{it.nickname?it.nickname:(it.firstName + ' ' + it.lastName)}
-                </Button>
+            {users.filter(selectedUser=> selectedUser.region === region).map(it=>
+                <>
+                    <Button 
+                        variant={it.email===selectedUser?.email?'contained':'outlined'} 
+                        type="button" 
+                        style={it.email===selectedUser?.email?styles.buttonContained:styles.buttonOutlined}  
+                        onClick={()=>setSelectedUser(it)}>{it.nickname?it.nickname:(it.name)}
+                    </Button>
+                </>
             )}    
         </div>
-        {dj.email?
+
+        {selectedUser?.email?
             <div className="columns is-centered" style={{color:COLORS.WHITE, width:'100vw', textAlign:'left', padding:40}}>
                 <div className="column is-6 has-white-text">
                     <div style={{textAlign:'center'}}>
-                        <strong style={{fontSize:36, fontWeight:'bold'}}>{dj.nickname?dj.nickname:(dj.firstName + ' ' + dj.lastName)}</strong>
+                        <strong style={{fontSize:36, fontWeight:'bold'}}>
+                            {selectedUser.nickname?selectedUser.nickname:selectedUser.name}
+                        </strong>
+                        &nbsp;
+                        <Tooltip title='Calendar for private lesson'>
+                            <IconButton sx={{height:50, width:50}} size='large' color="inherit" variant="outlined" onClick={goToCalendar} autoFokus>
+                                <br/>
+                                <CalendarMonthIcon sx={{height:50, width:50}} color={'white'}/>
+                            </IconButton>
+                        </Tooltip>
                         <p/><p/>
                         <strong style={{fontSize:16}}>
-                        City:{dj.city}
+                        City:{selectedUser.city}
                         &nbsp;
-                        Phone:{dj.phone}
+                        Phone:{selectedUser.phone?selectedUser.phone:'Unknown'}
                         &nbsp;
-                        E-mail:{dj.email?<a href={"mailto:" + (dj.email?dj.email:null)}>{dj.email}</a>:null}
+                        E-mail:{selectedUser.email?<a href={"mailto:" + (selectedUser.email?selectedUser.email:null)}>{selectedUser.email}</a>:null}
                         </strong>
                     </div>
                     <div style={{height:20}}/>
                     <div className='has-white-text'>
-                        <div className='content' dangerouslySetInnerHTML={{__html: dj.description}} />
+                        <div className='content' dangerouslySetInnerHTML={{__html: description}} />
                     </div>
                 </div>
                 <div className="column is-3" style={{textAlign:'left', paddingTop:40}}>
@@ -116,37 +150,53 @@ const viewDjsForRegion = (djs, region, dj, setDj) => {
 )}
 
 
-//AllCalendars
+// PrivateLesson
 export default () => {
-    const [djs, setDjs] = useState([])
-    const [dj, setDj] = useState({})
     const [region, setRegion] = useState([])
+    const [users, setUsers] = useState([])
+    const [selectedUser, setSelectedUser] = useState()
+    const [signinEmail, setSigninEmail] = useState()
     const navigate = useNavigate()
     const handleNavigate = lnk => {
         navigate(lnk)
     }
 
     useEffect(()=>{
-        const irl = '/getDjs'
-        serverFetchData(irl,  handleReply)
+        const auth = getAuth()
+        onAuthStateChanged(auth, user => {
+            setSigninEmail(user?.email?user.email:undefined)
+        })
     }, [])
 
-    // const cities = uniqueList(djs.map(it => it['city']))
-    const uniqueList = list => {return([...new Set(list)])}
-    const uniqueRegions = uniqueList(djs.filter(it=>it.active).map(it => it.region))
-    const regions = REGIONS.filter(it =>uniqueRegions.includes(it))
-
-    const handleReply = reply => {
+    const handleReply = (reply) => {
         if (reply.status === 'OK') {
             // alert(JSON.stringify(reply))
-            setDjs(reply.result)
+            setUsers(reply.result.filter(it=>it.isDiskjockey==1))
+
+            // If signied in, set selectedUser to user, otherwise, no user set initially
+            const user = reply.result.find(it => it.email === signinEmail)
+            setSelectedUser(user)
+            setRegion(user?.region?user.region:undefined)
         } else {
-            alert('ERROR: No DJ-s in database')
+            alert('ERROR: No DJ-s')
         }
     }
+
+    useEffect(()=>{
+        const irl = '/getUsers'
+        serverFetchData(irl,  reply=>handleReply(reply))
+    }, [signinEmail])
+
+  
+    // const cities = uniqueList(djs.map(it => it['city']))
+    const uniqueList = list => {return([...new Set(list)])}
+    const uniqueRegions = uniqueList(users.map(it => it.region))
+    const regions = REGIONS.filter(it =>uniqueRegions.includes(it))
+
     return(
         <div style={styles.container}>
                 <div style={{width:'100vw', textAlign:'center'}}>
+                    <h2 style={{color:COLORS.YELLOW}}>DJ-s</h2>
                     <h4 style={{color:COLORS.YELLOW}}>Regions</h4>
                     {regions.map(reg => 
                         <span>
@@ -154,13 +204,16 @@ export default () => {
                                 variant={reg===region?"contained":"outlined"} 
                                 // size={largeIcons.includes(reg)?'medium':'small'}
                                 type="button" style={reg===region?styles.buttonContained:styles.buttonOutlined}  
-                                onClick={()=>{setRegion(reg);setDj({})}}>{reg}
+                                onClick={()=>{
+                                    setRegion(reg); 
+                                    setSelectedUser()
+                                }}>{reg}
                             </Button>
                         </span>    
                     )}   
                 </div>     
                 <div style={{width:'100vw', textAlign:'center', margin:'auto'}}>
-                        {viewDjsForRegion(djs, region, dj, setDj)} 
+                    {viewUsersForRegion(region, users, selectedUser, setSelectedUser, navigate)} 
                 </div>
         </div>
     )

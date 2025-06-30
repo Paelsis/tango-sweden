@@ -15,21 +15,13 @@ const getField = column => {
     return {type, name, label:name, tooltip:'No helptext', names:undefined,  required:false}
 }    
 
-// FormTemplate.js
-export default props => {
-    const {fields, buttons, value, handleSubmit, setValue} = props
-    const handleKeyPress = e => {
-        if (e.key === 'Enter' && !!props.handlePressEnter) {
-            props.handlePressEnter()
-        } 
-    }
+const isHidden = (fld, value) => (fld.hiddenIf?value?value[fld.hiddenIf]?true:false:true:false) || (fld.notHiddenIf?value?value[fld.notHiddenIf]?false:true:true:false)
 
-    const isHidden = fld => (fld.hiddenIf?value?value[fld.hiddenIf]?true:false:true:false) || (fld.notHiddenIf?value?value[fld.notHiddenIf]?false:true:true:false)
-
+const isValid = (fields, value) => {
     const isValidFld = fld => {
         if (!value) {
             return(false)
-        } else if (isHidden(fld)) {
+        } else if (isHidden(fld, value)) {
             return true
         } else if (fld.required && !value[fld.name]) {
             return false
@@ -40,14 +32,26 @@ export default props => {
             }        
         }    
     }
+    
+    return fields.find(fld => !isValidFld(fld))
+}    
 
-    const isValid = fields.find(fld => !isValidFld(fld))
+
+// FormTemplate.js
+export default props => {
+    const {fields, buttons, value, handleSubmit, setValue} = props
+    const handleKeyPress = e => {
+        if (e.key === 'Enter' && !!props.handlePressEnter) {
+            props.handlePressEnter()
+        } 
+    }
+
     return(
         <div>   
             <form onSubmit={handleSubmit}>
                 <div>
                     {props.children}
-                    {fields.filter(fld=>!isHidden(fld)).map((fld, index) => 
+                    {fields.filter(fld=>!isHidden(fld, value)).map((fld, index) => 
                         <Tooltip 
                             title={<h4 style={{textAlign:'left' , fontSize:20, fontWeight:900, color:COLORS.WHITE}}>{fld.tooltip}</h4>}
                             open={fld.tooltip?undefined:false}
@@ -78,7 +82,7 @@ export default props => {
                                         type={button.type} 
                                         variant={button.variant?button.variant:"outlined"}
                                         color={"inherit"}
-s                                       onClick={button.onClick?button.onClick:undefined}
+s                                       onClick={button.handleClick?button.handleClick:undefined}
                                     >
                                         {button.label}
                                     </Button>

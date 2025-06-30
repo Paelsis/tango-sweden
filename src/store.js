@@ -2,13 +2,13 @@ import React, { createContext, useState, useContext } from 'react';
 
 const initialState = {
   authLevel:4,
-  city:'Unset',
-  region:'Unset',
+  city:'Stockholm',
+  region:'Mitt',
   country:'Sverige',
   color:'orange',
   backgroundColorLight:'grey',
   backgroundColorDark:'black',
-  // shoeStories:true,
+  calendarType:'DEFAULT'
 };
 
 const useMyState = () => useState(initialState);

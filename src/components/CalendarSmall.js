@@ -2,11 +2,13 @@ import React, {useState} from 'react';
 import {AVA_STATUS, MAX_LIMIT_UNSET, TBL_REGISTRATION_CALENDAR} from '../services/const'
 import { useNavigate } from 'react-router-dom';
 import { CALENDAR } from '../services/const'
+import Tooltip from '@mui/material/Tooltip';
 
 //import moment from 'moment';
 import moment from 'moment-with-locales-es6'
 import {IconButton} from '@mui/material';
 import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
+import PersonAddDisabledIcon from '@mui/icons-material/PersonAddDisabled';
 const language = 'SV'
 
 const CULTURE = (language) => language==='SV'?'sv':language==='ES'?'es':'en'
@@ -76,7 +78,8 @@ let styles = {
         width:'100%',
         marginRight:'auto',
         marginLeft:'auto',
-        borderSpacing:1,
+        marginTop:0,
+        paddingTop:0,
         borderCollapse:'collapse',
     },
     tbody: {
@@ -102,42 +105,56 @@ let styles = {
 
 };
 
+
+
 // CalendarSmall
 export default props => {
-    const {events, handleEvent, calendarType} = props
+    const {events, handleSelectEvent, calendarType, signinEmail} = props
     const [fontSize, setFontSize] = useState() 
     const navigate = useNavigate()
 
     moment.locale(CULTURE(language))
 
-    const tblRegistration = CALENDAR[calendarType?calendarType:'DEFAULT'].TBL_REGISTRATION
-  
-
-    const onClick = () => {
-        setFontSize(fontSize==='small'?'large':'small')
-    }
-
     const renderEvent = event => {
         const mstart = event.mstart
         const mend = event.mend
-        const maxLimit = event.maxLimit?event.maxLimit:MAX_LIMIT_UNSET
+        const ava = event.ava
+        const maxLimit = event.maxLimit?event.maxLimit:MAX_LIMIT_UNSET // Max number of registrations
         let weekday = mstart.format('dddd')
         let weekdayEnd = mend.format('dddd')
         weekday = weekday.toUpperCase().charAt(0) + weekday.slice(1,3)
         weekdayEnd = weekdayEnd.toUpperCase().charAt(0) + weekdayEnd.slice(1,3)
-        const startDate = event.startDate
         const timeRange = event.timeRange
         const dateRange=event.dateRange
+        const organizerEmail = event.email
         const title=event.title
         const dateRangeTime=event.dateRangeTime
         const useRegistrationButton = event.useRegistrationButton
         const trStyle = event.style
         //const forcedSmallFonts= ['milonga', 'practica', 'pratika'].find(it  => event.title.toLowerCase().includes(it)) && event.durationHours >12
         const forceSmallFonts = event.forceSmallFonts
-        const handleRegistration = e => {
+        const authorized = signinEmail === organizerEmail
+
+        const goToRegistration = () => {
             const eventIdExtended = event.eventId + event.startDate
-            // alert(eventIdExtended)
-            navigate('/registration', {state:{eventIdExtended, maxLimit, tblRegistration, title, dateRangeTime}})
+            // alert('[CalendarSmall] eventIdExtended = ' + eventIdExtended)
+            navigate('/registration', {state:{calendarType, eventIdExtended, maxLimit, ava, title, organizerEmail, dateRangeTime}})
+        }
+
+        const listRegistration = () => {
+            const eventIdExtended = event.eventId + event.startDate
+            const tblRegistration = CALENDAR[calendarType?calendarType:'DEFAULT'].TBL_REGISTRATION
+            navigate('/listRegistration', {state:{eventIdExtended, tblRegistration}})
+        }    
+
+        const handleClickButton = () => {
+            if (calendarType === CALENDAR.DEFAULT || !calendarType) {
+              goToRegistration(event); 
+            } else if (authorized) {
+              listRegistration(event)
+            } else {  
+              goToRegistration(event)
+            }
         }
 
         return(
@@ -147,35 +164,44 @@ export default props => {
                 style={styles.tr(event)}
             > 
                 {event.moreThan11Hours && !forceSmallFonts?
-                    <td colSpan={useRegistrationButton?4:4} onClick={()=>handleEvent(event)}>  
+                    <td colSpan={useRegistrationButton?4:4} onClick={()=>handleSelectEvent(event)}>  
                         {event.title}<br/>{dateRange}
                     </td>
                 :
                     <>
-                        <td style={styles.tdDateTime} onClick={()=>handleEvent(event)}>  
-                            <small>{event.sameDate?'':dateRange}</small>
+                        <td style={styles.tdDateTime} onClick={()=>handleSelectEvent(event)}>  
+                            <small>{dateRange}</small>
                         </td>
-                        <td style={styles.tdDateTime} onClick={()=>handleEvent(event)}>  
+                        <td style={styles.tdDateTime} onClick={()=>handleSelectEvent(event)}>  
                             <small>{timeRange}</small>
                         </td>
-                        <td style={styles.td} colSpan={useRegistrationButton==1?2:2} onClick={()=>handleEvent(event)}>  
+                        <td style={styles.td} colSpan={useRegistrationButton==1?2:2} onClick={()=>handleSelectEvent(event)}>  
                             <small>{event.title}</small>
                         </td>
                     </>
                 }
                 {useRegistrationButton==1?
                     <td style={styles.td}>  
-                        {event.avaStatus=== AVA_STATUS.CC?
-                            'Fully Booked'
-                        :
-                            <IconButton 
-                                key={event.productId} 
-                                className="button" 
-                                style={{backgroundColor:'transparent', color:trStyle.color, borderColor:trStyle.color, padding:1, fontSize:'small'}}
-                                onClick = {handleRegistration}
-                            >
-                                <AppRegistrationIcon />
-                            </IconButton>
+                        {event.cnt < event.maxLimit?
+                                <IconButton 
+                                    key={event.productId} 
+                                    className="button" 
+                                    style={{backgroundColor:'transparent', color:trStyle.color, borderColor:trStyle.color, padding:1, fontSize:'small'}}
+                                    varant='outlined'
+                                    handleClick = {handleClickButton}
+                                >
+                                    <AppRegistrationIcon />
+                                </IconButton>
+                            :           
+                                <Tooltip title='Fully booked'>
+                                    <IconButton 
+                                        variant="outlined"
+                                        style={{backgroundColor:'transparent', color:trStyle.color, borderColor:trStyle.color, padding:1, fontSize:'small'}}
+                                        handleClick = {handleClickButton}
+                                        >
+                                        <PersonAddDisabledIcon />
+                                    </IconButton>
+                                </Tooltip>                  
                         }
                     </td>
                 :<td style={styles.td} />}    
@@ -190,11 +216,11 @@ export default props => {
     }
 
     return (
-            <table style={styles.table}>
-                <tbody style={styles.tbody}>
-                    {renderAllEvents(events)}
-                </tbody>
-            </table>
+        <table style={styles.table}>
+            <tbody style={styles.tbody}>
+                {renderAllEvents(events)}
+            </tbody>
+        </table>
     )
 } 
 

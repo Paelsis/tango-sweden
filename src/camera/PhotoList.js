@@ -5,16 +5,13 @@ import DeleteForeverIcon from '@mui/icons-material/DeleteForever'
 import SaveIcon from '@mui/icons-material/Save';
 import Rotate90DegIcon from '@mui/icons-material/RotateRight'
 import {serverPost} from '../services/serverPost'
-import Button, { buttonClasses } from '@mui/material/Button';
-import withStatusLine from '../components/withStatusLine'
-import {STATUSLINE_STYLE} from '../services/const'
 
 const apiBaseUrl = process.env.REACT_APP_API_BASE_URL
 const BUTTON_COLOR={DEFAULT:'#888', OK:'green', PROCESSING:'lightGreen', WARNING:'orange', ERROR:'red'}
 
 // PhotoList
 const Func = props => {
-        const {subdir, list, setList, matching, setStatusLine} = props; // If matching is among calling parameters, then only files matching this string is is shown
+        const {subdir, list, setList, matching} = props; // If matching is among calling parameters, then only files matching this string is is shown
         const [buttonColor, setButtonColor] = useState(BUTTON_COLOR.DEFAULT)
 
         const styles = {
@@ -25,10 +22,10 @@ const Func = props => {
                 if (data.status === 'OK') {
                     if (matching) {
                         const newlist = data.result.filter(it=>it.fname.includes(matching) && !it.fname.includes('_thumb'))
-                        setStatusLine('Fetch of'  + newlist.length + ' rows successful', STATUSLINE_STYLE.OK, 2000) 
+                        console.log('Fetch of'  + newlist.length + ' rows successful') 
                         setList(newlist)
                     } else {
-                        setStatusLine('Fetch of'  + data.result.length + ' rows successful', STATUSLINE_STYLE.OK, 2000) 
+                        console.log('Fetch of'  + data.result.length + ' rows successful') 
                         setList(data.result)
                     }        
                 } else {
@@ -47,7 +44,7 @@ const Func = props => {
         const handleReply = reply =>{
                 if (reply) {   
                     if (reply.status==='OK') {
-                        setStatusLine('Delete successful', STATUSLINE_STYLE.OK, 2000) 
+                        console.log('Delete successful') 
                     } else {
                         alert('Delete/Rotate failed. Message, status:' + reply.status + ' message:' + (reply.message?reply.message:'No message'))     
                     }
@@ -107,5 +104,5 @@ const Func = props => {
         )
 }
 
-export default withStatusLine(Func)
+export default Func
 

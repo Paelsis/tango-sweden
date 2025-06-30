@@ -9,8 +9,6 @@ import {serverFetchData} from '../services/serverFetch'
 import { getAuth, onAuthStateChanged} from 'firebase/auth';
 import {REGIONS} from '../services/const'
 import AddPhotoSingle from '../camera/AddPhotoSingle'
-import withStatusLine from './withStatusLine'
-import {STATUSLINE_STYLE} from '../services/const'
 import { enhanceValueWithDraftVariables } from './DraftEditor'
 const MAX_DESC_LENGTH = 40000
 
@@ -123,18 +121,15 @@ const fields = [
     },
 ]
 
-const Func = props => {
+const Func = () => {
     const [sharedState, ] = useSharedState()
-    const [, forceUpdate] = useReducer(x => x + 1, 0)
-    const [email, setEmail] = useState()
+    const [signinEmail, setSigninEmail] = useState()
     const [value, setValue] = useState()
     const [list, setList] = useState([])
     const navigate = useNavigate()
     const auth = getAuth()
 
-    const {setStatusLine} = props
-
-    const subdir = 'images/djs'
+    const subdir = '/images/user'
 
 
     // useEffect(()=>setValue(props.init),[props.init])
@@ -144,11 +139,11 @@ const Func = props => {
             if (reply.result) {
                 setValue(enhanceValueWithDraftVariables(fields, reply.result))
             } else {
-                setStatusLine('[EditDj.js] No current info about DJ', STATUSLINE_STYLE.WARNING, 1500) 
+                console.log('[EditDj.js] No current info about DJ') 
             }    
         } else {
             setValue(enhanceValueWithDraftVariables(fields, undefined))
-            setStatusLine('Currently no info regarding DJ', STATUSLINE_STYLE.WARNING, 1500) 
+            console.log('Currently no info regarding DJ')
         }
     }
 
@@ -157,7 +152,7 @@ const Func = props => {
         onAuthStateChanged(auth, user => {
             if (user?user.email:false) {
                 // Get DJ for the email of the logged in user
-                setEmail(user.email);
+                setSigninEmail(user.email);
                 const irl1 = '/getDj?email=' + user.email
                 serverFetchData(irl1, handleReplyDj)
             } 
@@ -176,19 +171,19 @@ const Func = props => {
 
     const handleSaveReply = result => {
         if (result.status === 'OK') {
-          setStatusLine('Description saved on disk', STATUSLINE_STYLE.OK, 2000)  
+          console.log('Description saved on disk')  
         } else {
           if (result.message) {
             alert(JSON.stringify(result.message))  
           }  
-          setStatusLine('ERROR:Save DJ failed', STATUSLINE_STYLE.ERROR, 5000)  
+          console.log('ERROR:Save DJ failed')  
         }
     }
   
     const handleSave = () => {
-        if (!!email) {
+        if (!!signinEmail) {
             const active = value.active == 1?1:0
-            const record = {...value, active, email, authLevel:undefined, html:undefined, draft_description:undefined, creaTimestamp:undefined, updTimestamp:undefined}
+            const record = {...value, active, email:signinEmail, authLevel:undefined, html:undefined, draft_description:undefined, creaTimestamp:undefined, updTimestamp:undefined}
             const data = {tableName:'tbl_dj', record, fetchRows:true}
             if (value.description?value.description.length > MAX_DESC_LENGTH:false) {
                 alert('WARNING: Application doew not does not allow to save text longer than ' + MAX_DESC_LENGTH + ' characthers')
@@ -202,24 +197,24 @@ const Func = props => {
 
     const handleSaveImage = (urlImage, result) => {
         if (result.status === 'OK') {
-            const row = result.rows.find(it=>it.email === email)
+            const row = result.list.find(it=>it.email === signinEmail)
             if (row) {
-                setStatusLine('Image ' + value.urlImage + ' saved on disk', STATUSLINE_STYLE.OK, 2000)  
+                console.log('Image ' + urlImage + ' saved to disk')  
                 setTimeout(()=>{
-                    URL.revokeObjectURL(value.urlImage)
+                    URL.revokeObjectURL(urlImage)
                     window.location.reload(false);
                 }, 
                 2000);
         
             } else {
-                setValue({...row, urlImage: undefined})
-                setStatusLine('Image ' + value.urlImage + ' saved on disk', STATUSLINE_STYLE.ERROR, 10000)  
+                setValue({...row, urlImage:undefined})
+                console.log('[EditDisckjockey] Image not found in list')  
             }
           } else {
             if (result.message) {
               alert(JSON.stringify(result.message))  
             }  
-            setStatusLine('ERROR:Save DJ failed', STATUSLINE_STYLE.ERROR, 3000)  
+            console.log('ERROR:Save DJ failed')  
         }
   
     }
@@ -228,9 +223,9 @@ const Func = props => {
         if (fname) {
             const urlImage = apiBaseUrl + '/' + subdir + '/' + fname
             const active = value.active == 1?1:0
-            const record = {...value, active, email, urlImage, html:undefined, draft_description:undefined, creaTimestamp:undefined, updTimestamp:undefined}
+            const record = {...value, active, email:signinEmail, urlImage, html:undefined, draft_description:undefined, creaTimestamp:undefined, updTimestamp:undefined}
             const data = {tableName:'tbl_dj', record, fetchRows:true}
-            setValue({...value, urlImage: urlImage})
+            setValue({...value, urlImage})
             serverPost('/replaceRow', data, result=>handleSaveImage(urlImage, result))
         } else {
             alert("ERROR: Image not loaded")
@@ -252,7 +247,7 @@ const Func = props => {
         {
             type:'button',
             label:'Cancel',
-            handleClick:handleCancel
+            onClick:handleCancel
         },    
     ]
 
@@ -274,11 +269,10 @@ const Func = props => {
                         <div className='column is-4'>
 
                             <img src={value.urlImage?value.urlImage:''} alt={'No photo (Fill in data before uploading photo'}/>
-                            {email?<AddPhotoSingle 
-                                {...props} 
+                            {signinEmail?<AddPhotoSingle 
                                 remove={true}
-                                filename={email} 
-                                matching={email} 
+                                filename={signinEmail} 
+                                matching={signinEmail} 
                                 subdir={subdir}
                                 list={list} 
                                 setUrlImage={setUrlImage} />
@@ -297,5 +291,5 @@ const Func = props => {
         
 }
 
-export default withStatusLine(Func)
+export default Func
 

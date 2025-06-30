@@ -38,7 +38,7 @@ export function serverFetchDataResultApi(apiBaseUrl, irl, handleResult) {
 // serverFetchData
 function serverFetchDataApi(apiBaseUrl, irl, handleReply) {
     const url = irl.slice(0,4).toLowerCase().localeCompare('http')===0?irl:apiBaseUrl + irl
-    console.log('fetch url:', url)
+    // console.log('fetch url:', url)
     axios({
         method: 'get',
         url,

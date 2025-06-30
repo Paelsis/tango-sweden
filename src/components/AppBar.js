@@ -12,7 +12,6 @@ import HomeIcon from '@mui/icons-material/Home';
 import PersonIcon from '@mui/icons-material/Person';
 import SchoolIcon from '@mui/icons-material/School';
 import { TbVinyl } from "react-icons/tb";
-import { PiHighHeelLight } from "react-icons/pi";
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Divider from '@mui/material/Divider';
@@ -21,11 +20,11 @@ import { useNavigate } from 'react-router-dom';
 import { getAuth, signOut, onAuthStateChanged } from 'firebase/auth';
 import {AuthContext} from "../login/FirebaseAuth"
 import {serverFetchData} from '../services/serverFetch'
-import {COLORS} from '../services/const'
+import {COLORS, isProduction} from '../services/const'
 // AppBar.js
 export default () => {
   const [sharedState, setSharedState] = useSharedState()
-  const [email, setEmail] = useState(undefined)
+  const [signinEmail, setSigninEmail] = useState(undefined)
   //const [sharedState, setSharedState] = useGlobalState('USER_SETTINGS')
   const [anchorEl, setAnchorEl] = useState(null);
   const auth = getAuth()
@@ -57,7 +56,7 @@ export default () => {
   
   useEffect(()=>{
     onAuthStateChanged(auth, user => {
-      setEmail(user?user.email:undefined);
+      setSigninEmail(user?user.email:undefined);
       if (user?user.email:false) {
         const irl = '/getUser?email=' +  user.email
         serverFetchData(irl,  data=>handleResultUser(data))
@@ -70,7 +69,7 @@ export default () => {
   const handleSignin = () => navigate('/signin')
   
   const handleSignout = () => {
-    setEmail(undefined)
+    setSigninEmail(undefined)
     signOut(auth)
     navigate('/signin')
     // window.location.reload()
@@ -78,112 +77,115 @@ export default () => {
 
   const authLevel = sharedState?.authLevel?sharedState.authLevel:0
   const productLevel = sharedState?.productLevel?sharedState.productLevel:0
+  const isPrivateTeacher = sharedState?.isPrivateTeacher?sharedState.isPrivateTeacher:0
+
+//  {(signinEmail && authLevel >= 4 && isPrivateTeacher==1)?<MenuItem onClick={()=>navigate('/add/PRIVATE_LESSON')}>Add private lesson</MenuItem>:null}
 
   return (
       <div>
-      <Menu
-        id="basic-menu"
-        anchorEl={anchorEl}
-        open={open}
-        onClose={handleClose}
-        MenuListProps={{
-          'aria-labelledby': 'basic-button',
-        }}
-      >
-        <MenuItem><ListItemText inset></ListItemText></MenuItem>
-        {(email&&authLevel >= 1)?<MenuItem onClick={()=>handleSignout()}>Signout</MenuItem>:<MenuItem onClick={()=>handleSignin()}>Signin</MenuItem>}
-        {email?null:<MenuItem onClick={()=>handleSignup()}>Signup</MenuItem>}
-        {(email && authLevel >= 1)?<Divider />:null}
-        {(email && authLevel >= 1)?<MenuItem onClick={()=>navigate('/editDj')}>My TDJ Info</MenuItem>:null}
-        {(email && authLevel >= 4)?<MenuItem onClick={()=>navigate('/addEvent')}>Add Event</MenuItem>:null}
-        {(email && authLevel >= 8 && productLevel >= 2)?<MenuItem onClick={()=>navigate('/addPrivateLesson')}>Add Private Lesson</MenuItem>:null}
-        {(email && authLevel >= 1)?<MenuItem onClick={()=>navigate('/myProfile')}>My Profile</MenuItem>:null}
-        {(email && authLevel >= 16)?<MenuItem onClick={()=>navigate('/updateUser')}>Define users</MenuItem>:null}
-        <MenuItem onClick={()=>handleNavigate('/usage')}>Usage</MenuItem>
-      </Menu>
+        <Menu
+          id="basic-menu"
+          anchorEl={anchorEl}
+          open={open}
+          onClose={handleClose}
+          MenuListProps={{
+            'aria-labelledby': 'basic-button',
+          }}
+        >
+          <MenuItem><ListItemText inset></ListItemText></MenuItem>
+          {(signinEmail&&authLevel >= 1)?<MenuItem onClick={()=>handleSignout()}>Signout</MenuItem>:<MenuItem onClick={()=>handleSignin()}>Signin</MenuItem>}
+          {signinEmail?null:<MenuItem onClick={()=>handleSignup()}>Signup</MenuItem>}
+          {(signinEmail && authLevel >= 1)?<Divider />:null}
+          {(signinEmail && authLevel >= 4)?<MenuItem onClick={()=>navigate('/add')}>Add event</MenuItem>:null}
+          {(signinEmail && authLevel >= 1)?<MenuItem onClick={()=>navigate('/myProfile')}>My profile</MenuItem>:null}
+          {(signinEmail && authLevel >= 16)?<MenuItem onClick={()=>navigate('/updateUser')}>Define users</MenuItem>:null}
+          <MenuItem onClick={()=>handleNavigate('/usage')}>Usage</MenuItem>
+        </Menu>
 
-      <Box sx={{ flexGrow: 2}}>
-        <AppBar position="static" sx={{color:COLORS.YELLOW,  backgroundColor:'#232323'}}>
-          <Toolbar>
-            <Tooltip title={<h1 style={{color:COLORS.YELLOW, fontSize:14}}>Go to Home {productLevel}</h1>}>
-            <IconButton
-              size="large"
-              edge="start"
-              color="inherit"
-              aria-label="menu"
-              sx={{ mr: 0 }}
-            >
-              <HomeIcon 
-                    id="basic-button"
-                    aria-controls={open ? 'basic-menu' : undefined}
-                    aria-haspopup="true"
-                    aria-expanded={open ? 'true' : undefined}
-                    onClick={()=>handleNavigate('/home')}
-              />
-            </IconButton>
-            </Tooltip>
-            
-            <Typography variant="h5" component="div" sx={{ flexGrow: 1 }}  onClick={()=>handleNavigate('/home')}>
-            </Typography>
-            <Typography variant="h8" component="div" sx={{ flexGrow: 4 }}  onClick={()=>handleNavigate('/home')}>
-              {email?('Signed in as ' + (email?email:null) + ' ' + (authLevel >=16?'Administrator':authLevel>=8?'Superuser':'')):''}
-            </Typography>
-            <Tooltip title={<h1 style={{color:COLORS.YELLOW, fontSize:20}}>List of Tango Diskjockeys</h1>}>
-            <IconButton
-              size="large"
-              edge="start"
-              color="inherit"
-              aria-label="menu"
-              sx={{ mr: 0 }}
-              onClick={()=>handleNavigate('/djs')}
-            >
-              <TbVinyl 
-                    id="basic-button"
-                    aria-controls={open ? 'basic-menu' : undefined}
-                    aria-haspopup="true"
-                    aria-expanded={open ? 'true' : undefined}
-              />
-            </IconButton>
-            </Tooltip>
-            {sharedState.shoeStories?
-            <Tooltip title={<h1 style={{color:COLORS.YELLOW, fontSize:20}}>Discussion about tango shoes</h1>}>
-            <IconButton
-              size="large"
-              edge="start"
-              color="inherit"
-              aria-label="menu"
-              sx={{ mr: 0 }}
-            >
-              <PiHighHeelLight 
-                    id="basic-button"
-                    aria-controls={open ? 'basic-menu' : undefined}
-                    aria-haspopup="true"
-                    aria-expanded={open ? 'true' : undefined}
-                    onClick={()=>handleNavigate('/shoe')}
-              />
-            </IconButton>
-            </Tooltip>
-            :null}
-            <Tooltip title={<h1 style={{color:COLORS.YELLOW, fontSize:20}}>Menu to signup, signin, signout, add events ...</h1>}>
-            <IconButton
-              size="large"
-              edge="start"
-              color="inherit"
-              aria-label="menu"
-              sx={{ mr: 0 }}
-              onClick={handleClick}
+        <Box sx={{ flexGrow: 2}}>
+          <AppBar position="static" sx={{color:COLORS.YELLOW,  backgroundColor:'#222222'}}>
+            <Toolbar>
+              <Tooltip title={<h1 style={{color:COLORS.YELLOW, fontSize:14}}>Go to Home {productLevel}</h1>}>
+              <IconButton
+                size="large"
+                edge="start"
+                color="inherit"
+                aria-label="menu"
+                sx={{ mr: 0 }}
+                onClick={()=>handleNavigate('/home')}
+                >
+                <HomeIcon 
+                      id="basic-button"
+                      aria-controls={open ? 'basic-menu' : undefined}
+                      aria-haspopup="true"
+                      aria-expanded={open ? 'true' : undefined}
+                />
+              </IconButton>
+              </Tooltip>
+              
+              <Typography variant="h5" component="div" sx={{ flexGrow: 1 }}  onClick={()=>handleNavigate('/home')}>
+              </Typography>
+              <Typography variant="h8" component="div" sx={{ flexGrow: 4 }}  onClick={()=>handleNavigate('/home')}>
+                {signinEmail?('Signed in as ' + (signinEmail?signinEmail:null) + ' ' + (authLevel >=16?'Administrator':authLevel>=8?'Superuser':'')):''}
+              </Typography>
+
+              <Tooltip title={<h1 style={{color:COLORS.YELLOW, fontSize:20}}>Book a private lesson</h1>}>
+                <IconButton
+                  size="large"
+                  edge="start"
+                  color="inherit"
+                  aria-label="menu"
+                  sx={{ mr: 0 }}
+                  onClick={()=>handleNavigate('/privateLessons')}
+                >
+                  <SchoolIcon 
+                        id="basic-button"
+                        aria-controls={open ? 'basic-menu' : undefined}
+                        aria-haspopup="true"
+                        aria-expanded={open ? 'true' : undefined}
+                  />
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip title={<h1 style={{color:COLORS.YELLOW, fontSize:20}}>List of Tango Diskjockeys</h1>}>
+              <IconButton
+                size="large"
+                edge="start"
+                color="inherit"
+                aria-label="menu"
+                sx={{ mr: 0 }}
+                onClick={()=>handleNavigate('/djs')}
               >
-              <MenuIcon 
-                    id="basic-button"
-                    aria-controls={open ? 'basic-menu' : undefined}
-                    aria-haspopup="true"
-                    aria-expanded={open ? 'true' : undefined}
-              />
-            </IconButton>
-            </Tooltip>
-          </Toolbar>
-        </AppBar>
-      </Box>
+                <TbVinyl 
+                      id="basic-button"
+                      aria-controls={open ? 'basic-menu' : undefined}
+                      aria-haspopup="true"
+                      aria-expanded={open ? 'true' : undefined}
+                />
+              </IconButton>
+              </Tooltip>
+
+
+              <Tooltip title={<h1 style={{color:COLORS.YELLOW, fontSize:20}}>Menu to signup, signin, signout, add events ...</h1>}>
+              <IconButton
+                size="large"
+                edge="start"
+                color="inherit"
+                aria-label="menu"
+                sx={{ mr: 0 }}
+                onClick={handleClick}
+                >
+                <MenuIcon 
+                      id="basic-button"
+                      aria-controls={open ? 'basic-menu' : undefined}
+                      aria-haspopup="true"
+                      aria-expanded={open ? 'true' : undefined}
+                />
+              </IconButton>
+              </Tooltip>
+            </Toolbar>
+          </AppBar>
+        </Box>
       </div>
   );
 }
@@ -191,21 +193,4 @@ export default () => {
 /* {email?ADMINISTRATORS.includes(email)?<small>{JSON.stringify(sharedState)}</small>:null:null} */
 /*
 
-<Tooltip title={<h1 style={{color:COLORS.YELLOW, fontSize:20}}>Book a private lesson</h1>}>
-<IconButton
-  size="large"
-  edge="start"
-  color="inherit"
-  aria-label="menu"
-  sx={{ mr: 0 }}
-  onClick={()=>handleNavigate('/privateLessons')}
->
-  <PersonIcon 
-        id="basic-button"
-        aria-controls={open ? 'basic-menu' : undefined}
-        aria-haspopup="true"
-        aria-expanded={open ? 'true' : undefined}
-  />
-</IconButton>
-</Tooltip>
 */

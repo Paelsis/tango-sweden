@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
-import { useSharedState } from '../store';
+import { useSharedState } from '../store.js';
 import { useNavigate, useLocation } from 'react-router-dom';
-import FormTemplate from '../components/FormTemplate';
+import FormTemplate from '../components/FormTemplate.js';
 import Button from '@mui/material/Button';
 import moment from 'moment'
 import IconButton from '@mui/material/IconButton';
@@ -9,14 +9,11 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircleOutline';
 import Tooltip from '@mui/material/Tooltip';
-import {serverPost, replaceRow} from '../services/serverPost'
+import {serverPost, replaceRow} from '../services/serverPost.js'
 import { getAuth, onAuthStateChanged} from 'firebase/auth';
-import { BUTTON_STYLE } from '../services/const';
-import {serverFetchData} from '../services/serverFetch'
+import { BUTTON_STYLE } from '../services/const.js';
+import {serverFetchData} from '../services/serverFetch.js'
 import {MAX_LIMIT_UNSET, CALENDAR} from '../services/const.js'
-
-
-const TABLE_NAME = 'tbl_registration_calendar'
 
 const styles={
     container:{
@@ -151,24 +148,22 @@ const fields = [
     },
 ]
 
-
-
 // Registration
 export default () => {
     const location = useLocation();
     const event = location?.state?location.state:{}
-    const {eventIdExtended, maxLimit, calendarType, title, dateRangeTime} = location?.state?location.state:{}
-    const [sharedState, ] = useSharedState()
+    const {calendarType, eventIdExtended, ava, maxLimit, title, dateRangeTime, organizerEmail} = event
+    const [sharedState, setSharedState] = useSharedState()
+    const forceReloadCount = sharedState.forceReloadCount?sharedState.forceReloadCount:0
     const [value, setValue] = useState()
     const [mailSubject, setMailSubject] = useState()
     const [mailBody, setMailBody] = useState()
     const [list, setList] = useState([])
     const [buttonStyle, setButtonStyle] = useState(BUTTON_STYLE.DEFAULT)
     const navigate = useNavigate()
-    const tableName = CALENDAR[calendarType?calendarType:'DEFAULT'].TBL_REGISTRATION
-
-    // useEffect(()=>setValue(props.init),[props.init])
-    const numberOfRegistrations = list?.length?list.length:0
+    const calType = calendarType?calendarType:sharedState.calendarType?sharedState.calendarType:'DEFAULT'
+    const tblRegistration = CALENDAR[calType].TBL_REGISTRATION
+    const url = '/fetchRows?tableName=' + tblRegistration + '&eventIdExtended=' + eventIdExtended
 
     const handleReply = (data, url) => {
         if (data.status === 'OK') {
@@ -181,16 +176,15 @@ export default () => {
     useEffect(()=>{
         moment.locale('sv', {week:{dow : 1}})
         if (event.maxLimit !== MAX_LIMIT_UNSET) {
-            const url = '/fetchRows?tableName=' + tableName + '&eventIdExtended=' + event.eventIdExtended
             serverFetchData(url, data=>handleReply(data, url))
         }    
-    }, [numberOfRegistrations])
+    }, [forceReloadCount])
 
     const handleCancel = () => {
-        navigate('/calendar/' + sharedState.region)
+        navigate(-1)
     }
 
-    const handleReset = () => {
+    const handleEmpty = () => {
         setValue({})
     }
 
@@ -199,7 +193,10 @@ export default () => {
             alert('Check your mailbox for a confirmation mail')
             setButtonStyle(BUTTON_STYLE.DEFAULT) 
             navigate(-1)
-        } else {
+        } else if (reply.status === 'ERROR') {
+            alert('Message: ' + reply.message?reply.message:'No message')
+            setButtonStyle(BUTTON_STYLE.DEFAULT) 
+        } else {   
             alert('ERROR:Failed to send reply mail')
         }    
     }
@@ -207,12 +204,13 @@ export default () => {
     const handleRegReply = reply => {
         if (reply.status === 'OK') {
             setButtonStyle(BUTTON_STYLE.SAVED)
+            setSharedState({...sharedState, forceReloadCount:forceReloadCount+1, calendarType}) // Update shared state to trigger reload from database
             setTimeout(() => {
                 setList([...list, value])
                 if (process.env.NODE_ENV === 'production') {
                     const data = {
-                        email:value.email, 
-                        emailOrganizer:event.email,
+                        customerEmail:value.email, // The registrants email
+                        organizerEmail, // The email that was inserted when event was created
                         mailSubjectToCustomer:reply.mailSubject, 
                         mailBodyToCustomer:reply.mailBody,
                         mailSubjectToOrganizer:reply.mailSubject, 
@@ -223,8 +221,8 @@ export default () => {
                     setButtonStyle(BUTTON_STYLE.DEFAULT) 
                     setMailSubject(reply.mailSubject)
                     setMailBody(reply.mailBody)
-                    alert('OK: Your registration was successful but no mail sent since you are on DEV-system')
-                    // navigate(-1)
+                    alert("OK: Your registration was successful but no mail sent since you are on DEV-system\n(customerEmail=" + value.email + " organizerEmail=" + organizerEmail + ")")
+                    navigate(-1)
                 }
             }, 2000);
         } else {
@@ -236,34 +234,30 @@ export default () => {
 
     const registrationRegistrant = token => {
         if (!!value.email) {
-           const reg = {...event, ...value}
-            // alert('handleReg record:' + JSON.stringify(record))
-           serverPost('/registration', {tableName, reg, token}, handleRegReply)
+            const reg = {...event, ...value}
+            serverPost('/registration', {tableName:tblRegistration, reg, token}, handleRegReply)
         }   
     }
 
     const registrationPartnerAndRegistrant = () => {
         if (value.havePartner) {
             // Reverse names
-            const regPartner = {
-                ...event, 
-                ...value, 
-                eventIdExtended, 
+            const regPartner = {...event, ...value, 
                 firstName:value.firstNamePartner,
                 lastName:value.lastNamePartner,
                 firstNamePartner:value.firstName,
                 lastNamePartner:value.lastName,
                 token:undefined
             }
-            // alert('handleReg record:' + JSON.stringify(record))
-            serverPost('/registration', {tableName, reg:regPartner}, reply=>{
+            // alert('handleSubmit record:' + JSON.stringify(record))
+            serverPost('/registration', {tableName:tblRegistration, reg:regPartner}, reply=>{
                 if (reply.status === 'OK') {
                     setList([...list, regPartner])
 
                     // Make registration with same cancellation token
                     registrationRegistrant(reply.token)
                 } else {
-                    alert('Failed to register registrant')
+                    alert(reply.message)
                 }  
             })
             // replaceRow(tableName, recordPartner, handleRegReplyPartner)
@@ -271,7 +265,7 @@ export default () => {
     }
 
   
-    const handleReg = e => {
+    const handleSubmit = e => {
         e.preventDefault()
         setButtonStyle(BUTTON_STYLE.CLICKED)
         if (value.havePartner) {
@@ -282,6 +276,7 @@ export default () => {
             registrationRegistrant(undefined);
         }    
     }
+    
     const buttons=[
         {
             type:'submit',
@@ -290,44 +285,44 @@ export default () => {
         },    
         {
             type:'button',
-            label:'Reset',
+            label:'Empty',
             style:buttonStyle,
-            handleClick:handleReset
+            handleClick:handleEmpty
         },    
         {
             type:'button',
             label:'Cancel',
             style:buttonStyle,
-            handleClick:handleCancel
+            handleClick:()=>navigate(-1)
         },    
     ]
     return(
         <div style={styles.container}>
             {eventIdExtended?
-                numberOfRegistrations >= maxLimit?
-                    <h1 className='title is-3'>The event is full (={maxLimit} dancers )</h1>
+
+                ava <=0?
+                    <h1 className='title is-3'>No space left</h1>
                 :    
                     <div className='columns m-2 is-centered'>
                         <div className='column is-6 is-narrow'>
-                            <h3 className='title is-3'>Registration for {title?title:'No title'}</h3>
+                            <h3 className='title is-3'>Registration for {title?title:'No title'} ava = {event.ava}</h3>
                             <h4 className='title is-4'>{dateRangeTime?dateRangeTime:'No date info'}</h4>
                             {maxLimit === MAX_LIMIT_UNSET?
                                 null
                             :    
-                                <h5 className='title is-5'>Number of booked dancers on this event is {list?.length?list.length:0}   (max limit is {maxLimit})</h5>
+                                <h5 className='title is-6'>Available at this event:{ava}</h5>
                             }    
                             <FormTemplate 
                                         fields={fields} 
                                         value={value}
                                         setValue={setValue}
                                         buttons={buttons}
-                                        handleSubmit={handleReg}
+                                        handleSubmit={handleSubmit}
                             />
                         </div>
                     </div> 
             :
                 <h1 className='title is-3'>Registration must be done by first clicking on event in calender</h1>
-
             }
             {process.env.NODE_ENV === 'development'?mailSubject?
                 <h3 className='title is-3'>

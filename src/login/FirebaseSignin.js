@@ -21,7 +21,13 @@ const styles = {
   button: color=>({
     color,
     border:'2px solid ' + color,
+    fontWeight:900,
     padding:5
+  }),
+  buttonSmall: color=>({
+    color,
+    border:'1px solid ' + color,
+    padding:1
   }),
   input: color=>({
     color,
@@ -89,9 +95,15 @@ const FirebaseSignin = () => {
     navigate('/home');
   }
 
+  const handleResetPassword = () => {
+    navigate('/resetPassword')
+  }
+
+
   const handleChange = e =>setCredentials({...credentials, [e.target.name]:e.target.value})
   const inputStyle = styles.input(buttonColor)
   const buttonStyle = styles.button(buttonColor)
+  const buttonStyleSmall = styles.buttonSmall(buttonColor)
   return(
     uid===undefined?
       <>
@@ -106,17 +118,25 @@ const FirebaseSignin = () => {
                 <input style={inputStyle} name='password' type='password' placeholder='Password' onChange={handleChange} />
                 <p/>
                 <Button variant="outlined"  type="submit" style={buttonStyle}>
-                  Submit     
+                  Signin     
                 </Button>    
-                &nbsp;
-                &nbsp;
-                &nbsp;
-                &nbsp;
                 <p/>      
                 <p/>      
                 <p/>      
-                <div style={{fontSize:14}}>Reset your password by double-click <Link to='/resetPassword'>here</Link></div>
-                <div style={{fontSize:14}}>Signup for a free account by double-click <Link to='/signup'>here</Link></div>
+                <p/>      
+                <p/>      
+                <p/>      
+                <p/>      
+                <p/>      
+                <p/>      
+                <p/>      
+                <p/>      
+                <p/>      
+                <div style={{fontSize:14}}>Click on this button to reset your password&nbsp;&nbsp; 
+                  <Button variant='outlined' style={buttonStyleSmall} size='small' onClick={handleResetPassword}>
+                    Reset Password
+                  </Button>
+                </div>
             </form>
           </div>
         </>

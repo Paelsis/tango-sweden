@@ -86,7 +86,7 @@ class Comp extends Component {
               alert('ERROR: Posting of image failed:' + JSON.stringify(response.data))
             }
         }).catch(error => {
-            alert('ERROR: Failed to post image:' + JSON.stringify(error));
+            alert('ERROR: Failed to post image:' + JSON.stringify(error.message));
         });
       }
     }

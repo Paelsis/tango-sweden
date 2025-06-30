@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 import { useSharedState } from '../store';
 import { useLocation, useParams } from 'react-router-dom'
 import { useNavigate } from "react-router-dom";
-import AddEvent from './AddEvent'
+import AddEvent from '../components/AddEvent'
 import { EditorState, ContentState, convertFromHTML } from 'draft-js'
 import { generateEditorStateFromValue, emptyEditorState } from '../components/DraftEditor'
 
@@ -45,15 +45,13 @@ export default () => {
             return {draft_description}
         }
     }
-    let adjustedEvent = adjustEvent()
+    let props = adjustEvent()
 
     return (
         <div style={styles.container}>
             <div className='classes m-2 is-centered'>
                 <div className='column is-three-quarters'>
-                    <AddEvent 
-                        init={adjustedEvent} 
-                    />
+                    <AddEvent {...props} />
                 </div>
             </div>    
         </div>    

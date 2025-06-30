@@ -88,7 +88,7 @@ const formFields = [
         type:'draft',
         label:'Description of DJ',
         name:'description',
-        draftName:'draft_description',
+        // draftName:'draft_description',
         required:false,
         hiddenIf:'htmlEditor',
         maxLength:200,
@@ -176,7 +176,7 @@ export default () => {
     }        
 
     const handleSave = () => {
-            serverPost('/updateRow', {tableName, record:value, id:value.id?value.id:undefined}, handleSaveCallback)
+        serverPost('/updateRow', {tableName, record:value, id:value.id?value.id:undefined}, handleSaveCallback)
     }
 
     const removeEmptyVal = val => {   

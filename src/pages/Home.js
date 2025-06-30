@@ -16,6 +16,32 @@ const colors = {
     skane:{
         color:COLORS.YELLOW,
         borderColor:COLORS.YELLOW,
+        backgroundColor:'black',
+    },
+    sverige:{
+        color:COLORS.YELLOW,
+        borderColor:COLORS.YELLOW,
+        backgroundColor:'black',
+    },
+    norge:{    
+        color:COLORS.WHITE,
+        borderColor:COLORS.WHITE,
+        backgroundColor:'black'
+    },
+    danmark:{    
+        color:'white',
+        borderColor:'red',
+        backgroundColor:'black'
+    },
+    finland:{    
+        color:COLORS.WHITE,
+        borderColor:COLORS.WHITE,
+        backgroundColor:'black'
+    }
+    /*
+    skane:{
+        color:COLORS.YELLOW,
+        borderColor:COLORS.YELLOW,
         backgroundColor:'red',
     },
     sverige:{
@@ -38,6 +64,7 @@ const colors = {
         borderColor:'white',
         backgroundColor:'blue'
     }
+    */
 }
 
 const buttons ={

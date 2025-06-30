@@ -5,12 +5,13 @@ import firebaseApp from '../services/firebaseApp'
 import { getAuth, onAuthStateChanged} from 'firebase/auth'
 import FormTemplate from '../components/FormTemplate'
 import SelectUser from '../components/SelectUser'
-import {serverFetchData} from '../services/serverFetch'
 import {replaceRow} from "../services/serverPost"
 import Square from "../components/Square"
 import {BUTTON_STYLE, REGIONS, COUNTRIES, DEFAULT_AUTH_LEVEL, STATUSLINE_STYLE, COLORS} from '../services/const'
-import withStatusLine from '../components/withStatusLine'
+import {serverFetchData} from '../services/serverFetch'
+import MyImage from '../camera/MyImage'
 
+const TBL_USER = 'tbl_user'
 
 const styles = {
     container:{
@@ -144,6 +145,16 @@ const fieldsCAL = [
     name:'isDiskjockey',
   },
   {
+    // type:'rte',
+    type:'draft',
+    label:'Description of DJ',
+    name:'descriptionDJ',
+    //draftName:'draft_descriptionDJ',
+    required:false,
+    notHiddenIf:'isDiskjockey',
+    maxlength:5000,
+  },
+  {
     type:'checkbox',
     label:'Is private teacher',
     tooltip: 'If you are a DJ you will after login be directly redirected to Add/Update DJ page',
@@ -151,30 +162,23 @@ const fieldsCAL = [
     name:'isPrivateTeacher',
   },
   {
-    type:'checkbox',
-    label:'HTML-editor',
-    name:'htmlEditor',
-    tooltip: 'Use HTML-editor',
-    maxlength:10,
-  },
-  {
     // type:'rte',
     type:'draft',
-    label:'Description of DJ/Private teacher',
-    name:'description',
-    draftName:'draft_description',
+    label:'Description of private teacher',
+    name:'descriptionPT',
+    // draftMNdraftName:'draft_descriptionPT',
     required:false,
-    hiddenIf:'htmlEditor',
+    notHiddenIf:'isPrivateTeacher',
     maxlength:200,
   },
   {
-    type:'textarea',
-    label:'Description of DJ/Private teacher',
-    name:'description',
-    required:false,
-    notHiddenIf:'htmlEditor',
-    maxlength:40000,
+    type:'checkbox',
+    label:'Private',
+    tooltip: 'If this box is checked, you are the only person who can change your events, i.e. your events are completely private',
+    //disabled:true,
+    name:'private',
   },
+  /*  
   {
       type:'text',
       label:'Text color',
@@ -229,31 +233,20 @@ const fieldsCAL = [
     name:'borderColor',
     notHiddenIf:'hasBorder'
   },
-  {
-    type:'checkbox',
-    label:'Is diskjockey',
-    tooltip: 'If you are a DJ you will after login be directly redirected to Add/Update DJ page',
-    //disabled:true,
-    name:'isDiskjockey',
-  },
-  {
-    type:'checkbox',
-    label:'Private',
-    tooltip: 'If this box is checked, you are the only person who can change your events, i.e. your events are completely private',
-    //disabled:true,
-    name:'private',
-  },
+  */
 ]
 
 
-// Settings.js
-const Func = props => {
-    const [email, setEmail] = useState(undefined)
+// MyProfile
+export default () => {
     const [sharedState, setSharedState] = useSharedState()
-    const [buttonStyle, setButtonStyle] = useState(BUTTON_STYLE.DEFAULT)
+    const [signinEmail, setSigninEmail] = useState(undefined)
+    const buttonStyle = useState(BUTTON_STYLE.DEFAULT)
     const auth = getAuth()
+    const subdir = 'images/user'
+    const navigate = useNavigate()
 
-    const handleReply = (data) => {
+    const handleReply = (data) => {' '
       if (data.status === 'OK') {
         setSharedState({...sharedState, ...data.result})
         if (data.message) {
@@ -261,6 +254,7 @@ const Func = props => {
         }
       } else {
         console.log('ERROR: data.status = ' + data.status + ' message:' + data.message)
+        alert('ERROR: Failed to fetch user')
       }  
     }
 
@@ -268,43 +262,35 @@ const Func = props => {
       onAuthStateChanged(auth, user => {
         if (user?user.email:false) {
           const irl = '/getUser?email=' +  user.email
-          setEmail(user.email);
+          setSigninEmail(user.email);
           serverFetchData(irl,  data=>handleReply(data))
         }  
       })
     }, [])
-   
   
-    const handleSaveReply = data => {
-      if (data.status === 'OK') {
-        const rec = data.list.find(it=>it.email === email)
-        // alert('RESULT value :' +  JSON.stringify(rec) + ' email:' + email)
-        setButtonStyle(BUTTON_STYLE.SAVED)
-        if (rec.namn) {
-          setSharedState({...rec, authLevel:sharedState.authLevel})
+    const handleSaveReply = reply => {
+      if (reply.status === 'OK') {
+        const rec = reply.list.find(it=>it.email === signinEmail)
+        if (rec?.name?rec.name:undefined) {
+            alert('You saved the profile successfully for user ' + (rec.name?rec.name:'<Name undefined>'))
+            setSharedState({...rec, authLevel:sharedState.authLevel})
+            navigate(-1)
         }  
-        setTimeout(() => 
-          {
-            setButtonStyle(BUTTON_STYLE.DEFAULT) 
-          },  
-        2000);
+
       } else {
-        setButtonStyle(BUTTON_STYLE.ERROR) 
-        setTimeout(() => setButtonStyle(BUTTON_STYLE.DEFAULT), 5000);
+        alert('ERROR: Failed to save the profile')
       }
     }
 
     const handleSubmit = e => {
         e.preventDefault()
-        setButtonStyle(BUTTON_STYLE.CLICKED)
-        if (!!email) {
+        if (!!signinEmail) {
           const backgroundImage = sharedState.backgroundImage?sharedState.backgroundImage:null
           const borderStyle = sharedState.hasBorder?sharedState.borderStyle:'none'
-          const record = {...sharedState, email, backgroundImage,  borderStyle, creaTimestamp:undefined, updTimestamp:undefined, authLevel:sharedState.authLevel}
-          const tableName = 'tbl_user'
+          const record = {...sharedState, email:signinEmail, backgroundImage,  borderStyle, creaTimestamp:undefined, updTimestamp:undefined, authLevel:sharedState.authLevel}
           const data = {...record, fetchRows:true}
           //alert('Data:' + JSON.stringify(record))
-          replaceRow(tableName, data, result=>handleSaveReply(result))
+          replaceRow(TBL_USER, data, reply=>handleSaveReply(reply))
         } else {
           alert('Error: Dont save data since system cannot find any valid login email address')
         }         
@@ -314,11 +300,19 @@ const Func = props => {
       {
           type:'submit',
           label:'Save',
-          style:buttonStyle,
-          validate:true,
-          variant:(buttonStyle===BUTTON_STYLE.SAVED)?'contained':'outlined',
-          color:'green',
+          style:BUTTON_STYLE.DEFAULT,
+          variant:'outlined',
+          color:'grey',
           tooltip:'Save your profile',
+      },    
+      {
+        type:'button',
+        label:'Back',
+        style:BUTTON_STYLE.DEFAULT,
+        variant:'outlined',
+        color:'grey',
+        tooltip:'Go to previous page',
+        onClick:()=>navigate(-1)
       },    
     ]
 
@@ -330,19 +324,19 @@ const Func = props => {
               {/*JSON.stringify(allUsers)*/}
               {sharedState.authLevel >=4?   
                 <div className='columns m-4 is-centered'>
-                  <div className='column is-5'>
+                  <div className='column is-4'>
                     <FormTemplate 
-                        fields={fieldsCAL} 
-                        value={sharedState}
-                        setValue={setSharedState}
-                        buttons={buttons}
-                        handleSubmit={handleSubmit}
+                      fields={fieldsCAL} 
+                      value={sharedState}
+                      setValue={setSharedState}
+                      buttons={buttons}
+                      handleSubmit={handleSubmit}
                     />
                   </div>
-                  <div className='column is-3'>
-                    <Square settings={sharedState} />
-                    <SelectUser email={email} sharedState={sharedState} setSharedState={setSharedState} /> 
-                  </div>
+                  <div className='column is-2'>
+                    <SelectUser email={signinEmail} sharedState={sharedState} setSharedState={setSharedState} /> 
+                    <MyImage tableName={TBL_USER} email={signinEmail} subdir={subdir} value={sharedState} setValue={setSharedState} />
+                    </div>
                 </div>
               :
                 <div className='columns m-4 is-centered'>
@@ -363,6 +357,9 @@ const Func = props => {
     </div>
   )  
 }
+/*
+<Square settings={sharedState} />
+*/
 
-export default withStatusLine(Func)
+
 

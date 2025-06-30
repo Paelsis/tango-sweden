@@ -5,7 +5,7 @@ import firebaseApp from '../services/firebaseApp'
 import { getAuth, onAuthStateChanged} from 'firebase/auth'
 import FormTemplate from './FormTemplate'
 import {serverFetchData} from '../services/serverFetch'
-import Add from '../pages/AddEvent'
+import Add from './AddEvent'
 import {serverPost} from "../services/serverPost"
 import Square from "./Square"
 import { ADMINISTRATORS } from "../services/const";

@@ -10,8 +10,7 @@ const SwedishUsage = () =>
     Hemsidan tangosweden.se är öppen för alla arrangörer i Sverige/Danmark/Norge/Finland som önskar ha en tangokalender för sin ort eller region.
     På förstasidan finns knappar för de regioner och städer som är aktiva i kalendern. Helsingborg, Göteborg och Danmark har sina egna kalendrar 
     som även dessa nås via knappar på förstasidan.
-
-    <h3>Lägga till, ta bort och ändra händelser</h3>
+    <p/>
 
     <h4>Registrera dig som användare</h4>
 
@@ -19,93 +18,88 @@ const SwedishUsage = () =>
     Vid Signup anger du din email och ett lösenord. Föreningar med många administratörer bör ha en gemensam email eftersom 
     eventen ägs av email-adressen, dvs endast den email som loggat in kan ändra eller ta bort event för denna email.  
     Önskar man ändra password för en given email gör man det via länken som finns på sidan "Signin".
-    
+    <p/>    
     <h4>Logga in</h4>
-.
-    När man har skapat ett konto med Signin kan man logga in på tangosweden.se. Som inloggad har du tillgång till att registrera lägga till events 
-    för din region och stad. Om du är DJ kan du ladda upp bild och skriva information om din själv.
+
+    När man har skapat ett konto med Signin kan man logga in på tangosweden.se. Som inloggad har du tillgång till att lägga till events 
+    för din region och stad. 
+    Du kan lista och beskriva dig som privatlärare samt lägga till en bild på dig själv. 
+    Detsamma gäller om du är DJ. Kunder kan då hitta dig via hatt ikonen (privatlärare) och cd-ikonen (diskjockey) längst upp till höger.
     När ni loggat in första gången skall ni gå in i menyn <i>Settings</i>.
-    
+    <p/>
     <h3>Inställningar</h3>
 
-    I menyn uppe till höger finns där en meny option "Settings". Här fyller du i stad och region (Skåne, Väst, Mitt eller Norr).
-    Det finns ingen begränsning på antalet städer.  
-    På förstasidan hos tangosweden.se finns knappar för regioner och städer.
-    Endast städer och regioner som lagt in events visas med knappar.
+    I menyn uppe till höger finns där en meny option "Settings". Här fyller du i stad och region (Skåne, Västra Götaland, Mitt, Norr, ...).
+    Det finns ingen begränsning på antalet städer. På förstasidan hos tangosweden.se finns knappar för de regioner som har händelser.
+    Om du är DJ eller privatlärare kan du kryssa i rutan för detta samt lägga till foto och beskrkivande text.
+    Man kan inte längre göra egna färgval för sina events. Då blir sidan enligt experter alldeles för rörig.
+    Tryck på <i>Save</i> knappen när du är klar med dina val i inställningar (Settings). 
     <p/>
-    På Settings sidan gör du även färgval för text och bakgrund för dina händelser (Detta gäller ej användare i Stockholm som valt fixt färgschema). 
-    Tanken är att varje arrangör gör sina egna unika färgval som representerar företaget/föreningen.
-    Man knn göra 3 färgval: text-färg, bakgrundsfärg övre vänstra hörnet, backgroundsfärg nedre högra hörnet. 
-    Bakgrundsfärgen tonas succesivt från färgen i övre högre ned till färgen i nedre vänstra hörnet.
+    <h3>Modifiera händelser</h3>
 
-    Värden på färgerna anges med text (ex red, green, blue, lightYellow), eller med ett hexadeimalt värde. 
-    Hexasdecimala färg-värden består av ett #-tecken följt av 6 siffror 0-9 eller bokstäverna a-f (eller A-F), ex #fa23e8. 
-    Hexademimala färger finner du genom att googla på något i stil med "hex color wine red". Då får du som sök-svar upp massor av hex-koder på nyanser av vinrött. 
-    Totalt har du med hex-koder tillgång till drygt 16 miljoner färger. På settingssidan
-    förhandsvisas dina färgval. Man kan även välja en ram av variabel tjocklek och färg. Ytterligare ett alternativ är att man använder en bild som bakgrund,
-    men då måste bilden vara upplagd på nätet med en given url (ex: https://tangokompaniet.com/images/anna.jpg).
-    Om man använder bilder kommer ingen ram visas.
+    <h4>Lägga till händelse <i class="fa fa-plus"/></h4>
 
-    Tryck på <i>Save</i> knappen när du ärklar med dina val i inställningar (Settings). 
-    Om du ändrat dina färgval i inställningar så ändras de bara på nya events eftersom varje event i kalendern får sina färger sparade när du lägger till dem. 
-    Om du vill ändra färgen på redan existerande händelser skall du 
-    kryssa i rutan "Change colors to latest settings" när du uppdaterar eventet (med pennan).
-    Detta för att du skall ha möjlighet att uppdatera färg på nya events utan att för den skull ändra färgen på events som skapats tidigare. 
-    Nya events får alltid automatiskt färgvalen som är definierade på sidan Settings.
-
-    <h3>Lägga till events</h3>
-
-    För att lägga till ett event går du som in i menyn uppe till höger och klickar på "Add Event". Fyll sen i dina data.
+    Som inloggad kan du inne i kalendern lägga till händelser med <i class="fa fa-plus"/> ikonen uppe till höger.
     Om du önskar lägga in repeterade händelser med en viss frekvens kryssar du i Repeat. Då visas 3 nya värden för offset, enhet och antal repetitioner. 
-    Sättes tex <i>offset</i> till 2 och enhet till <i>weeks</i> betyder det varannan vecka. Fältet <i>repeat number of times</i> anger det antalet repetitioner med den angivna frekvensen.
-    När du därefter klickar på knappen <i>Add to list</i>, så visas en lista på genererade datumen. 
-    Du kan lägga till eller ta bort datum från listan. Därefter klickar du på knappen <i>ADD TO CALENDAR</i>
-    Om du fyller i starttid 00:00 och sluttid 23:59 kommer tidsfältet visas för kunden som “Hela dagen” på mobilkalendern. 
-    Detta kan vara lämpligt för heldags-events, festivaler och marathon som sträcker sig över men än en dag. För events längre än 11 timmar och som
-    sträcker sig över flera dagar blir texten större i mobil-kalendern. Detta för att ge lite promotion till de som gör sig besväret att
-    arrangera flerdagsevents.
+    Sättes tex <i>offset</i> till 2 och enhet till <i>weeks</i> betyder det varannan vecka. Fältet <i>Repeat number of times</i> anger antalet gånger händelsen skall upprepas
+    med den angivna frekvensen.  När du därefter klickar på knappen <button>ADD TO LIST</button>, så visas en lista med genererade datumen. 
+    Du kan lägga denna lista repeterade gånger, så att du får en massa händelser.
+    <p/>
+    Önskar du ta bort en enstaka händelse frå listan klickar du på knappen <i class="fa fa-trash-o"></i> till höger om den händelse du vill ta bort. 
+    Om du önksar rensa hela listan du på knappen <button>CLEAR LIST</button> till höger.
+    När du är klar med den skapade listan skickar du denna till kalendern med knappen<button>SEND LIST TO CALENDAR</button>.
+    Alla händelser i listan ges en unik identitets-nyckel eventId. Denna nyckel används senare om man vill ändra eller ta bort en specifik händelse, alternativt en lista om det är et man satt in.
+    Efter att du tryckt på <button>SEND LIST TO CALENDAR</button> syns händelserna i kalendern för din region och stad.
+    Om du fyller i starttid 00:00 och sluttid 23:59 kommer tidsfältet visas för kunden som <i>Hela dagen</i> på mobilkalendern. 
+    Detta kan vara lämpligt för heldags-events, festivaler och maraton som sträcker sig över mer än en dag. För events som varar längre än 11 timmar och som
+    sträcker sig över flera dagar blir texten större i mobil-kalendern. Detta för att ge lite extra promotion till dem som gör sig besväret att
+    arrangera flerdagarsevenemang.
+    <p/>
 
-    <h3>Ta bort events</h3>
 
-    Den som är inloggad kan ändra eller ta bort sina event genom att klicka på eventet. Du kan endast ta bort events som din email äger, dvs events som skapats under den email du loggat på med.
-    Det finns 2 typer av ta birt <i>En Spann</i> och <i>En spann med streck</i>.
-    Den första <i>Spann</i>-knappen tar endast bort edet event du klickat på. 
-    Den andra, <i>Spann med streck</i> knappen, tar bort hela listan som du skapade med <i>Add Event</i> och eventuellt <i>Repeat/Frequency</i>.
+    <h4>Ändra händelse <i class="fa fa-pencil" /></h4>
+
+    Som inloggad kan du ändra din händelse genom att klicka på händelesen och därefter klicka på edit knappen <i class="fa fa-pencil" />.
+    Då dyker det upp ett formulär där man kan beskriva händelsen. Om du önskar ändra hela listan för en given eventId kryssa i <i>Change all events in list</i>.
+    När du är klar med dina nya uppgifter klicka på <button>UPDATE</button> knappen längst ned. 
+    <p/>
     
-    <h3>Ändra existerande events</h3>
-
-    Du kan ändra ditt event. Om du skapat en hel serie och vill ändra alla på samma sätt är det ochså möjligt.
-    I fönstret som kommer upp finns längst ned en knapp som ser ut som en <i>Penna</i>. 
-    Klicka på denna och uppdatera de uppgifter du önskar. Om du vill att samtliga events i serien skall uppdateras kryssar du i översta krysset på sidan.
-    När du är klar med dina nya uppgifter klicka på <i>Update</i> knappen längst ned på settingssidan. Om du önskar uppdatera alla events i serien med samma data, 
-    markera översta kryssboxen (Change all events in same group). En serie är den lista du skapar när du lägger till nya events med meny option
-    <i>Add Event</i>. Här skapar du först en lista och som sen du sendan uppdaterar kalendern med. Alla envents som tillhör en lista får samma eventId.
-    Detta eventId användes sedan om vi väljer att ta bort en hel serie. 
-    
-    <h3>Kopiera data till nya events</h3>
+    <h4>Kopiera händelser <i class="fa fa-copy"></i></h4>
 
     För den som vill återanvända samma information från tidigare events till nya använda knappen <i>Kopiera</i>.
     Det typiska exemplet är att du har en återkommande milonga eller praktika under hösten som vill skall fortsätta med nästa säsong.
     <p/>
-    Som inloggad klickar du då först på eventet som du vill kopiera data från och sen på knappen <i>Kopiera</i>. I fönstet som poppar upp finns nu förifylda data 
+    Som inloggad klickar du på eventet som du vill kopiera data från och därfter på copy knappen <i class="fa fa-copy"></i>. I fönstet som poppar upp finns nu förifylda data 
     samt tomma fält för datum och tid. Fyll i ditt nya datum och din nya tid samt eventuell upprepad frekvens med <i>Repeat</i>.
-    För att underlätta för dem som glömt kopiera finns där kalender-historik bakåt i tiden. Dessa kalnder data nås om man klickar på klockan längst ned till vänster under kalendern.
+    För att underlätta för dem som glömt kopiera finns där kalender-historik bakåt i tiden. Dessa kalender data nås om man klickar på <i class="fa fa-history"></i> längst upp till höger.
     Historik finns för cirka 6 månader tillbaka. 
+    <p/>
+    <h4>Ta bort händelse <i class="fa fa-trash-o"/></h4>
 
-    <h3>Anmälan via knapp i kalendern</h3>
+    Den som är inloggad kan ändra eller ta bort dina händelser genom att klicka på händelsen i kalendern. 
+    Du kan endast ta bort events som din email äger, dvs events som skapats under den email du loggat på med.
+    Det finns 2 varianter av att ta bort händelser från kalender.
+    <ul>
+        <li><i class="fa fa-trash-o"/> tar endast bort edet event du klickat på.</li>
+        <li><i class="fa fa-trash-o"/> med tre streck efter knappen, tar bort hela listan av händelser som du skapade med <button>SEND LIST TO CALENDAR</button></li>
+    </ul>
+    <p/>
 
-    När du är inloggad kan du lägga till en registreringsknapp så att dansare kan registrera sig till eventet. Du kan sen se och editera de registreringar som folk gjort.
-    En dansare kan även registrera sin danspartner så hen slipper att göra detta själv.
+    <h3>Anmälan till händelse via knapp i kalendern</h3>
+
+    När du är inloggad kan du lägga till en registreringsknapp så att dansare kan registrera sig till händelsen. 
+    Du kan sen editera de registreringar som gjorts.
+    En dansare kan även registrera sin danspartner så att hen slipper göra det själv.
     <p/>
     Gör så här för att introducera anmälan-knappen i ditt event.
     <ul>
         <li>Logga in med din e-post och password uppe i menyn till höger.</li>
         <li>Klicka på den händelsen du önskar ändra i kalendern</li>
-        <li>Redigera nu händelsen med penn-ikonen enligt följande</li>
+        <li>Redigera händelsen med penn-ikonen enligt följande</li>
         <li>Markera rutan "Use registration button"</li>
         <li>Om du önskar begränsa antalet tillåtna anmälningar fyller du i fältet "Maximalt antal anmälningar". Då går det inte att anmäla sig när eventet är fullbokat
         </li>.
-        <li>Klicka till sist på uppdaterings-knappen</li>
+        <li>Klicka på uppdaterings-knappen</li>
     </ul>
     <p/>
     För att granska de anmälningar som gjorts gör du enligt följande:
@@ -124,9 +118,51 @@ const SwedishUsage = () =>
             14 dagar efter anmälan gjorts efetersom då anses lagmässigt anmälan vara bindande.</li>
     </ul>
 
+    <h3>Privatlektioner <i class="fa fa-graduation-cap"/></h3>
+    <p/>
+    <h4>Markera dig som privatlärare</h4>
+    I meny option "My profile" kryssa i fältet <i>Is private teacher</i> så kommer ditt namn listas som privatlärare  
+    under din region när kunder klickar på knappen <i class="fa fa-graduation-cap"/> uppe till höger. 
+    <p/>
+    <h4>Beskriv dig själv som privatlärare</h4>
+    När man markerat "Is private teacher" dyker det upp ett text-fält där du kan beskriva sig själv som privatlärare.
+    Klickar du på kameran kan du även ladda upp en bild på dig själv som du sparat på den dator eller mobil du befinner dig.
+    <p/>
+    <h4>Privatlärarens kalender</h4>
+    Som privatlärare har du även tillgång till din egen kalender där du kan lägga in tider för dina privatlektioner som eleverna därefter kan boka in sig på.
+    Kalendern syns i form av en kalender ikon på sidan där du beskrivs som provatlärare (<i class="fa fa-graduation-cap"/> | region | namn).
+    <p/>
+    <h5>Lägga till privatlektion till kalendern</h5>
+    För att lägga till tider till din privatlektions-kalender går du till din kalender via <i class="fa fa-graduation-cap"/> överst på sidan. 
+    Du klickar sedan på  <i class="fa fa-plus"/> ikonen längst ute till höger. Resten fungerar som när du lägger till händelser till 
+    den vanliga händelse-kalendern vilket finns bekrivet ovan.
+    <p/>
+    <h5>Så här bokar kunden en privatlektion via kalendern</h5>
+    För att boka en privatlektion klickar man på kalendern för önskad privatlärare och leter därefter upp en önskad ledig tid.
+    När man klickar på denna privatlektion dyker det upp ett anmälan-formulär. När eleven fyllt i sina uppgifter och skickat anmälan 
+    registreras anmälan och därefter sändes två mails, ett bekräftelsemail till kunden och ett mail till privatläraren. 
+    När anmälan genomförts tonas tiden i kalendern grå som betyder att tiden är 
+    uppbokad och ingen kan då boka denna tid.
+    <p/>
+    <h5>Se/Editera/Ta bort bokningen  <i class="fa fa-users"/></h5>
+    I kalendern kan du som inloggad klicka på eventet och få fram fler uppgifter än de kunderna kan se (som inte loggat på med din email).
+    För att se namnet och eventuellt editera den person som bokat klickar du på knappen <i class="fa fa-users"/>.
+    Du kan även ta bort lektionen helt om du vill.
+    <p/>
+    <h5>Direktlänkar till kalendern</h5>
+    Om du önskar eller dina kunder vill kunna nå kalendern direkt så skall nyttja tangoswedens direkt-länk till din privatlärar-kalender.    
+    http://tangosweden.se/calendar/Region/PRIVATE_LESSON/email, där Region är den Region du har angivit in din profil (Ex: Skåne) och email är den email 
+    som du loggat på med (Exempel per.eskilson@gmail.com). Med dessa 2 nycklar som exempel ser länken ut enligt 
+    http://tangosweden.se/calendar/Skåme/PRIVATE_LESSON/per.eskilson@gmail.com.
+    <p/>
+    <h4>Kommentar</h4>
+    För tillfället är denna service gratis men framöver (om cirka 3 månader) kommer den sannolikt avgiftsbeläggas med en låg avgift, 
+    så vi kan fortsatt kan hålla sidan uppe och hålla borta privatlärare med alltför få elever. 
+    Ni kan testa sidan och se om den fungerar bra. 
+
     <h3>Förslagslåda:</h3>
-    Om du har några fantastiska förslag på ändringar för viddareutveckling av kalendern, 
-    skicka dessa i en email till per.eskilson@gmail.com eller till anita.e.dobi@gmail.com.
+    Om du har några fantastiska förslag på ändringar för vidareutveckling av kalendern, 
+    skicka dessa i en email till mig på email per.eskilson@gmail.com.
 </div>
 
 const EnglishUsage = () => 
@@ -146,12 +182,12 @@ const EnglishUsage = () =>
     At Signup, you enter your email and a password. Associations with many administrators should have a common email because 
     the events are owned by the email address, i.e. only the email that logged in can change or delete events for this email.  
     If you wish to change the password for a given email, you do so via the link on the "Signin" page.
-
+    <p/>
     <h4>Signin</h4>
     Once you have created an account with Signin, you can log in to tangosweden.se. As logged in, you have access to register and add events 
     for your region and city. If you are a DJ, you can upload a picture and write information about yourself.
     When you log in for the first time, you must enter the <i>Settings</i> menu.
-
+    <p/>
     <h3>Settings</h3>
     I menyn uppe till höger finns där en meny option Settings. Här fyller du i stad och region (Skåne, Väst, Mitt eller Norr).
     Det finns ingen begränsning på antalet städer.  
@@ -177,51 +213,57 @@ const EnglishUsage = () =>
     check the box "Change colors to latest settings" when you update the event (with the pen).
     This is so that you can update the color of new events without changing the color of previously created events. 
     New events always automatically get the color c
-  
-    <h3>Add new events</h3>
+    <p/>
 
-    Click on the menu (the menu at the top right corner) and click on the menu item "Add Event". Then you will see a website that is relatively easy to understand.
-    If you wish to enter repeated events with a certain frequency, check repeat. Then 3 new values ​​for offset, unit and number of repetitions appear.
-    This means that if this is set to 1 and the radio button below is set to weeks, the event is repeated every week.
-    An offset of 2 and a unit set to 'weeks' is translated to every two weeks. The field <i>repeat number of times</i> specifies the number of times the event is to be repeated.
-    When you then click on the button <i>Add to list</i>, you will get a list with the dates that have been generated.
-    You can add or remove more dates to/from the list. When you are satisfied with the list, click the button <i>ADD TO CALENDAR</i>
-    If you enter start time 00:00 and end time 23:59, the time field will be displayed to the customer as "Whole day" on the mobile calendar.
-    This is suitable for weekend events, festivals and marathons that span more than one day. For events longer than 11 hours and which
-    extends over several days, the text becomes larger in the mobile calendar. This is to give a little promotion to those who take the trouble to
-    create multi-day events.
+    <h3>Add new events  <i class="fa fa-plus"/></h3>
 
-    hoices defined on the Settings page.
+    Log in and open your calendar and click on the <i class="fa fa-plus"/> icon at the top right. Then a form for describing your event appears.
+    If you wish to insert repeated events with a certain frequency, check Repeat. Then 3 new values ​​for offset, unit and number of repetitions are displayed. 
+    If, for example, <i>offset</i> is set to 2 and unit to <i>weeks</i>, it means every two weeks. The field <i>Repeat number of times</i> specifies the number of times the event shall be repeated
+    with the specified frequency.  When you then click the button <button>ADD TO LIST</button>, a list of the generated dates is displayed. 
+    You can add to this list repeatedly, so you get a lot of events in the list.
+    <p/>
+    If you wish to remove a single event from the list, click the <i class="fa fa-trash-o"></i> button to the right of the event you want to remove. 
+    If you wish to clear the entire list, click the button <button>CLEAR LIST</button> on the right.
+    <p/>
+    When you are finished with the created list, send it to the calendar with the button <button>SEND LIST TO CALENDAR</button>.
+    All events in the list are given a unique identity key eventId. This key is used later if you want to change or delete a specific event, alternatively a list if it is one you have inserted.
+    After you press <button>SEND LIST TO CALENDAR</button>, the events appear in the calendar for your region and city.
+    If you enter start time 00:00 and end time 23:59, the time field will be displayed to the customer as <i>All day</i> on the mobile calendar. 
+    This can be suitable for all-day events, festivals and marathons that span more than one day. For events that last longer than 11 hours and which
+    extends over several days, the text becomes larger in the mobile calendar. This is to give a little extra promotion to those who take the trouble to
+    organize multi-day events.
+    <p/>
 
-    <h3>Remove events</h3>
+    <h3>Modify events <i class="fa fa-pencil" /></h3>
 
-    Those who are logged in can change or delete their events by clicking on the event. You can only delete events that your email owns, i.e. events that were created under the email you signed in with.
-    There are 2 types of ta birt <i>A Spann</i> and <i>A spann with dash</i>.
-    The first <i>Span</i> button only removes the event you clicked on. 
-    The second, the <i>Span with dashes</i> button, removes the entire list you created with <i>Add Event</i> and possibly <i>Repeat/Frequency</i>.
+    As logged in, you can change your event by clicking on the event and then clicking on the edit button <i class="fa fa-pencil" />. 
+    A form will then appear where you can describe the event. If you wish to change the entire list for a given eventId, check <i>Change all events in list</i>.
+    When you are done with your new information, click the <button>UPDATE</button> button at the bottom.
+    <p/>
 
-
-    <h3>Modify existing events</h3>
-
-    You can change your existing events. If you have created a whole series and want to change them all in the same way, that is also possible.
-    In the window that appears, at the bottom there is a button that looks like a <i>Pen</i>. 
-    Click on this and update the information you want.
-    When you are done with your new information, click the <i>Update</i> button at the bottom of the settings page. 
-    If you want all events in the series to be updated, check the top checkbox with name
-     <i>Change all events in same group</i>). A series is the list you create when you add new events with the menu option
-    <i>Add Event</i>. Here you first create a list which you when ready the calendar with. All events that belong to a list get the same eventId.
-    This eventId was then used if we choose to delete an entire series.
- 
-    <h3>Duplicate existing events to upcoming events</h3>
+    <h3>Duplicate existing events to upcoming events <i class="fa fa-copy"/></h3>
 
     For those who want to reuse the same information from previous events for new ones, use the <i>Copy</i> button.
     The typical example is that you have a recurring milonga or practika during the fall that you want to continue with next season.
     <p/>
-    As logged in, you then first click on the event you want to copy data from and then on the <i>Copy</i> button. In the window that pops up there is now pre-filled data 
+    As logged in, you click on the event that you want to copy data from and press the copy button <i class="fa fa-copy"/>. In the window that pops up there is now pre-filled data 
     as well as empty fields for date and time. Fill in your new date and time as well as any repeat frequency with <i>Repeat</i>.
-    To make it easier for those who forgot to copy, there is a calendar history going back in time. These calendar data can be accessed by clicking on the 
-    clock at the bottom left under the calendar.
+    To make it easier for those who forgot to copy, there is a calendar history going back in time. This calendar data is accessed by clicking on <i class="fa fa-history"></i> at the top right.
     History is available for about 6 months back.
+    <p/>
+
+    <h3>Remove events <i class="fa fa-trash-o"/></h3>
+
+    As logged in you can delete your events by clicking on the event in the calendar. 
+    You can only delete events that your created under your login email.
+    There are 2 variants of deleting events from calendar.
+    <ul>
+        <li>The first delete button <i class="fa fa-trash-o"/> only deletes the event you clicked on.</li>
+        <li>The second delete button<i class="fa fa-trash-o"/> with three dashes after the button, deletes the entire list of events that you created with <button>SEND LIST TO CALENDAR</button></li>
+    </ul>
+    <p/>
+
 
     <h3>Registration button</h3>
 
@@ -255,6 +297,43 @@ const EnglishUsage = () =>
         <li>If someone so wishes, we can change the functionality so that it is not possible for customer to cancel 
         14 days after the registration was been made, since then the notification is legally considered to be binding</li>
     </ul>
+
+    <h3>Private lessons <i class="fa fa-graduation-cap"></i></h3>
+
+    <h4>Mark yourself as a private teacher</h4>
+    In the menu option "My profile" check the field <i>Is private teacher</i> and your name will be listed as a private teacher  
+    under your region when customers click the <i class="fa fa-graduation-cap"/> button in the top right.
+    <p/>
+    <h4>Describe yourself as a private teacher</h4>
+    When you have checked "Is private teacher", a text field appears where you can describe yourself as a private teacher.
+    If you click on the camera, you can also upload a picture of yourself that you have saved on your computer or mobile phone.
+    <p/>
+    <h4>The private teacher's calendar</h4>
+    As a private teacher, you also have access to your own calendar where you can enter times for your private lessons that students can then book in.
+    The calendar is visible in the form of a calendar icon on the page where you are described as a probationary teacher (accessed via the school hat | region | name).
+    <p/>
+    <h5>Add private lesson to calendar</h5>
+    To add lessons to your private-teacher-calendar, go to your private-teacher-calendar via the school-hat button at the top of the page. 
+    You then press the  <i class="fa fa-plus"/> icon the far right. The rest works as when you add events to 
+    the regular event calendar described above.
+    <p/>
+    <h5>How a customer books a private lesson via the calendar</h5>
+    To book a private lesson, click on the calendar for the desired private teacher and then look for a desired free time.
+    When you click on this private lesson, a registration form appears. When the student has filled in their information and sent the report 
+    registration is registered and two emails are then sent, a confirmation email to the customer and an email to the private tutor. 
+    When the registration has been completed, the time in the calendar is grayed out, which means that the time is 
+    booked up and no one can then book this time.
+    <p/>
+    <h5>View/Edit/Delete the booking  <i class="fa fa-users"/></h5>
+    In the calendar, you can click on the event as a logged-in user and get more information than customers can see (who are not logged in with your email).
+    To see the name and possibly edit the person who booked, click on the <i class="fa fa-users"/> icon
+    You can also delete the lesson completely if you want.
+    <p/>
+    <h5>Direct links to calendar</h5>
+    For the customer, the calendar is visible via the calendar icon on your page for private lessons accessed via the school hat icon. The customer can also reach this by
+    direct https-link https://tangosweden.se/calendar/Region/PRIVATE_LESSON/email, where Region is the Region you have given in your profile (Ex: Skåne) and email is the email 
+    you logged in with (Exempel per.eskilson@gmail.com). With thosw two keys the link will be http://tangosweden.se/calendar/Skåme/PRIVATE_LESSON/per.eskilson@gmail.com.
+    Right now this service is free, but will probaly have a small fee later.
 
     <h3>Suggestion box:</h3>
     If you have any great suggestions for changes to further develop the calendar,

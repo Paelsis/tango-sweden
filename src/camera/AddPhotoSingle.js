@@ -6,7 +6,6 @@ import IconButton from '@mui/material/IconButton';
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
-import withStatusLine from '../components/withStatusLine'
 import {STATUSLINE_STYLE} from '../services/const'
 
 const apiBaseUrl = process.env.REACT_APP_API_BASE_URL
@@ -21,11 +20,10 @@ const styles={
   }
 }
 
-class Func extends Component {
+class Comp extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      statusLineText:undefined,
       newFileNames:[],
     };
     this.handleChange = this.handleChange.bind(this);
@@ -57,9 +55,8 @@ class Func extends Component {
         formData.append('remove', this.props.remove?this.props.remove:'')
       }
 
-      if (this.props.setStatusLine) {
-        this.props.setStatusLine('Submitting image to disk ...', STATUSLINE_STYLE.PROCESSING, 10000)
-      }  
+      console.log('Submitting image to disk ...', STATUSLINE_STYLE.PROCESSING, 10000)
+
       // console.log(Object.fromEntries(formData))
       for(let i=0; i < event.target.files.length; i++) {
         let selectedFile = event.target.files[i]
@@ -76,33 +73,26 @@ class Func extends Component {
       } 
       // alert(JSON.stringify(Object.fromEntries(formData)))
       console.log('formData', Object.fromEntries(formData))
-      const url = apiBaseUrl+'/postImages'
-      this.props.setStatusLine('Posting image to disk ...', STATUSLINE_STYLE.PROCESSING, 10000)
+      const url = apiBaseUrl + '/postImages'
+      console.log('[AddPhotoSingle]:Posting image to disk with axios ...')
       axios.post(url, formData,
           {
               onUploadProgress: progressEvent => {console.log(progressEvent.loaded / progressEvent.total); }
           }
       ).then(response => {
-          // alert('AddPhotoMultiple.handleSubmit: response.data' + JSON.stringify(response.data))
-          if (this.props.addImage) {
-            this.state.newFileNames.forEach(it => {
-              this.props.addImage(it)
-            }) 
-          }
           if (response.data.status ==='OK') {
             const fname = response.data.result.find(it=>this.props.matching?it.fname.includes(this.props.matching):true).fname
             if (fname) {
+              console.log('[AddPhotoSingle]:Successful loading of image ' + fname)
               this.props.setUrlImage(fname)
-              this.props.setStatusLine('Succerssful load of image', STATUSLINE_STYLE.OK, 1500)
             } else {
-              this.props.setStatusLine('ERROR: No fname returnedSuccerssful load of image', STATUSLINE_STYLE.ERROR, 3000)
+              alert('[AddPhotoSingle]: ERROR: No fname returnedSuccerssful load of image', STATUSLINE_STYLE.ERROR, 3000)
             } 
           } else {
-            alert('Posting image failed:' + JSON.stringify(response.data))
-            this.props.setStatusLine('ERROR: Failed to load image', STATUSLINE_STYLE.ERROR, 1500)
+            alert('[AddPhotoSingle]: ERROR: Posting image failed:' + JSON.stringify(response.data))
           }
       }).catch(error => {
-          alert('ERROR: Failed to post image:' + JSON.stringify(error));
+          alert('[AddPhotoSingle]: ERROR: Failed to post image:' + error?.message?error.message:'<No message>');
       });
     }
   }
@@ -138,7 +128,7 @@ class Func extends Component {
             sx={{ mr: 0 }}
           >
           <p/>  
-          <SaveIcon display='none' />
+            <SaveIcon display='none' />
           </IconButton>
           <IconButton
             //className='column is-narrow'
@@ -185,5 +175,5 @@ render() {
 }
 }
 
-export default props => <Func {...props}/>
+export default props => <Comp {...props}/>
   

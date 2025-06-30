@@ -41,6 +41,7 @@ export default ({settings})=>{
             borderColor,
             width:300,
             height:150, 
+            fontSize:12,
         }
     
 
@@ -51,8 +52,8 @@ export default ({settings})=>{
             :
                 <ul>
                 <li>Text color:{settings.color}</li>
-                <li>Background color light:{settings.backgroundColorLight}</li>
-                <li>Background color dark:{settings.backgroundColorDark}</li>
+                <li>Bgcolor top left:{settings.backgroundColorLight}</li>
+                <li>Bgcolor bottom right:{settings.backgroundColorDark}</li>
                 </ul>
             }    
         </div>

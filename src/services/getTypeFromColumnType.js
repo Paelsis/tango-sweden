@@ -6,8 +6,8 @@ export default function (column) {
         case 'interger':
             return 'number'
         case 'text':
-                return 'textarea'
-            case 'varchar':
+            return 'textarea'
+        case 'varchar':
             const length = column.Type.split('(')[1].split(')')[0]
             if (length > 1000) {
                 return 'textarea'
