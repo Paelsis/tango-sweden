@@ -2,49 +2,47 @@ import axios from 'axios'
 
 const username = process.env.REACT_APP_SLIM_USERNAME
 const password = process.env.REACT_APP_SLIM_PASSWORD
-const auth = {username, password}
+const axiosConfig = {
+    auth : {username, password}
+}
 
+// serverPostApi
 const serverPostApi = (apiBaseUrl, irl,  record, handleReply) => {
     const url = irl.slice(0,4).toLowerCase().localeCompare('http')===0?irl:apiBaseUrl + irl
-    const axiosConfig = {
-        auth,
-    }
     axios.post(url, record, axiosConfig)
     .then(reply => {
         const data = reply.data?reply.data:reply
         if (data) {
             if (data.status ==='OK') {
                 // Controlled OK reply
-                const message = '[serverPost] status:OK data:' + JSON.stringify(data)
-                // console.log(message)
+                //const message = '[serverPostApi] status:OK data:' + JSON.stringify(data)
+                handleReply(data);
             } else if (data.status ==='WARNING'){
                 // Controlled ERROR reply
-                const message = '[serverPost] status:' + data.message?data.message:'No message ???'
-                console.log(message)
+                // const message = '[serverPostApi] status:' + data.message?data.message:'No message ???'
+                handleReply(data);
             } else if (data.status ==='ERROR'){
                 // Controlled ERROR reply
-                const message = '[serverPost] status:' + data.message?data.message:'No message ???'
-                console.log(message)
+                const message = '[serverPostApi] status:' + data.message?data.message:'No message ???'
+                alert(message)
             } else {
                 // Uncontrolled ERROR reply
-                const message = '[serverPost] Uncontrolled error with no status. data:' + JSON.stringify(data) 
-                console.log(message)
+                const message = '[serverPostApi] Uncontrolled error with no status. data:' + JSON.stringify(data) 
                 alert(message)
             }   
-            handleReply(data);
         } else {
-            const message = '[serverPost] ERROR: No data in reply from axios.post'
-            console.log(message)
+            const message = '[serverPost] ERROR: serverPostApi failed. No data.' 
+                + ' url:' + url +  ' record:' + JSON.stringify(record);
             alert(message)
         }
     })
     .catch((e) => {
         const message = '[serverPost] ERROR: axios.post falied for url:' + url + ' message:' + e?.message
-        console.log(message);
         alert(message)
     });
 }
 
+// addRowApi
 export const addRowApi = (apiBaseUrl, tableName, row, handleReply) =>
 {
     const irl = '/replaceRow'
@@ -57,6 +55,7 @@ export const addRowApi = (apiBaseUrl, tableName, row, handleReply) =>
     serverPostApi(apiBaseUrl, irl, value, handleReply)
 }
 
+// replaceRowApi
 export const replaceRowApi = (apiBaseUrl, tableName, record, handleReply) =>
 {
     const irl = '/replaceRow'
@@ -68,6 +67,7 @@ export const replaceRowApi = (apiBaseUrl, tableName, record, handleReply) =>
     serverPostApi(apiBaseUrl, irl, value, handleReply)
 }
 
+// deleteRowApi
 export const deleteRowApi = (apiBaseUrl, tableName, id, handleReply) =>
 {
     const url=apiBaseUrl + '/deleteRow'

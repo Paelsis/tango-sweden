@@ -101,11 +101,12 @@ export const backgroundImages = {
 
 export const REGIONS = 
 [
-  'Mitt',
   'Skåne',
+  'Stockholm',
   'Halland',
-  'Sydost',
   'Västra Götaland',
+  'Sydost',
+  'Mitt',
   'Norr',
   'Danmark',
   'Norge',
