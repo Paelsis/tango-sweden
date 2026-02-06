@@ -48,20 +48,20 @@ export default props => {
         }    
     }    
     const handleSave = record => {
-        let recordSave = {}
+        let recordAdj = {}
         if (fields) {
             fields.forEach(it => {
                 if (record[it.name]!==undefined) {
-                    recordSave = {...recordSave, [it.name]:record[it.name]}
+                    recordAdj = {...recordAdj, [it.name]:record[it.name]}
                 }
             })
-            recordSave = {id:record.id?record.id:0, ...recordSave, ...constants}
-            alert('Saving' + JSON.stringify(recordSave))
+            recordAdj = {id:record.id?record.id:0, ...recordAdj, ...constants}
+            alert('Saving' + JSON.stringify(recordAdj))
         } else {
-            recordSave = record;
+            recordAdj = record;
         }   
 
-        serverPost('/replaceRow', {tableName:tableName, record:recordSave}, handleReplySave)
+        serverPost('/replaceRow', {table:tableName, data:recordAdj}, handleReplySave)
     }
 
     const handleReplyDelete = reply => {

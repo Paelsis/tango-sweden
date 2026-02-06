@@ -118,7 +118,7 @@ const _createEvent = props => {
         moreThan11Hours,
         ongoing, 
         calendar:mstart.calendar(),
-        location:location?location:'No location',
+        location:location?location:'',
         // weekNumber: mstart.isoWeek(),
         style,
         /* Registration props */
@@ -196,7 +196,8 @@ const _getEventsFromGoogleCalendar = (calendarId, apiKey, timeMin, timeMax, lang
           const title = it.summary?it.summary:'No summary given in google calendar'
           const description = it.description?it.description:'No description given in google calendar'
           const location = it.location?it.location:'No location given in google calendar'
-          const eventId = it.id
+          const eventId = it.eventId
+          const id=it.id
           const guessStyleKey = guessStyleKeyFunc(location, title, description)     
 
           /*
@@ -211,7 +212,7 @@ const _getEventsFromGoogleCalendar = (calendarId, apiKey, timeMin, timeMax, lang
           }
           */
 
-          event = _createEvent({start, end, title, description, location, eventId, email:'daniel@tangokompaniet.com', hideLocationAndTime:false, useRegistrationButton:false, guessStyleKey, language})
+          event = _createEvent({start, end, title, description, location, eventId, id, email:'daniel@tangokompaniet.com', hideLocationAndTime:false, useRegistrationButton:false, guessStyleKey, language})
 
 
           event = _forceSmallFonts(event)

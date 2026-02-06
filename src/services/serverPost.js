@@ -1,88 +1,103 @@
 import axios from 'axios'
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL
 const username = process.env.REACT_APP_SLIM_USERNAME
 const password = process.env.REACT_APP_SLIM_PASSWORD
+const auth = {username, password}
 const axiosConfig = {
-    auth : {username, password}
+    auth,
 }
 
-// serverPostApi
-const serverPostApi = (apiBaseUrl, irl,  record, handleReply) => {
-    const url = irl.slice(0,4).toLowerCase().localeCompare('http')===0?irl:apiBaseUrl + irl
-    axios.post(url, record, axiosConfig)
-    .then(reply => {
-        const data = reply.data?reply.data:reply
+export const serverPost = (irl, indata, handleReply) => {
+    const url = irl.includes(API_BASE_URL)?irl:API_BASE_URL + irl
+    axios.post(url, indata, axiosConfig).then(response => {
+        const data = response.data?response.data:response
         if (data) {
-            if (data.status ==='OK') {
-                // Controlled OK reply
-                //const message = '[serverPostApi] status:OK data:' + JSON.stringify(data)
+            const status = data.status?data.status:'Unknown status'
+            if (status === 'OK') {
                 handleReply(data);
-            } else if (data.status ==='WARNING'){
-                // Controlled ERROR reply
-                // const message = '[serverPostApi] status:' + data.message?data.message:'No message ???'
-                handleReply(data);
-            } else if (data.status ==='ERROR'){
-                // Controlled ERROR reply
-                const message = '[serverPostApi] status:' + data.message?data.message:'No message ???'
+            } else if (status === 'WARNING') {
+                const message = 'WARNING [serverPost]:\n\n' + (data.message?data.message:"No message in warning reply from axios.post for url=$url")
                 alert(message)
+                handleReply(data);
             } else {
-                // Uncontrolled ERROR reply
-                const message = '[serverPostApi] Uncontrolled error with no status. data:' + JSON.stringify(data) 
+                const message = status + ' [serverPost]:\n\nProblem in reply from axios.post url:' 
+                + url + '\nstatus:' + status + '\nmessage:' + (data.message?data.message:JSON.stringify(data))
                 alert(message)
-            }   
-        } else {
-            const message = '[serverPost] ERROR: serverPostApi failed. No data.' 
-                + ' url:' + url +  ' record:' + JSON.stringify(record);
+            }    
+        } else {    
+            const message = 'ERROR [serverPost]:\n\nNo data in reply from axios.post url:' + url + '\n\nindata:' + JSON.stringify(indata) 
             alert(message)
-        }
+        } 
     })
-    .catch((e) => {
-        const message = '[serverPost] ERROR: axios.post falied for url:' + url + ' message:' + e?.message
+    .catch(e => {
+        const message = '[serverPost] Fatal error in reply from axios post from from url:' 
+        + url + '\nindata:' + JSON.stringify(indata) + '\nerror:' + JSON.stringify(e?e.message?e.message:e:'No message')
         alert(message)
     });
 }
 
-// addRowApi
-export const addRowApi = (apiBaseUrl, tableName, row, handleReply) =>
+export const addRow= (table, data, handleReply) =>
 {
-    const irl = '/replaceRow'
-    const value = {
-        tableName,
-        table:tableName,
-        data:row,
+    const irl = '/admin/replaceRow'
+    const indata = {
+        table,
+        data
     }  
 
-    serverPostApi(apiBaseUrl, irl, value, handleReply)
+    serverPost(irl, indata, handleReply)
 }
 
-// replaceRowApi
-export const replaceRowApi = (apiBaseUrl, tableName, record, handleReply) =>
+export const replaceRow = (table, data, handleReply) =>
 {
-    const irl = '/replaceRow'
-    const value = {
-        tableName,
-        record,
-        fetchRows:true, 
+    const irl = '/admin/replaceRow'
+    const indata = {
+        table,
+        data
     }  
-    serverPostApi(apiBaseUrl, irl, value, handleReply)
+    serverPost(irl, indata, handleReply)
 }
 
-// deleteRowApi
-export const deleteRowApi = (apiBaseUrl, tableName, id, handleReply) =>
+export const replaceRowReturnList = (table, data, handleReply) =>
 {
-    const url=apiBaseUrl + '/deleteRow'
-    const value = {
-        tableName,
-        table:tableName, 
+    const irl = '/admin/replaceRow'
+    const indata = {
+        table,
+        data,
+        fetchAll:true
+    }  
+    serverPost(irl, indata, handleReply)
+}
+
+export const updateRow = (table, data, handleReply) =>
+{
+    const irl = '/admin/updateRow'
+    const indata = {
+        table,
+        data,
+        id:data.id,
+    } 
+    serverPost(irl, indata, handleReply)
+}
+
+export const updateRowReturnList = (table, data, handleReply) =>
+{
+    const irl = '/admin/updateRow'
+    const indata = {
+        table,
+        data,
+        id:data.id,
+        fetchAll:true
+    } 
+    serverPost(irl, indata, handleReply)
+}
+
+export const deleteRow = (table, id, handleReply) =>
+{
+    const irl='/admin/deleteRow'
+    const indata = {
+        table, 
         id
     }  
-    serverPost(url, value, handleReply)
+    serverPost(irl, indata, handleReply)
 }
-
-const apiBaseUrl = process.env.REACT_APP_API_BASE_URL
-
-export const serverPost = (irl,  record, handleReply) => serverPostApi(apiBaseUrl, irl, record, handleReply)
-export const replaceRow = (tableName, record, handleReply) => replaceRowApi(apiBaseUrl, tableName, record, handleReply)
-export const deleteRow = (tableName, id, handleReply) => deleteRowApi(apiBaseUrl, tableName, id, handleReply)
-
-

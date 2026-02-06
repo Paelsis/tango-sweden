@@ -53,8 +53,8 @@ const FormField = props => {
     }    
     const required = fld.required?true:false 
     const disabled = fld.disabledFunc?fld.disabledFunc(value):false
-    const labelStyle={fontWeight:700, ...props.labelStyle?props.labelStyle:{}}
-    const supStyle = {color:'red', fontWeight:700, ...props.subStyle?props.subStyle:{}}
+    const labelStyle={fontWeight:400, fontSize:16, ...props.labelStyle?props.labelStyle:{}}
+    const supStyle = {color:'red', fontWeight:900, ...props.subStyle?props.subStyle:{}}
     const valueStyle = props.valueStyle?props.valueStyle:{}
     const placeholder = fld.placeholder
 
@@ -106,7 +106,7 @@ const FormField = props => {
             case 'radio':
                 return(
                     <p>
-                        <label style={{fontWeight:700}}>
+                        <label style={labelStyle}>
                                 {label}&nbsp;{required?<sup style={supStyle}>*</sup>:null}&nbsp;
                         </label>    
                         <br/>
@@ -218,11 +218,11 @@ const FormField = props => {
                         </p>
                         )    
                 
-                    case DRAFT_EDITOR:
+                case DRAFT_EDITOR:
                         const onEditorStateChange = val => {
                             const html = draftToHtml(convertToRaw(val.getCurrentContent()))
                             setEditorState(val)
-                            setValue({...value, [draftName]:val, [fld.name]:html})
+                            setValue({...value, [fld.name]:html})
                         }    
                         return (
                             <p className='content'>
@@ -234,13 +234,12 @@ const FormField = props => {
                                     style={{cols:50}} 
                                     required={required} 
                                     disabled={disabled}
-                                    placeholder={fld.placeholder}
                                     editorState={editorState} 
                                     onEditorStateChange={onEditorStateChange} 
                                 />
                             </p>
                         )    
-                    case 'date':
+                case 'date':
                         return(
                             <p>
                                 <label style={labelStyle}>

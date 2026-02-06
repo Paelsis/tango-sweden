@@ -1,5 +1,6 @@
 import React, {useState, useRef, useEffect} from 'react';
 import Button, { buttonClasses } from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import FormField from './FormField';
 import {COLORS} from '../services/const'
@@ -53,7 +54,7 @@ export default props => {
                     {props.children}
                     {fields.filter(fld=>!isHidden(fld, value)).map((fld, index) => 
                         <Tooltip 
-                            title={<h4 style={{textAlign:'left' , fontSize:20, fontWeight:900, color:COLORS.WHITE}}>{fld.tooltip}</h4>}
+                            title={<h4 style={{textAlign:'left' , fontSize:22, fontWeight:700, color:COLORS.WHITE}}>{fld.tooltip}</h4>}
                             open={fld.tooltip?undefined:false}
                         >    
                             <div>
@@ -74,18 +75,24 @@ export default props => {
                             <Tooltip 
                                 title={<h2>{button.tooltip}</h2>} 
                                 enterDelay={500} 
-                                open={button.tooptip?undefined:false}
+                                open={button.tooltip?undefined:false}
                             >
                             <span style={button.style}>
                                 {
-                                    <Button 
-                                        type={button.type} 
-                                        variant={button.variant?button.variant:"outlined"}
-                                        color={"inherit"}
-s                                       onClick={button.handleClick?button.handleClick:undefined}
+                                    <IconButton 
+                                        onClick={button.onClick?button.onClick:button.handleClick}
+                                        disabled={button.disabled}
                                     >
-                                        {button.label}
-                                    </Button>
+                                        <Button 
+                                            type={button.type?button.type:'button'}
+                                            variant={button.variant?button.variant:"outlined"}
+                                            style={button.style}
+                                            color={"inherit"}
+                                            disabled={button.disabled}
+                                        >
+                                            {button.label}
+                                        </Button>
+                                    </IconButton>
                                 }                      
                                 &nbsp;
                             </span>

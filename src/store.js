@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext } from 'react';
-
+import {CALENDAR_TYPE} from './services/const'
 const initialState = {
   authLevel:4,
   city:'Stockholm',
@@ -8,7 +8,7 @@ const initialState = {
   color:'orange',
   backgroundColorLight:'grey',
   backgroundColorDark:'black',
-  calendarType:'DEFAULT'
+  calendarType:CALENDAR_TYPE.REGULAR
 };
 
 const useMyState = () => useState(initialState);

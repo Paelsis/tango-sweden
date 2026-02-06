@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {useContext, useState, useEffect} from 'react';
+import {AuthContext} from "../login/FirebaseAuth"
 import {serverFetchData} from '../services/serverFetch'
 import {IconButton} from '@mui/material';
 import Button from '@mui/material/Button';
@@ -10,7 +11,7 @@ import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
 import PersonAddDisabledIcon from '@mui/icons-material/PersonAddDisabled';
-
+import {CALENDAR_TYPE} from '../services/const'
 import CloseIcon from '@mui/icons-material/Close';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -18,8 +19,6 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Tooltip from '@mui/material/Tooltip';
-import {AuthContext} from "../login/FirebaseAuth"
-import { getAuth, onAuthStateChanged} from 'firebase/auth';
 import {serverPost} from '../services/serverPost'
 import { useNavigate } from "react-router-dom";
 import {ADMINISTRATORS, MAX_LIMIT_UNSET, CALENDAR} from '../services/const'
@@ -56,10 +55,10 @@ const renderDescription = (description, type, handleClose) => {
 
 // DialogSlide
 export default props => {
-  const {open, setOpen, event, calendarType} = props
+  const {open, setOpen, event} = props
+  const calendarType = props?.calendarType?props.calendarType:CALENDAR_TYPE.REGULAR
   const [sharedState, setSharedState] = useSharedState()
   const forceReloadCount = sharedState.forceReloadCount?sharedState.forceReloadCount:0
-  const [signinEmail, setSigninEmail] = useState(undefined)
   const navigate = useNavigate();
   const handleClose = () => setOpen(false)
   const eventId = event.eventId?event.eventId:'Missing'
@@ -68,10 +67,11 @@ export default props => {
   const maxLimit = event.maxLimit?event.maxLimit:MAX_LIMIT_UNSET
   const title = event.title
   const dateRangeTime = event.dateRangeTime
-  const tblCalendar = CALENDAR[calendarType?calendarType:'DEFAULT'].TBL_CALENDAR
-  const tblRegistration = CALENDAR[calendarType?calendarType:'DEFAULT'].TBL_REGISTRATION
+  const tblCalendar = CALENDAR[calendarType].TBL_CALENDAR
+  const tblRegistration = CALENDAR[calendarType].TBL_REGISTRATION
   const ava = event.ava
-
+  const {user} = useContext(AuthContext)
+  const signinEmail = user?user.email?user.email:undefined:undefined
 
   const handleUpdate = e => {
     e.preventDefault(); 
@@ -81,12 +81,14 @@ export default props => {
     
     navigate('/update', {
       state: { 
+        id:ev.id,
         private:ev.private,
         eventId:ev.eventId, 
         title:ev.title, 
         company:ev.company, 
         description:ev.description, 
         location:ev.location, 
+        startDate:ev.startDate, 
         startDateTime:ev.start, 
         endDateTime:ev.end,
         startTime:ev.start.substring(11,16),
@@ -103,8 +105,8 @@ export default props => {
         backgroundImage:ev.backgroundImage,
         useRegistrationButton:ev.useRegistrationButton,
         maxLimit:ev.maxLimit,
-        calendarType:calendarType?calendarType:'DEFAULT',
         email:ev.email,
+        calendarType,
       }
     })
   }
@@ -117,6 +119,7 @@ export default props => {
       const ev = event
       navigate('/copy', {
         state: {
+          id:ev.id,
           email:ev.email,
           private:ev.private,
           eventId:ev.eventId, 
@@ -124,6 +127,7 @@ export default props => {
           company:ev.company, 
           description:ev.description, 
           location:ev.location, 
+          startDate:ev.startDate, 
           startDateTime:ev.start, 
           endDateTime:ev.end,
           startTime:ev.start.substring(11,16),
@@ -142,7 +146,7 @@ export default props => {
           backgroundImage:ev.backgroundImage,
           useRegistrationButton:ev.useRegistrationButton,
           maxLimit:ev.maxLimit,
-          calendarType:calendarType?calendarType:'DEFAULT',
+          calendarType,
         }
       })
   }
@@ -188,17 +192,8 @@ export default props => {
         navigate('/registration', {state:{calendarType, eventIdExtended, maxLimit, ava, title, organizerEmail, dateRangeTime}})
     }
 
-
-  const auth = getAuth()
-  useEffect(()=>onAuthStateChanged(auth, user => {
-    if (user?user.email:false) {
-        setSigninEmail(user.email)
-    }    
-  }), [])
-
   const authLevel = sharedState.authLevel
   const privateEvent = event.private==1?true:false
-
  
   // You are authorized if you own event or (authLevel is 8 and not private) or authLevel=16
   const authorized = (signinEmail === event.email) || (authLevel === 16) || ((authLevel === 8) && !privateEvent)
@@ -212,11 +207,11 @@ export default props => {
           aria-labelledby="alert-dialog-title"
           aria-describedby="alert-dialog-description"
         >
-          {event.hideLocationAndTime==1?null:
+          {event.location?
           <DialogTitle id="alert-dialog-title">
             {event.location + ' ' + event.dateRangeTime}
           </DialogTitle>
-          }
+          :null}
           <DialogContent>
             <DialogContentText id="alert-dialog-description">
               {linkToFacebook?<a href={linkToFacebook}>Link to Facebook</a>:null}

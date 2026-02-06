@@ -10,7 +10,6 @@ import {STATUSLINE_STYLE} from '../services/const'
 
 const apiBaseUrl = process.env.REACT_APP_API_BASE_URL
 
-
 const styles={
   preview: {
     padding:1, 
@@ -20,7 +19,8 @@ const styles={
   }
 }
 
-class Comp extends Component {
+// AddPhotoSingle
+class AddPhotoSingle extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -43,7 +43,6 @@ class Comp extends Component {
 
   handleSubmit(event) {
     event.preventDefault();
-    
     if (event.target.files.length > 0) {
       const formData = new FormData()
       //formData.append('rootdir', this.props.rootdir?this.props.rootdir:'')
@@ -55,7 +54,7 @@ class Comp extends Component {
         formData.append('remove', this.props.remove?this.props.remove:'')
       }
 
-      console.log('Submitting image to disk ...', STATUSLINE_STYLE.PROCESSING, 10000)
+      alert('Submitting image to disk ...')
 
       // console.log(Object.fromEntries(formData))
       for(let i=0; i < event.target.files.length; i++) {
@@ -80,19 +79,25 @@ class Comp extends Component {
               onUploadProgress: progressEvent => {console.log(progressEvent.loaded / progressEvent.total); }
           }
       ).then(response => {
-          if (response.data.status ==='OK') {
-            const fname = response.data.result.find(it=>this.props.matching?it.fname.includes(this.props.matching):true).fname
-            if (fname) {
-              console.log('[AddPhotoSingle]:Successful loading of image ' + fname)
-              this.props.setUrlImage(fname)
+          const data = response.data?response.data:response
+          const status = data.status?data.status:'NO STATUS'
+          if (data) {
+            if (status ==='OK') {
+              const fname = response.data.result.find(it=>this.props.matching?it.fname.includes(this.props.matching):true).fname
+              if (fname) {
+                this.props.setUrlImage(fname)
+              } else {
+                alert('[AddPhotoSingle]: ERROR: No fname returned from axios.post')
+              } 
             } else {
-              alert('[AddPhotoSingle]: ERROR: No fname returnedSuccerssful load of image', STATUSLINE_STYLE.ERROR, 3000)
-            } 
+              alert('[AddPhotoSingle]:' + status + ': Posting image failed with axios.post')
+            }
           } else {
-            alert('[AddPhotoSingle]: ERROR: Posting image failed:' + JSON.stringify(response.data))
+              alert('[AddPhotoSingle]: No data returned from axios.post for url ' + url)
           }
-      }).catch(error => {
-          alert('[AddPhotoSingle]: ERROR: Failed to post image:' + error?.message?error.message:'<No message>');
+      }).catch(e => {
+          const message = e.getMessage()?e.getMessage():'No message'
+          alert('[AddPhotoSingle]: SEVERER ERROR: Failed to post url:' + url + ' message:' + message)
       });
     }
   }
@@ -119,6 +124,7 @@ class Comp extends Component {
   renderForm() {    
     return(
       <form className='columns is-centered' onSubmit={this.handleSubmit}>
+          <h1>{this.props.subdir}</h1>
           <IconButton
             //className='column is-narrow'
             type='submit'
@@ -143,37 +149,35 @@ class Comp extends Component {
           </IconButton>
       </form>
     )
-}
-render() {
-  return (
-    <div>
-        <div>
-          <input 
-            type="file" 
-            name="newfile"
-            accept="image/*, application/pdf" 
-            onChange={this.handleChange} 
-            style={{display:'none'}}
-            ref={fileInput => this.fileInput = fileInput} 
-          />
-          <IconButton
-            //className='column is-narrow'
-            type='button'
-            size="medium"
-            edge="start"
-            color="inherit"
-            sx={{ mr: 0 }}
-            onClick={()=>this.fileInput.click()}
-          >
-            <AddAPhotoIcon fontSize="inherit" />
-          </IconButton>
-        </div>
-    </div>
-
-
-  )
-}
+  }
+  render() {
+    return (
+      <div>
+          <div>
+            <input 
+              type="file" 
+              name="newfile"
+              accept="image/*, application/pdf" 
+              onChange={this.handleChange} 
+              style={{display:'none'}}
+              ref={fileInput => this.fileInput = fileInput} 
+            />
+            <IconButton
+              //className='column is-narrow'
+              type='button'
+              size="medium"
+              edge="start"
+              color="inherit"
+              sx={{ mr: 0 }}
+              onClick={()=>this.fileInput.click()}
+            >
+              <AddAPhotoIcon fontSize="inherit" />
+            </IconButton>
+          </div>
+      </div>
+    )
+  }
 }
 
-export default props => <Comp {...props}/>
+export default props => <AddPhotoSingle {...props}/>
   

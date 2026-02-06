@@ -1,4 +1,5 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useContext} from 'react';
+import {AuthContext} from "../login/FirebaseAuth"
 import { getAuth, onAuthStateChanged} from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import {Button, IconButton, Tooltip} from '@mui/material';
@@ -78,7 +79,7 @@ const viewUsersForRegion = (region, users, selectedUser, setSelectedUser, naviga
     const subdir = 'images/users'
     const src = selectedUser?.urlImage?selectedUser.urlImage.includes('http')?selectedUser.urlImage:(apiBaseUrl + '/' + subdir + '/' + selectedUser.urlImage):undefined
     const alt = selectedUser?.urlImage?('File ' + selectedUser.urlImage + ' not found'):'No image'
-    const calendarType = 'DJ'
+    const calendarType = 'DISKJOCKEY'
     const description = selectedUser?.descriptionDJ?selectedUser.descriptionDJ:selectedUser?.description?selectedUser.description:''
     const email = selectedUser?.email?selectedUser.email:'No email'
     
@@ -155,18 +156,12 @@ export default () => {
     const [region, setRegion] = useState([])
     const [users, setUsers] = useState([])
     const [selectedUser, setSelectedUser] = useState()
-    const [signinEmail, setSigninEmail] = useState()
     const navigate = useNavigate()
     const handleNavigate = lnk => {
         navigate(lnk)
     }
-
-    useEffect(()=>{
-        const auth = getAuth()
-        onAuthStateChanged(auth, user => {
-            setSigninEmail(user?.email?user.email:undefined)
-        })
-    }, [])
+    const {user} = useContext(AuthContext)
+    const signinEmail = user?user.email?user.email:undefined:undefined
 
     const handleReply = (reply) => {
         if (reply.status === 'OK') {

@@ -18,16 +18,17 @@ import Divider from '@mui/material/Divider';
 import ListItemText from '@mui/material/ListItemText';
 import { useNavigate } from 'react-router-dom';
 import { getAuth, signOut, onAuthStateChanged } from 'firebase/auth';
+
 import {AuthContext} from "../login/FirebaseAuth"
 import {serverFetchData} from '../services/serverFetch'
 import {COLORS, isProduction} from '../services/const'
 // AppBar.js
 export default () => {
-  const [sharedState, setSharedState] = useSharedState()
-  const [signinEmail, setSigninEmail] = useState(undefined)
+  const [sharedState, setSharedState] = useSharedState({})
   //const [sharedState, setSharedState] = useGlobalState('USER_SETTINGS')
-  const [anchorEl, setAnchorEl] = useState(null);
-  const auth = getAuth()
+  const [anchorEl, setAnchorEl] = useState(null)
+  const {user} = useContext(AuthContext)  
+  const signinEmail = user?.email?user.email:undefined
   const open = Boolean(anchorEl);
   const navigate = useNavigate()
   const handleClick = (event) => {
@@ -55,21 +56,18 @@ export default () => {
   }
   
   useEffect(()=>{
-    onAuthStateChanged(auth, user => {
-      setSigninEmail(user?user.email:undefined);
-      if (user?user.email:false) {
-        const irl = '/getUser?email=' +  user.email
-        serverFetchData(irl,  data=>handleResultUser(data))
-      } 
-    })
-  }, [])
+     if (signinEmail?true:false) {
+       const irl = '/getUser?email=' +  user.email
+       serverFetchData(irl,  data=>handleResultUser(data))
+     } 
+  }, [signinEmail])
 
   const handleNavigate = route =>  navigate(route)
   const handleSignup = () => navigate('/signup')
   const handleSignin = () => navigate('/signin')
   
   const handleSignout = () => {
-    setSigninEmail(undefined)
+    const auth=getAuth()
     signOut(auth)
     navigate('/signin')
     // window.location.reload()
@@ -96,10 +94,10 @@ export default () => {
           {(signinEmail&&authLevel >= 1)?<MenuItem onClick={()=>handleSignout()}>Signout</MenuItem>:<MenuItem onClick={()=>handleSignin()}>Signin</MenuItem>}
           {signinEmail?null:<MenuItem onClick={()=>handleSignup()}>Signup</MenuItem>}
           {(signinEmail && authLevel >= 1)?<Divider />:null}
-          {(signinEmail && authLevel >= 4)?<MenuItem onClick={()=>navigate('/add')}>Add event</MenuItem>:null}
-          {(signinEmail && authLevel >= 1)?<MenuItem onClick={()=>navigate('/myProfile')}>My profile</MenuItem>:null}
-          {(signinEmail && authLevel >= 16)?<MenuItem onClick={()=>navigate('/updateUser')}>Define users</MenuItem>:null}
-          <MenuItem onClick={()=>handleNavigate('/usage')}>Usage</MenuItem>
+          {(signinEmail && authLevel >= 4)?<MenuItem onClick={()=>{navigate('/add');handleClose()}}>Add event</MenuItem>:null}
+          {(signinEmail && authLevel >= 1)?<MenuItem onClick={()=>{navigate('/myProfile');handleClose()}}>My profile</MenuItem>:null}
+          {(signinEmail && authLevel >= 16)?<MenuItem onClick={()=>{navigate('/updateUser'); handleClose()}}>Define users</MenuItem>:null}
+          <MenuItem onClick={()=>{handleNavigate('/usage'); handleClose()}}>Usage</MenuItem>
         </Menu>
 
         <Box sx={{ flexGrow: 2}}>

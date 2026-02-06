@@ -6,9 +6,9 @@ import {useLocation} from 'react-router-dom'
 import moment from 'moment-with-locales-es6'
 import { useNavigate } from "react-router-dom";
 import {serverPost} from '../services/serverPost'
-import { BUTTON_STYLE, MAX_LENGTH_DESC, CALENDAR } from '../services/const';
+import { BUTTON_STYLE, MAX_LENGTH_DESC, CALENDAR, CALENDAR_TYPE } from '../services/const';
 import Square from '../components/Square'
-import FORM_FIELDS from '../services/formFields'
+import {FORM_FIELDS} from '../services/formFields'
 // import { generateEditorStateFromValue, emptyEditorState } from '../components/DraftEditor'
 
 const styles={
@@ -30,201 +30,55 @@ const styles={
 }
 
 
-const development = process.env.NODE_ENV === 'development'
-  
-/*
-const fields = [
-    {
-        type:'checkbox',
-        label:'Change all events in list',
-        name:'changeAll',
-        tooltip:'Change the whole list of events you created with "Send List To Calendar" + "Send to calender" button'
-    },
-    {
-        type:'checkbox',
-        label:'Update event with latest settings',
-        name:'updateWithSettings',
-        tooltip:'Update this event with colors of the values un Settings'
-    },
-    {
-        type:'checkbox',
-        label:'Private',
-        name:'private',
-        tooltip:'No-one but owner of event can update event (not even the superuser)'
-    },
-    {
-        type:'text',
-        label:'Title',
-        name:'title',
-        required:true,
-        tooltip:'The event title shown in the calendar',
-    },
-    {
-        type:'checkbox',
-        label:'Hide location and time in popup window',
-        name:'hideLocationAndTime',
-        tooltip: 'Check this box if you want to hide the location and time in the popup windo when clicking at event'
-    },
-    {
-        type:'text',
-        label:'Location',
-        name:'location',
-        hiddenIf:'hideLocationAndTime',
-        tooltip: 'Location of the event'
-
-    },
-    {
-        type:'datetime-local',
-        label:'Start date and time',
-        name:'startDateTime',
-        required:true,
-        hiddenIf:'changeAll',
-        tooltip:'Start date and time of the single event'
-    },
-    {
-        type:'datetime-local',
-        label:'End date and time',
-        name:'endDateTime',
-        required:true,
-        hiddenIf:'changeAll',
-        tooltip:'End date and time for the single event'
-    },
-    {
-        type:'time',
-        label:'Start time',
-        name:'startTime',
-        required:true,
-        notHiddenIf:'changeAll',
-        tooltip:'Change start time in all events of the series created at the same occation'
-
-    },
-    {
-        type:'time',
-        label:'End time',
-        name:'endTime',
-        required:true,
-        notHiddenIf:'changeAll',
-        tooltip:'Change end time in all events of the series created at the same occation'
-    },
-    {
-        type:'checkbox',
-        label:'Use HTML-editor',
-        name:'htmlEditor',
-        tooltip: 'If you want to write your Description in html instead of using the editor, check this box'
-    },
-    {
-        // type:'rte',
-        type:'draft',
-        label:'Description',
-        name:'description',
-        draftName:'draft_description',
-        required:true,
-        hiddenIf:'htmlEditor',
-        tooltip:'The description shown whenever you click at an event in the calendar',
-
-    },
-    {
-        name:'description',
-        label:'Description',
-        type:'textarea',
-        required:false,
-        notHiddenIf:'htmlEditor',
-        tooltip:'The description given as html',
-        maxlength:65000,
-    },
-    {
-        name:'facebookEventLink',
-        label:'Facebook event link',
-        type:'text',
-        maxLength:200,
-        tooltip:'The https-link to the facebook event (Ex: https://fb.me/e/1OwKAA8Lm)',
-        hiddenIf:'facebookEventId',
-    },
-    {
-
-        name:'facebookEventId',
-        label:'Facebook event id',
-        type:'number',
-        tooltip:'The facebook event id (Ex: 1123264745523165)',
-        maxLength:20,
-        hiddenIf:'facebookEventLink',
-    },
-    {
-        type:'checkbox',
-        label:'Use registration button',
-        name:'useRegistrationButton',
-        tooltip:'If you want a registration button and save registrations for the event',
-    },    
-    {
-        type:'email',
-        label:'E-mail of respoinsible organizer',
-        name:'email',
-        tooltip:'E-mail that will recieve the confirmation mails from the registrations',
-        notHiddenIf:'useRegistrationButton',
-    },    
-    {
-        type:'number',
-        label:'Maximum number of registrants',
-        style:{width:40},
-        name:'maxLimit',
-        min:1, 
-        max:500,
-        notHiddenIf:'useRegistrationButton',
-        tooltip: 'Maximum number of registrants for this event. Registration not possible when max is reached.'
-    },
-]
-*/
-
-
   
 export default () => {
-    const [sharedState, ] = useSharedState()
+    const [sharedState, setSharedState] = useSharedState()
     const [value, setValue] = useState()
     const [buttonStyle, setButtonStyle] = useState()
     const navigate = useNavigate() 
     const location = useLocation()
-    const event = location.state
-    const {calendarType, email} = event
+    const event = location?.state?location.state:undefined
+    const {calendarType, email} = event?event:{}
     const calendarEmail = email
-    const fields = FORM_FIELDS[calendarType].UPDATE
+    const fields = calendarType?FORM_FIELDS[calendarType].UPDATE:[]
 
-    console.log('Update: value = ', value)
-    const adjustEvent = ev => {
-        if (ev) {
-            const extendedEvent = {
-                ...ev,
-                id:undefined,
-            }    
-            return extendedEvent
-        } 
-    }
+
 
     useEffect(()=>{
-        setValue(adjustEvent(event))
+        setValue(event)
     }, [])
 
     const handleReply = reply => {
         setButtonStyle(BUTTON_STYLE.SAVED)
+        const calendarDate = value.startDateTime.substring(0,10)
+        setSharedState({...sharedState, calendarDate})
         // alert(JSON.stringify(reply))
         if (reply.status==='OK') {
             setButtonStyle(BUTTON_STYLE.SAVED)
             setTimeout(() => {
-                navigate('/calendar/' + sharedState.region + '/' + calendarType + (calendarEmail?'/' + calendarEmail:''))   
-        }, 500);
-    
+               const addEmail = (calendarType !== CALENDAR_TYPE.REGULAR) 
+               navigate('/calendar/' + sharedState.region + '/' + calendarType + (addEmail?'/' + email:''))   
+            }, 500);
+        } else if (reply.status ==='WARNING') {
+            setButtonStyle(BUTTON_STYLE.WARNING)
+            setTimeout(() => alert('WARNING:' + reply.message), 5000);
         } else {
-            setButtonStyle(BUTTON_STYLE.ERROR)
-            setTimeout(() => alert('ERROR:' + reply.message), 5000);
-        }     
+            setButtonStyle(BUTTON_STYLE.WARNING)
+            setTimeout(() => alert('WARNING:' + reply.message), 5000);
+        }    
     }
     const handleSubmit = e => {
         e.preventDefault()
+
         // alert('[handleSubmit]:calendarType:' + calendarType)
         setButtonStyle(BUTTON_STYLE.CLICKED)
 
-        if (moment(value.startDateTime) > moment(value.endDateTime)) {
-            alert('WARNING: End of the event must be set later than start of the event. Please check dates and times.')
-            return
+        /* When changeAll is set, we do not use startDateTime or endDateTime, only startTime and endTime */
+        if (!value.changeAll) {
+            if (moment(value.startDateTime) > moment(value.endDateTime)) {
+                alert('WARNING: End of the event must be set later than start of the event. Please check dates and times.')
+                return
+            }
         }
 
         if (value.description?value.description.length > MAX_LENGTH_DESC:false) {
@@ -233,30 +87,22 @@ export default () => {
         }
 
         const backgroundImage = sharedState.backgroundImage?sharedState.backgroundImage:""
-        const settings = value.updateWithSettings?{
-                ...sharedState, 
-                authLevel:sharedState.authLevelOverride?sharedState.authLevelOverride:sharedState.authLevel,
-                backgroundImage
-            }
-        :
-            {}
-
             
-        const startDateTime = value.changeAll?undefined:value.startDateTime;
-        const endDateTime = value.changeAll?undefined:value.endDateTime;
         const startTime = value.changeAll?value.startTime:undefined 
         const endTime = value.changeAll?value.endTime:undefined
         const tableName = CALENDAR[calendarType].TBL_CALENDAR
         const email = undefined // Do not update email
-        const id = undefined  // Do not update id, i.e. use the same 
-        const data = {...value, ...settings, startDateTime, endDateTime, startTime, endTime, email, tableName, id} 
+        const eventId = event.eventId
 
-        console.log('[Update]formulär Just before update with /updateEvent: data =', data)
+        //alert('[Update] id = ' + event.id)
+        const data = {...value, startTime, endTime, email, tableName } 
+
         const irl = '/updateEvent'
+        console.log('Update: data = ', JSON.stringify(data))
         serverPost(irl,  data, handleReply)
     }    
 
-    const handleReset = () => {setValue(adjustEvent(event))}
+    const handleReset = () => {setValue(event)}
 
     const handleEmpty = () => {setValue({})}
 
@@ -282,7 +128,11 @@ export default () => {
             
     return (
         <div style={styles.container}>
-            {value?    
+            {!event?
+                <div style={{textAlign:'center', width:'100vw'}}>
+                <h1 style={{color:'red'}}>Update must be called with an event via route</h1>
+                </div>
+            :value?    
                 <div className='columns m-2 is-centered is-half'>
                     <div className="column is-5">
                         <FormTemplate 
@@ -292,13 +142,6 @@ export default () => {
                             buttons={buttons}
                             handleSubmit={handleSubmit}
                         />
-                    </div>
-                    <div className='column is-1' >
-                    </div>    
-                    <div className='column is-2'>
-                        <Square settings={value.updateWithSettings?sharedState:value} />
-                        <p/><p/>
-                        <small>email:{event.email}</small>
                     </div>
                 </div>
             :

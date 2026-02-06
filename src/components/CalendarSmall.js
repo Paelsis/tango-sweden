@@ -3,6 +3,8 @@ import {AVA_STATUS, MAX_LIMIT_UNSET, TBL_REGISTRATION_CALENDAR} from '../service
 import { useNavigate } from 'react-router-dom';
 import { CALENDAR } from '../services/const'
 import Tooltip from '@mui/material/Tooltip';
+import {CALENDAR_TYPE} from '../services/const'
+
 
 //import moment from 'moment';
 import moment from 'moment-with-locales-es6'
@@ -143,12 +145,12 @@ export default props => {
 
         const listRegistration = () => {
             const eventIdExtended = event.eventId + event.startDate
-            const tblRegistration = CALENDAR[calendarType?calendarType:'DEFAULT'].TBL_REGISTRATION
+            const tblRegistration = CALENDAR[calendarType?calendarType:CALENDAR_TYPE.REGULAR].TBL_REGISTRATION
             navigate('/listRegistration', {state:{eventIdExtended, tblRegistration}})
         }    
 
         const handleClickButton = () => {
-            if (calendarType === CALENDAR.DEFAULT || !calendarType) {
+            if (calendarType === CALENDAR.REGULAR || !calendarType) {
               goToRegistration(event); 
             } else if (authorized) {
               listRegistration(event)

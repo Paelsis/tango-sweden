@@ -1,5 +1,6 @@
-import React, {useEffect, useRef, useReducer, useState} from "react"
+import React, {useEffect, useContext, useState} from "react"
 import { useSharedState } from '../store';
+import {AuthContext} from "../login/FirebaseAuth"
 import { Navigate, useNavigate } from 'react-router-dom'
 import firebaseApp from '../services/firebaseApp'
 import { getAuth, onAuthStateChanged} from 'firebase/auth'
@@ -94,7 +95,7 @@ const styles = {
 const fieldsCAL = [
   {
       type:'text',
-      label:'Full name',
+      label:'Name (first and last)',
       name:'name',
       required:'true', 
       tooltip:'First and last name of the logged in user',
@@ -240,57 +241,61 @@ const fieldsCAL = [
 // MyProfile
 export default () => {
     const [sharedState, setSharedState] = useSharedState()
-    const [signinEmail, setSigninEmail] = useState(undefined)
-    const buttonStyle = useState(BUTTON_STYLE.DEFAULT)
-    const auth = getAuth()
-    const subdir = 'images/user'
+    const [value, setValue] = useState(undefined)
+    const subdir = process.env.REACT_APP_IMAGES_USER_DIR // ='user'
     const navigate = useNavigate()
-
-    const handleReply = (data) => {' '
-      if (data.status === 'OK') {
-        setSharedState({...sharedState, ...data.result})
-        if (data.message) {
-            console.log('Message:' + data.message)
-        }
-      } else {
-        console.log('ERROR: data.status = ' + data.status + ' message:' + data.message)
-        alert('ERROR: Failed to fetch user')
-      }  
-    }
-
+    const {user} = useContext(AuthContext)
+    const signinEmail = user?.email?user.email:null
+    
     useEffect(()=>{
-      onAuthStateChanged(auth, user => {
-        if (user?user.email:false) {
-          const irl = '/getUser?email=' +  user.email
-          setSigninEmail(user.email);
-          serverFetchData(irl,  data=>handleReply(data))
+      const handleReply = data => {
+        if (data.status === 'OK') {
+          setValue(data.result)
+          if (data.message) {
+              console.log('Message:' + data.message)
+          }
+        } else {
+          alert('ERROR: Failed to fetch user')
         }  
-      })
-    }, [])
-  
-    const handleSaveReply = reply => {
-      if (reply.status === 'OK') {
-        const rec = reply.list.find(it=>it.email === signinEmail)
-        if (rec?.name?rec.name:undefined) {
-            alert('You saved the profile successfully for user ' + (rec.name?rec.name:'<Name undefined>'))
-            setSharedState({...rec, authLevel:sharedState.authLevel})
-            navigate(-1)
-        }  
-
-      } else {
-        alert('ERROR: Failed to save the profile')
       }
-    }
+      const irl = '/getUser?email=' +  signinEmail
+      serverFetchData(irl,  data=>handleReply(data))
+    }, [signinEmail])
+  
 
     const handleSubmit = e => {
         e.preventDefault()
+
+        const handleReplaceReply = reply => {
+          const data = reply.data?reply.data:reply
+          if (data.status === 'OK') {
+            const rec = data?.list?data.list.find(it=>it.email === signinEmail):undefined
+            if (rec?.name?rec.name:undefined) {
+                setSharedState({authLevel:sharedState.authLevel})
+                // navigate(-1)
+                alert('You saved the profile successfully for user ' + (rec?.name?rec.name:'<Name undefined>'))
+            }  
+            alert('You saved the profile successfully for user ' + (value?.name?value.name:'<Name undefined>'))
+          } else {
+            alert('ERROR: Failed to save the profile')
+          }
+        }
+
         if (!!signinEmail) {
           const backgroundImage = sharedState.backgroundImage?sharedState.backgroundImage:null
           const borderStyle = sharedState.hasBorder?sharedState.borderStyle:'none'
-          const record = {...sharedState, email:signinEmail, backgroundImage,  borderStyle, creaTimestamp:undefined, updTimestamp:undefined, authLevel:sharedState.authLevel}
-          const data = {...record, fetchRows:true}
+          let record = {...sharedState, 
+              ...value, 
+              email:signinEmail, 
+              backgroundImage,  
+              borderStyle, 
+              creaTimestamp:undefined, 
+              updTimestamp:undefined, 
+              authLevel:sharedState.authLevel,
+              fetchRows:true,   
+          }
           //alert('Data:' + JSON.stringify(record))
-          replaceRow(TBL_USER, data, reply=>handleSaveReply(reply))
+          replaceRow(TBL_USER, record, reply=>handleReplaceReply(reply))
         } else {
           alert('Error: Dont save data since system cannot find any valid login email address')
         }         
@@ -318,7 +323,6 @@ export default () => {
 
     return(  
       <div style={styles.container}>
-        {sharedState?
           <>
             <h4 style={{color:'green', textAlign:'center'}}>Please choose your city, region and enter your name and save</h4>
               {/*JSON.stringify(allUsers)*/}
@@ -327,24 +331,24 @@ export default () => {
                   <div className='column is-4'>
                     <FormTemplate 
                       fields={fieldsCAL} 
-                      value={sharedState}
-                      setValue={setSharedState}
+                      value={value}
+                      setValue={setValue}
                       buttons={buttons}
                       handleSubmit={handleSubmit}
                     />
                   </div>
                   <div className='column is-2'>
                     <SelectUser email={signinEmail} sharedState={sharedState} setSharedState={setSharedState} /> 
-                    <MyImage tableName={TBL_USER} email={signinEmail} subdir={subdir} value={sharedState} setValue={setSharedState} />
-                    </div>
+                    <MyImage tableName={TBL_USER} email={signinEmail} subdir={subdir} sharedState={sharedState} setSharedState={setSharedState} />
+                  </div>
                 </div>
               :
                 <div className='columns m-4 is-centered'>
                   <div className='column is-4'>
                     <FormTemplate 
                       fields={fieldsDJ} 
-                      value={sharedState}
-                      setValue={setSharedState}
+                      value={value}
+                      setValue={setValue}
                       buttons={buttons} 
                       handleSubmit={handleSubmit}
                     />
@@ -352,8 +356,6 @@ export default () => {
                 </div>  
               }              
           </>
-        :null
-    }    
     </div>
   )  
 }

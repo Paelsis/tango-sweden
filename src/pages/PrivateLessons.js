@@ -1,11 +1,11 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useContext} from 'react';
+import {AuthContext} from "../login/FirebaseAuth"
 import { getAuth, onAuthStateChanged} from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import {Button, IconButton, Tooltip} from '@mui/material';
 import {serverFetchData} from '../services/serverFetch'
 import { COLORS, REGIONS, CALENDAR} from '../services/const'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import AddIcon from '@mui/icons-material/Add';
 // import './Djs.css';
 
 const apiBaseUrl = process.env.REACT_APP_API_BASE_URL
@@ -156,11 +156,10 @@ export default () => {
     const [region, setRegion] = useState([])
     const [users, setUsers] = useState([])
     const [selectedUser, setSelectedUser] = useState()
-    const [signinEmail, setSigninEmail] = useState()
     const navigate = useNavigate()
-    const handleNavigate = lnk => {
-        navigate(lnk)
-    }
+    const {user} = useContext(AuthContext)
+    const signinEmail = user?user.email?user.email:undefined:undefined
+    
     const handleReply = (reply) => {
         if (reply.status === 'OK') {
             // alert(JSON.stringify(reply))
@@ -175,17 +174,11 @@ export default () => {
         }
     }
 
-    useEffect(()=>{
-        const auth = getAuth()
-        onAuthStateChanged(auth, user => {
-            setSigninEmail(user?.email?user.email:undefined)
-        })
-    }, [])
 
     useEffect(()=>{
         const irl = '/getPrivateTeachers'
         serverFetchData(irl,  reply=>handleReply(reply))
-    }, [signinEmail])
+    }, [])
 
   
     // const cities = uniqueList(djs.map(it => it['city']))

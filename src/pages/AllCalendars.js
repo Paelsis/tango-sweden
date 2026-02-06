@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useSharedState} from '../store';
 import Button from '@mui/material/Button';
 import {serverFetchData} from '../services/serverFetch'
-import {labelSwedish} from '../services/functions'
 import Image from '../images/tangosweden.jpg';
 import {COLORS} from '../services/const'
 

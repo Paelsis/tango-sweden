@@ -35,46 +35,62 @@ const SwedishUsage = () =>
     Man kan inte längre göra egna färgval för sina events. Då blir sidan enligt experter alldeles för rörig.
     Tryck på <i>Save</i> knappen när du är klar med dina val i inställningar (Settings). 
     <p/>
-    <h3>Modifiera händelser</h3>
+    <h3>Lägg till / ändra / ta bort händelser</h3>
 
-    <h4>Lägga till händelse <i class="fa fa-plus"/></h4>
+    <h4>Lägga till händelse &nbsp; <i class="fa fa-plus"/></h4>
 
-    Som inloggad kan du inne i kalendern lägga till händelser med <i class="fa fa-plus"/> ikonen uppe till höger.
-    Om du önskar lägga in repeterade händelser med en viss frekvens kryssar du i Repeat. Då visas 3 nya värden för offset, enhet och antal repetitioner. 
-    Sättes tex <i>offset</i> till 2 och enhet till <i>weeks</i> betyder det varannan vecka. Fältet <i>Repeat number of times</i> anger antalet gånger händelsen skall upprepas
-    med den angivna frekvensen.  När du därefter klickar på knappen <button>ADD TO LIST</button>, så visas en lista med genererade datumen. 
-    Du kan lägga denna lista repeterade gånger, så att du får en massa händelser.
+    <ol>
+        <li>Logga på</li>
+        <li>Klicka till din stads kalender</li>
+        <li>Klicka på <i class="fa fa-plus"/> ikonen till höger i kalendern.</li>
+        <li>Fyll i formuläret med data</li>
+        <li>Klicka på <button>ADD TO LIST</button></li>
+        <li>Klicka på <button>PUSH TO CALENDAR</button></li>
+        <li>Nu syns eventet i din stads kalender</li>
+    </ol>
+    <h4>Repeterade händelser</h4>
+    Om du önskar lägga in repeterade händelser med en viss frekvens kryssar du i Repeat. Då visas 3 
+    nya värden för offset, enhet och antal repetitioner. 
+    Om du vill att ditt event skall repteras 9 gånger varannan vecka sätter du  <i>offset</i> till 2 och enhet till <i>weeks</i>
+    och <i>Repeat number of times</i>  till 9. Klicka sem på knappen <button>ADD TO LIST</button>. 
+    Då visas en lista med dina 9 datum. Du kan lägga till eller ta bort (med minus knappen) från denna list upprepade gånger. 
+    Du avslutar med att sända öistan till kalendern med knappen <button>PUSH TO CALENDAR</button>.
     <p/>
-    Önskar du ta bort en enstaka händelse frå listan klickar du på knappen <i class="fa fa-trash-o"></i> till höger om den händelse du vill ta bort. 
-    Om du önksar rensa hela listan du på knappen <button>CLEAR LIST</button> till höger.
-    När du är klar med den skapade listan skickar du denna till kalendern med knappen<button>SEND LIST TO CALENDAR</button>.
-    Alla händelser i listan ges en unik identitets-nyckel eventId. Denna nyckel används senare om man vill ändra eller ta bort en specifik händelse, alternativt en lista om det är et man satt in.
-    Efter att du tryckt på <button>SEND LIST TO CALENDAR</button> syns händelserna i kalendern för din region och stad.
-    Om du fyller i starttid 00:00 och sluttid 23:59 kommer tidsfältet visas för kunden som <i>Hela dagen</i> på mobilkalendern. 
-    Detta kan vara lämpligt för heldags-events, festivaler och maraton som sträcker sig över mer än en dag. För events som varar längre än 11 timmar och som
-    sträcker sig över flera dagar blir texten större i mobil-kalendern. Detta för att ge lite extra promotion till dem som gör sig besväret att
+    <h4>Modifiera listan av händelser</h4>
+    Önskar du ta bort en enstaka händelse från listan ovan klickar du på knappen <i class="fa fa-trash-o"/> 
+    till höger i listan om datumet du vill ta bort. Om du önksar rensa hela listan du på knappen <button>CLEAR LIST</button>.
+    När du är klar med den skapade med listan skickar du denna till kalendern 
+    med knappen <button>SEND LIST TO CALENDAR</button>.
+    <p/>
+    Samtliga händelser i en given lista har ett och samma samma unika eventId. Detta är praktiskt om man senare vill ändra 
+    eller ta bort samtliga event i hel en serie. 
+    <p/>
+    <h4>Heldagsevent</h4>
+    Om du fyller i starttid 00:00 och sluttid 23:59 kommer tidsfältet visas ditt event som <i>Hela dagen</i> på mobilkalendern. 
+    Detta kan vara lämpligt för heldags-events, festivaler och maraton som sträcker sig över mer än en dag. För events som varar 
+    längre än 11 timmar och som sträcker sig över flera dagar blir texten större i mobil-kalendern. Detta för att ge lite extra promotion till dem som gör sig besväret att
     arrangera flerdagarsevenemang.
     <p/>
 
-
-    <h4>Ändra händelse <i class="fa fa-pencil" /></h4>
+    <h4>Ändra existerande händelse &nbsp;<i class="fa fa-pencil" /></h4>
 
     Som inloggad kan du ändra din händelse genom att klicka på händelesen och därefter klicka på edit knappen <i class="fa fa-pencil" />.
     Då dyker det upp ett formulär där man kan beskriva händelsen. Om du önskar ändra hela listan för en given eventId kryssa i <i>Change all events in list</i>.
     När du är klar med dina nya uppgifter klicka på <button>UPDATE</button> knappen längst ned. 
     <p/>
     
-    <h4>Kopiera händelser <i class="fa fa-copy"></i></h4>
+    <h4>Kopiera händelser till nya händelser &nbsp; <i class="fa fa-copy"></i></h4>
 
-    För den som vill återanvända samma information från tidigare events till nya använda knappen <i>Kopiera</i>.
-    Det typiska exemplet är att du har en återkommande milonga eller praktika under hösten som vill skall fortsätta med nästa säsong.
+    För den som vill återanvända samma information från tidigare events till nya använda knappen <i class="fa fa-copy"/>.
+    Det typiska exemplet är att du har en återkommande milonga eller praktika under hösten som önskar skall 
+    fortsätta nästa säsong.
     <p/>
-    Som inloggad klickar du på eventet som du vill kopiera data från och därfter på copy knappen <i class="fa fa-copy"></i>. I fönstet som poppar upp finns nu förifylda data 
-    samt tomma fält för datum och tid. Fyll i ditt nya datum och din nya tid samt eventuell upprepad frekvens med <i>Repeat</i>.
+    Som inloggad klickar du på eventet i kalendern som du vill kopiera data från. Därfter klickar du på copy knappen <i class="fa fa-copy"/>. 
+    I fönstet som poppar upp finns nu förifylda data  samt tomma fält för datum och tid. Fyll i dina nya datum och tider samt eventuell upprepad frekvens med <i>Repeat</i>.
     För att underlätta för dem som glömt kopiera finns där kalender-historik bakåt i tiden. Dessa kalender data nås om man klickar på <i class="fa fa-history"></i> längst upp till höger.
     Historik finns för cirka 6 månader tillbaka. 
     <p/>
-    <h4>Ta bort händelse <i class="fa fa-trash-o"/></h4>
+    <h4>Ta bort händelse från kalender <i class="fa fa-trash-o"/></h4>
 
     Den som är inloggad kan ändra eller ta bort dina händelser genom att klicka på händelsen i kalendern. 
     Du kan endast ta bort events som din email äger, dvs events som skapats under den email du loggat på med.
@@ -216,17 +232,23 @@ const EnglishUsage = () =>
     <p/>
 
     <h3>Add new events  <i class="fa fa-plus"/></h3>
-
-    Log in and open your calendar and click on the <i class="fa fa-plus"/> icon at the top right. Then a form for describing your event appears.
-    If you wish to insert repeated events with a certain frequency, check Repeat. Then 3 new values ​​for offset, unit and number of repetitions are displayed. 
-    If, for example, <i>offset</i> is set to 2 and unit to <i>weeks</i>, it means every two weeks. The field <i>Repeat number of times</i> specifies the number of times the event shall be repeated
-    with the specified frequency.  When you then click the button <button>ADD TO LIST</button>, a list of the generated dates is displayed. 
-    You can add to this list repeatedly, so you get a lot of events in the list.
+    <ol>
+        <li>
+            Log in with your email and password klick on your city calendar. 
+        </li>
+        <li>Click on the add icon <i class="fa fa-plus"/> e right at top on your laptop (in bottom of mobile).</li>
+        <li>Fill in the form with title, location, date and time</li>
+        <li>If you want to repeat an event check box repeat and, otherwise jump to 4. 
+            If you want to repeat your event 14 times every week set <i>offset</i>1 and unit to <i>weeks</i> and <i>Repeat number of times.</i> to 14</li>
+        <li>Click button <button>ADD TO LIST</button> to add your entry to the list</li>
+        <li>Repeat the procedure from bullet point 1</li>
+        <li>When your list of events (shown to the right) is ready, send it to the calendar with the button <button>SEND LIST TO CALENDAR</button></li>
+    </ol>    
+    <h3>Remove an event <i class="fa fa-trash-o"></i></h3>
     <p/>
     If you wish to remove a single event from the list, click the <i class="fa fa-trash-o"></i> button to the right of the event you want to remove. 
     If you wish to clear the entire list, click the button <button>CLEAR LIST</button> on the right.
     <p/>
-    When you are finished with the created list, send it to the calendar with the button <button>SEND LIST TO CALENDAR</button>.
     All events in the list are given a unique identity key eventId. This key is used later if you want to change or delete a specific event, alternatively a list if it is one you have inserted.
     After you press <button>SEND LIST TO CALENDAR</button>, the events appear in the calendar for your region and city.
     If you enter start time 00:00 and end time 23:59, the time field will be displayed to the customer as <i>All day</i> on the mobile calendar. 

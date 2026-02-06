@@ -72,7 +72,7 @@ const styles = {
 }
 
 const viewDjsForRegion = (djs, region, dj, setDj) => {
-    const subdir = 'images/user'
+    const subdir = procees.env.REACT_APP_IMAGES_USER_DIR
     const src = dj?dj.urlImage?dj.urlImage.includes('http')?dj.urlImage:(apiBaseUrl + '/' + subdir + '/' + dj.urlImage):undefined:undefined
     const alt = dj?.urlImage?('File ' + dj.urlImage + ' not found'):undefined
     const description = dj?.descriptionDJ?dj.descriptionDJ:dj?.description?dj.description:'' 

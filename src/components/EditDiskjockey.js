@@ -1,4 +1,5 @@
-import React, {useState, useEffect, useReducer} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
+import {AuthContext} from "../login/FirebaseAuth"
 import { useSharedState } from '../store';
 import { useNavigate } from 'react-router-dom';
 import FormTemplate from './FormTemplate';
@@ -123,13 +124,13 @@ const fields = [
 
 const Func = () => {
     const [sharedState, ] = useSharedState()
-    const [signinEmail, setSigninEmail] = useState()
     const [value, setValue] = useState()
     const [list, setList] = useState([])
     const navigate = useNavigate()
-    const auth = getAuth()
+    const {user} = useContext(AuthContext)
+    const signinEmail = user?user.email?user.email:undefined:undefined
 
-    const subdir = '/images/user'
+    const subdir = process.env.REACT_APP_IMAGES_USER_DIR
 
 
     // useEffect(()=>setValue(props.init),[props.init])
@@ -149,14 +150,11 @@ const Func = () => {
 
 
     useEffect(()=>{
-        onAuthStateChanged(auth, user => {
-            if (user?user.email:false) {
+        if (signinEmail) {
                 // Get DJ for the email of the logged in user
-                setSigninEmail(user.email);
-                const irl1 = '/getDj?email=' + user.email
+                const irl1 = '/getDj?email=' + signinEmail
                 serverFetchData(irl1, handleReplyDj)
             } 
-        })
     }, [])
 
     const deleteRow = index => setList(list.filter((it, idx)=>idx !== index))  
@@ -183,12 +181,12 @@ const Func = () => {
     const handleSave = () => {
         if (!!signinEmail) {
             const active = value.active == 1?1:0
-            const record = {...value, active, email:signinEmail, authLevel:undefined, html:undefined, draft_description:undefined, creaTimestamp:undefined, updTimestamp:undefined}
-            const data = {tableName:'tbl_dj', record, fetchRows:true}
+            const data = {...value, active, email:signinEmail, authLevel:undefined, html:undefined, draft_description:undefined, creaTimestamp:undefined, updTimestamp:undefined}
+            const record = {table:'tbl_dj', data, fetchRows:true}
             if (value.description?value.description.length > MAX_DESC_LENGTH:false) {
                 alert('WARNING: Application doew not does not allow to save text longer than ' + MAX_DESC_LENGTH + ' characthers')
             } else {
-                serverPost('/replaceRow', data, handleSaveReply)
+                serverPost('/replaceRow', record, handleSaveReply)
             }    
         } else {
             alert('No valid email when saving')
@@ -223,10 +221,10 @@ const Func = () => {
         if (fname) {
             const urlImage = apiBaseUrl + '/' + subdir + '/' + fname
             const active = value.active == 1?1:0
-            const record = {...value, active, email:signinEmail, urlImage, html:undefined, draft_description:undefined, creaTimestamp:undefined, updTimestamp:undefined}
-            const data = {tableName:'tbl_dj', record, fetchRows:true}
+            const data = {...value, active, email:signinEmail, urlImage, html:undefined, draft_description:undefined, creaTimestamp:undefined, updTimestamp:undefined}
+            const record = {table:'tbl_dj', data, fetchRows:true}
             setValue({...value, urlImage})
-            serverPost('/replaceRow', data, result=>handleSaveImage(urlImage, result))
+            serverPost('/replaceRow', record, result=>handleSaveImage(urlImage, result))
         } else {
             alert("ERROR: Image not loaded")
         }

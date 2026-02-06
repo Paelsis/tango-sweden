@@ -1,5 +1,5 @@
 // formFields
-export default {
+export const FORM_FIELDS = {
     PRIVATE_LESSON:{ // calendarType
         ADD:[
             {
@@ -14,7 +14,6 @@ export default {
                 name:'location',
                 label:'Location',
                 type:'text',
-                hiddenIf:'hideLocationAndTime', 
                 tooltip: 'Location of the event'
             },
             {
@@ -41,7 +40,7 @@ export default {
             {
                 name:'startTime',
                 label:'Starttime',
-                tooltip:'Endtime of the event (for full day events set to 00:00)',
+                tooltip:'Starttime of the event (for full day events set to 00:00)',
                 type:'time',
                 required:true
             },
@@ -85,7 +84,7 @@ export default {
             },
             {
                 type:'number',
-                label:'Offset between events',
+                label:'Every',
                 name:'offset',
                 style:{width:40},
                 notHiddenIf:'repeat',
@@ -96,12 +95,12 @@ export default {
             },
             {
                 type:'radio',
-                label:'Offset unit',
+                label:'Days, Weeks, Moths',
                 name:'unit',
                 radioValues:['days', 'weeks', 'months'],
                 notHiddenIf:'repeat',
                 required:true,
-                tooltip: 'The unit of the field \"Offset between events\" right above' 
+                tooltip: 'The unit of the field \"Every\" right above' 
             },
             {
                 type:'number',
@@ -137,22 +136,25 @@ export default {
                 tooltip: 'Maximum number of registrants for this event. Defaults to 1 for private lessons.'
             },
         ],
-
         UPDATE:[
+            {
+                type:'checkbox',
+                label:'Change multiple events at one time (special case)',
+                name:'changeAll',
+                tooltip:'Mark only if you want to change multiple events in one go (list with more than 1 element)',
+            },
+            {
+                name:'location',
+                label:'Location',
+                type:'text',
+                tooltip: 'Location of the event'
+            },
             {
                 type:'text',
                 label:'Title',
                 name:'title',
                 required:true,
                 tooltip:'The event title shown in the calendar',
-            },
-            {
-                type:'text',
-                label:'Location',
-                name:'location',
-                hiddenIf:'hideLocationAndTime',
-                tooltip: 'Location of the event'
-        
             },
             {
                 type:'datetime-local',
@@ -219,16 +221,6 @@ export default {
                 type:'text',
                 maxLength:200,
                 tooltip:'The https-link to the facebook event (Ex: https://fb.me/e/1OwKAA8Lm)',
-                hiddenIf:'facebookEventId',
-            },
-            {
-        
-                name:'facebookEventId',
-                label:'Facebook event id',
-                type:'number',
-                tooltip:'The facebook event id given as a long digit number (Ex: 1123264745523165)',
-                maxLength:20,
-                hiddenIf:'facebookEventLink',
             },
             {
                 type:'checkbox',
@@ -252,12 +244,6 @@ export default {
                 max:500,
                 notHiddenIf:'useRegistrationButton',
                 tooltip: 'Maximum number of registrants for this event. Registration not possible when max is reached.'
-            },
-            {
-                type:'checkbox',
-                label:'Change all events in list',
-                name:'changeAll',
-                tooltip:'Change the whole list of events that you established with button SEND LIST TO CALENDAR',
             },
         ]
     },
@@ -267,7 +253,6 @@ export default {
                 name:'location',
                 label:'Location',
                 type:'text',
-                hiddenIf:'hideLocationAndTime', 
                 tooltip: 'Location of the event'
             },
             {
@@ -348,16 +333,6 @@ export default {
                 maxLength:200,
             },
             {
-                name:'facebookEventId',
-                type:'number',
-                style:{width:120},
-                width:200,
-                label:'Facebook event id',
-                tooltip:'The facebook event id (Ex: 1123264745523165)',
-                hiddenIf:'facebookEventLink',
-        
-            },
-            {
                 type:'checkbox',
                 label:'Repeat',
                 name:'repeat',
@@ -365,7 +340,7 @@ export default {
             },
             {
                 type:'number',
-                label:'Offset between events',
+                label:'Every',
                 name:'offset',
                 style:{width:40},
                 notHiddenIf:'repeat',
@@ -376,12 +351,12 @@ export default {
             },
             {
                 type:'radio',
-                label:'Offset unit',
+                label:'Days, Weeks, Moths',
                 name:'unit',
                 radioValues:['days', 'weeks', 'months'],
                 notHiddenIf:'repeat',
                 required:true,
-                tooltip: 'The unit of the field \"Offset between events\" right above' 
+                tooltip: 'The unit of the field \"Every\" right above' 
             },
             {
                 type:'number',
@@ -419,18 +394,23 @@ export default {
         ],
         UPDATE:[
             {
+                type:'checkbox',
+                label:'Change multiple events at one time (special case)',
+                name:'changeAll',
+                tooltip:'Mark only if you want to change multiple events in one go (list with more than 1 element)',
+            },
+            {
+                name:'location',
+                label:'Location',
+                type:'text',
+                tooltip: 'Location of the event'
+            },
+            {
                 type:'text',
                 label:'Title',
                 name:'title',
                 required:true,
                 tooltip:'The event title shown in the calendar',
-            },
-            {
-                type:'text',
-                label:'Location',
-                name:'location',
-                hiddenIf:'hideLocationAndTime',
-                tooltip: 'Location of the event'
             },
             {
                 type:'datetime-local',
@@ -497,16 +477,6 @@ export default {
                 type:'text',
                 maxLength:200,
                 tooltip:'The https-link to the facebook event (Ex: https://fb.me/e/1OwKAA8Lm)',
-                hiddenIf:'facebookEventId',
-            },
-            {
-        
-                name:'facebookEventId',
-                label:'Facebook event id',
-                type:'number',
-                tooltip:'The facebook event id (Ex: 1123264745523165)',
-                maxLength:20,
-                hiddenIf:'facebookEventLink',
             },
             {
                 type:'checkbox',
@@ -531,21 +501,9 @@ export default {
                 notHiddenIf:'useRegistrationButton',
                 tooltip: 'Maximum number of registrants for this event. Registration not possible when max is reached.'
             },
-            {
-                type:'checkbox',
-                label:'Change all events in the same group',
-                name:'changeAll',
-                tooltip:'Change the whole list of events that you established with button SEND LIST TO CALENDAR',
-            },
-            {
-                type:'checkbox',
-                label:'Hide location and time in popup window',
-                name:'hideLocationAndTime',
-                tooltip: 'Check this box if you want to hide the location and time in the popup windo when clicking at event'
-            },
         ]
     },    
-    DEFAULT:{ // calendarType
+    REGULAR:{ // calendarType
         ADD:[
             {
                 name:'title',
@@ -559,7 +517,6 @@ export default {
                 name:'location',
                 label:'Location',
                 type:'text',
-                hiddenIf:'hideLocationAndTime', 
                 tooltip: 'Location of the event'
             },
             {
@@ -632,16 +589,6 @@ export default {
                 maxLength:200,
             },
             {
-                name:'facebookEventId',
-                type:'number',
-                style:{width:120},
-                width:200,
-                label:'Facebook event id',
-                tooltip:'The facebook event id (Ex: 1123264745523165)',
-                hiddenIf:'facebookEventLink',
-        
-            },
-            {
                 type:'checkbox',
                 label:'Repeat',
                 name:'repeat',
@@ -649,33 +596,31 @@ export default {
             },
             {
                 type:'number',
-                label:'Offset between events',
+                label:'Every',
                 name:'offset',
                 style:{width:40},
                 notHiddenIf:'repeat',
                 min:1, 
                 max:31,
                 required:true,
-                tooltip: 'The number of days/weeks/months between repeated events'
+                tooltip: 'Example: A value of 2 in Every means \"Every 2 <unit>\" (where unit=days/months/weeks)'
             },
             {
                 type:'radio',
-                label:'Offset unit',
+                label:'Days, Weeks, Moths',
                 name:'unit',
                 radioValues:['days', 'weeks', 'months'],
                 notHiddenIf:'repeat',
                 required:true,
-                tooltip: 'The unit of the field \"Offset between events\" right above' 
+                tooltip: 'Example: Unit of field Every.'
             },
             {
-                type:'number',
-                label:'Repeat number of times',
-                style:{width:40},
-                name:'numberOfTimes',
+                name:'lastRepeatDate',
+                label:'Last repeat date',
+                type:'date',
+                tooltip: 'After this date the repeat is stopped',
                 notHiddenIf:'repeat',
-                min:2, 
-                max:52,
-                tooltip: 'Repeat the event this number of times (Ex: 20 means 20 repeated events with an offset given in units specified above)'
+                required:true
             },
             {
                 type:'checkbox',
@@ -700,14 +645,14 @@ export default {
                 notHiddenIf:'useRegistrationButton',
                 tooltip: 'Maximum number of registrants for this event. Registration not possible when max is reached.'
             },
-            {
-                name:'hideLocationAndTime',
-                label:'Hide location and time in popup window',
-                type:'checkbox',
-                tooltip: 'Check this box if you want to hide the location and time in the popup window when clicking at event'
-            },
         ],
         UPDATE:[
+            {
+                type:'checkbox',
+                label:'Change multiple events at one time (special case)',
+                name:'changeAll',
+                tooltip:'Mark only if you want to change multiple events in one go (list with more than 1 element)',
+            },
             {
                 type:'text',
                 label:'Title',
@@ -716,12 +661,10 @@ export default {
                 tooltip:'The event title shown in the calendar',
             },
             {
-                type:'text',
-                label:'Location',
                 name:'location',
-                hiddenIf:'hideLocationAndTime',
+                label:'Location',
+                type:'text',
                 tooltip: 'Location of the event'
-        
             },
             {
                 type:'datetime-local',
@@ -789,16 +732,6 @@ export default {
                 type:'text',
                 maxLength:200,
                 tooltip:'The https-link to the facebook event (Ex: https://fb.me/e/1OwKAA8Lm)',
-                hiddenIf:'facebookEventId',
-            },
-            {
-        
-                name:'facebookEventId',
-                label:'Facebook event id',
-                type:'number',
-                tooltip:'The facebook event id (Ex: 1123264745523165)',
-                maxLength:20,
-                hiddenIf:'facebookEventLink',
             },
             {
                 type:'checkbox',
@@ -822,18 +755,6 @@ export default {
                 max:500,
                 notHiddenIf:'useRegistrationButton',
                 tooltip: 'Maximum number of registrants for this event. Registration not possible when max is reached.'
-            },
-            {
-                type:'checkbox',
-                label:'Change all events in the same group',
-                name:'changeAll',
-                tooltip:'Change the whole list of events that you established with button SEND LIST TO CALENDAR',
-            },
-            {
-                type:'checkbox',
-                label:'Hide location and time in popup window',
-                name:'hideLocationAndTime',
-                tooltip: 'Check this box if you want to hide the location and time in the popup windo when clicking at event'
             },
         ]
     },    

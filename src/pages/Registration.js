@@ -13,7 +13,7 @@ import {serverPost, replaceRow} from '../services/serverPost.js'
 import { getAuth, onAuthStateChanged} from 'firebase/auth';
 import { BUTTON_STYLE } from '../services/const.js';
 import {serverFetchData} from '../services/serverFetch.js'
-import {MAX_LIMIT_UNSET, CALENDAR} from '../services/const.js'
+import {MAX_LIMIT_UNSET, CALENDAR, CALENDAR_TYPE} from '../services/const.js'
 
 const styles={
     container:{
@@ -161,7 +161,7 @@ export default () => {
     const [list, setList] = useState([])
     const [buttonStyle, setButtonStyle] = useState(BUTTON_STYLE.DEFAULT)
     const navigate = useNavigate()
-    const calType = calendarType?calendarType:sharedState.calendarType?sharedState.calendarType:'DEFAULT'
+    const calType = calendarType?calendarType:sharedState.calendarType?sharedState.calendarType:CALENDAR_TYPE.REGULAR
     const tblRegistration = CALENDAR[calType].TBL_REGISTRATION
     const url = '/fetchRows?tableName=' + tblRegistration + '&eventIdExtended=' + eventIdExtended
 

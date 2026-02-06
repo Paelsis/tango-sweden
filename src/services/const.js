@@ -152,23 +152,28 @@ export const PRODUCT_LEVEL = {
 
 export const ADMINISTRATORS=['tangosmedjan@gmail.com', 'anita.e.dobi@gmail.com', 'admin@tangosweden.se'];
 
+export const CALENDAR_TYPE={
+  PRIVATE_LESSON:'PRIVATE_LESSON',
+  DISKJOCKEY:'DISKJOCKEY',
+  REGULAR:'REGULAR'
+}
 
 export const CALENDAR={
   PRIVATE_LESSON:{ // calendarType
-    TBL_CALENDAR:'tbl_calendar_private_lesson',
-    TBL_REGISTRATION:'tbl_registration_private_lesson',
+    TBL_CALENDAR:'tbl_calendar_PRIVATE_LESSON',
+    TBL_REGISTRATION:'tbl_registration_PRIVATE_LESSON',
     EVENT_DEFAULT:{
       maxLimit:1, // Max number of allowed registrations
     }
   }, 
-  DJ:{ // calendarType
+  DISKJOCKEY:{ // calendarType
     TBL_CALENDAR:'tbl_calendar_dj',
     TBL_REGISTRATION:'tbl_registration_dj',
     EVENT_DEFAULT:{
       maxLimit:1, // Max number of allowed registrations
     }
   }, 
-  DEFAULT:{ // calendarType
+  REGULAR:{ // calendarType
     TBL_CALENDAR:'tbl_calendar',
     TBL_REGISTRATION:'tbl_registration_calendar',
   },

@@ -1,5 +1,5 @@
-import React, {useState, useEffect, useCallback} from 'react'
-import { getAuth, onAuthStateChanged} from 'firebase/auth';
+import React, {useState, useEffect, useContext, useCallback} from 'react'
+import {AuthContext} from "../login/FirebaseAuth"
 import { useSharedState } from '../store';
 import { useParams, useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
@@ -26,10 +26,11 @@ import Tooltip from '@mui/material/Tooltip'
 import HistoryIcon from '@mui/icons-material/History'
 // import { transferAnitasCalendar } from '../services/transferAnitasCalendar'
 import { layoutGenerator } from 'react-break';
-import {COLORS, CALENDAR} from '../services/const'
+import {COLORS, CALENDAR, CALENDAR_TYPE} from '../services/const'
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import '../style.css';
 import { Toolbar } from '@mui/material';
+
 
 const DeviceDetector = () => (
   <div>I am rendered on: {isMobile ? "Mobile" : "Desktop"}</div>
@@ -99,9 +100,9 @@ const ListData = ({list}) => {
 
 export default () => {
   const params = useParams()
-  const {calendarName, calendarType, calendarEmail} = params
-  const [sharedState, ] = useSharedState()
-  const [signinEmail, setSigninEmail] = useState()
+  const calendarType = params?.calendarType?params.calendarType:CALENDAR_TYPE.REGULAR
+  const {calendarName, calendarEmail} = params
+  const [sharedState, setSharedState] = useSharedState()
   const forceReloadCount = sharedState.forceReloadCount?sharedState.forceReloadCount:0
   const [eventsGoogleCal, setEventsGoogleCal] = useState([])
   const [eventsTable, setEventsTable] = useState([])
@@ -111,9 +112,10 @@ export default () => {
   const [momentStart, setMomentStart] = useState(undefined)
   const [view, setView] = useState(Views.WEEK);
   const [date, setDate] = useState(new Date());
-  const tblCalendar = CALENDAR[calendarType?calendarType:'DEFAULT'].TBL_CALENDAR
-  const tblRegistration = CALENDAR[calendarType?calendarType:'DEFAULT'].TBL_REGISTRATION
+  const tblCalendar = CALENDAR[calendarType].TBL_CALENDAR
+  const tblRegistration = CALENDAR[calendarType].TBL_REGISTRATION
   const navigate = useNavigate()
+
 
   //const OnMobile = layout.is('mobile');
   const OnAtMostPhablet = layout.isAtMost('phablet');
@@ -121,18 +123,17 @@ export default () => {
   const timeMin = momentStart?momentStart:moment().startOf('day')
   const timeMax = moment().endOf('month').add(24,'months').add(7, 'days')
   moment.locale('sv');
-  const authorized = signinEmail && calendarEmail?calendarEmail===signinEmail:true && [sharedState.region.toLowerCase(),sharedState.city.toLowerCase()].includes(calendarName.toLowerCase())
-  
-  useEffect(()=>{
-      const auth = getAuth()
-      onAuthStateChanged(auth, user => {
-          setSigninEmail(user?.email?user.email:undefined)
-      })
-  }, [])
+  const region = sharedState.region.toLowerCase()
+  const city = sharedState.city.toLowerCase()
+  const regionOrCityMatch = [region, city].includes(calendarName.toLowerCase())
+  const {user} = useContext(AuthContext)  
+  const signinEmail = (user?.email?user.email:undefined)
+  const authLevel = sharedState.authLevel
+  const showPlusButton = signinEmail ? ((authLevel === 16) || regionOrCityMatch):false
+  const calendarDate = sharedState.calendarDate
 
   useEffect(()=>{
-    if (calendarType==='DEFAULT' || !calendarType) { 
-      // alert('XXXXXZZZZZ calendarType =' + calendarType)
+    if (calendarType===CALENDAR_TYPE.REGULAR || !calendarType) { 
       getEventsFromGoogleCalendar(calendarName, timeMin, timeMax, setEventsGoogleCal) 
     }   
     
@@ -154,7 +155,9 @@ export default () => {
 
   const toggleHistory = () => setMomentStart(momentStart?undefined:moment().startOf('month').add(-2,'months').add(-7, 'days'))
 
-  const handleAdd = () =>navigate('/add/' + (calendarType?calendarType:'DEFAULT'))
+  const handleAdd = () =>{
+    navigate('/add/' + (calendarType?calendarType:CALENDAR_TYPE.REGULAR))
+  }  
 
   const dayPropGetter = useCallback(
     (date) => ({
@@ -190,17 +193,20 @@ export default () => {
 
 
   const handleSelectEvent = ev =>{
-    const isDefaultCalendar = (calendarType === CALENDAR.DEFAULT) || !calendarType
-    const authorized = signinEmail?(signinEmail === ev.email):false
-    if (signinEmail && !authorized) {
+    const isDefaultCalendar = (calendarType === CALENDAR_TYPE.REGULAR) || !calendarType
+    const isAllowed = signinEmail?(authLevel === 16|| (signinEmail == ev.email)):false
+    /*
+    const isAlert = signinEmail?(authLevel < 16 && (signinEmail !== ev.email)):false
+    if (isAlert) {
       alert('This event is owned by ' +  ev.email + ' and you signed in as ' + signinEmail + '\nYou will therfore not be able to modify the event !')
-    }  
+    } 
+    */   
     if (isDefaultCalendar) {
         setEvent(ev); 
         setOpen(true)
     } else {
         // If the event belongs to the logged in email
-        if (authorized) {
+        if (isAllowed) {
           setEvent(ev); 
           setOpen(true)
         } else {  
@@ -230,6 +236,8 @@ export default () => {
       {
         background:COLORS.LIGHT_YELLOW
       }
+
+  const handleNavigate =  date=> setSharedState({...sharedState, calendarDate:date})
   
   // Render the calendar div
   const renderCalendarDiv = () => 
@@ -239,6 +247,7 @@ export default () => {
           <OnAtMostPhablet>
             {agenda?
               <Calendar 
+                onNavigate={handleNavigate}
                 localizer={localizer}
                 events={events}
                 startAccessor={event => {return new Date(event.start)}}
@@ -266,6 +275,7 @@ export default () => {
           </OnAtMostPhablet>
           <OnAtLeastTablet>
             <Calendar 
+              date={moment(calendarDate)}
               localizer={localizer}
               events={events}
               startAccessor={(event) => {return new Date(event.start)}}
@@ -278,13 +288,10 @@ export default () => {
               min={moment('08:00', 'hh:mm').toDate()}
               showMultiDayTimes={true}  
               showAllEvents={true}              
-              views={['day', 'week', 'month', 'agenda']}
+              views={['day', 'week']}
               view={view} // Include the view prop
-              date={date} // Include the date prop
               onView={(view) => setView(view)}
-              onNavigate={(date) => {
-                setDate(new Date(date));
-              }}
+              onNavigate={handleNavigate}
               messages={defaultMessages}
               style={{...style, height:'100%'}}
             />
@@ -320,7 +327,7 @@ export default () => {
         <div className='column pt-0' >
           {renderCalendarDiv()}
         </div>   
-        {authorized?
+        {showPlusButton?
           <div className='column is-1'>
               <p/>
               <Tooltip title = "Move back to earlier events">
