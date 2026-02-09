@@ -54,7 +54,7 @@ export default props => {
                     {props.children}
                     {fields.filter(fld=>!isHidden(fld, value)).map((fld, index) => 
                         <Tooltip 
-                            title={<h4 style={{textAlign:'left' , fontSize:22, fontWeight:700, color:COLORS.WHITE}}>{fld.tooltip}</h4>}
+                            title={<h4 style={{textAlign:'left' , fontSize:18, fontWeight:700, color:COLORS.WHITE}}>{fld.tooltip}</h4>}
                             open={fld.tooltip?undefined:false}
                         >    
                             <div>
@@ -79,20 +79,26 @@ export default props => {
                             >
                             <span style={button.style}>
                                 {
-                                    <IconButton 
-                                        onClick={button.onClick?button.onClick:button.handleClick}
-                                        disabled={button.disabled}
-                                    >
+                                    button.icon?
+                                        <IconButton 
+                                            onClick={button.onClick?button.onClick:button.handleClick}
+                                            edge="start"
+                                            color="inherit"
+                                            sx={{ mr: 0 }}
+                                            disabled={button.disabled}
+                                        >
+                                        </IconButton>
+                                    :
                                         <Button 
                                             type={button.type?button.type:'button'}
                                             variant={button.variant?button.variant:"outlined"}
                                             style={button.style}
                                             color={"inherit"}
                                             disabled={button.disabled}
+                                            onClick={button.onClick?button.onClick:button.handleClick}
                                         >
-                                            {button.label}
+                                                {button.label}
                                         </Button>
-                                    </IconButton>
                                 }                      
                                 &nbsp;
                             </span>

@@ -63,7 +63,7 @@ export const FORM_FIELDS = {
                 label:'Description',
                 name:'description',
                 hiddenIf:'htmlEditor',
-                tooltip:'The text shown in the popup window when you click the event in the calendar',
+                tooltip:'The description shown when clicking on event in calendar',
                 required:true,
                 maxlength:32768, // 2**15
             },
@@ -73,7 +73,7 @@ export const FORM_FIELDS = {
                 name:'description',
                 required:false,
                 notHiddenIf:'htmlEditor',
-                tooltip:'The description given as html',
+                tooltip:'The description in html format',
                 maxlength:32768, // 2**15
             },
             {
@@ -139,9 +139,9 @@ export const FORM_FIELDS = {
         UPDATE:[
             {
                 type:'checkbox',
-                label:'Change multiple events at one time (special case)',
+                label:'Change all events in group (special case)',
                 name:'changeAll',
-                tooltip:'Mark only if you want to change multiple events in one go (list with more than 1 element)',
+                tooltip:'Mark if you want to change all events in the group in one go',
             },
             {
                 name:'location',
@@ -212,7 +212,7 @@ export const FORM_FIELDS = {
                 type:'textarea',
                 required:false,
                 notHiddenIf:'htmlEditor',
-                tooltip:'The description given as html',
+                tooltip:'The description in html format',
                 maxlength:32768, // 2**15
             },
             {
@@ -310,7 +310,7 @@ export const FORM_FIELDS = {
                 label:'Description',
                 name:'description',
                 hiddenIf:'htmlEditor',
-                tooltip:'The text shown in the popup window when you click the event in the calendar',
+                tooltip:'The description shown when clicking on event in calendar',
                 required:true,
                 maxlength:32768, // 2**15
             },
@@ -320,7 +320,7 @@ export const FORM_FIELDS = {
                 name:'description',
                 required:false,
                 notHiddenIf:'htmlEditor',
-                tooltip:'The description given as html',
+                tooltip:'The description in html format',
                 maxlength:32768, // 2**15
             },
             {
@@ -468,7 +468,7 @@ export const FORM_FIELDS = {
                 type:'textarea',
                 required:false,
                 notHiddenIf:'htmlEditor',
-                tooltip:'The description given as html',
+                tooltip:'The description in html format',
                 maxlength:32768, // 2**15
             },
             {
@@ -558,7 +558,7 @@ export const FORM_FIELDS = {
                 type:'checkbox',
                 label:'HTML-editor',
                 name:'htmlEditor',
-                tooltip: 'If you want to write your Description in html instead of using the editor, check this box'
+                tooltip: 'Use html-editor to edit the text'
             },
             {
                 // type:'rte',
@@ -566,7 +566,7 @@ export const FORM_FIELDS = {
                 label:'Description',
                 name:'description',
                 hiddenIf:'htmlEditor',
-                tooltip:'The text shown in the popup window when you click the event in the calendar',
+                tooltip:'The description shown when clicking on event in calendar',
                 required:true,
                 maxlength:32768, // 2**15
             },
@@ -576,7 +576,7 @@ export const FORM_FIELDS = {
                 name:'description',
                 required:false,
                 notHiddenIf:'htmlEditor',
-                tooltip:'The description given as html',
+                tooltip:'The description in html format',
                 maxlength:32768, // 2**15
             },
             {
@@ -723,7 +723,7 @@ export const FORM_FIELDS = {
                 label:'Description',
                 required:false,
                 notHiddenIf:'htmlEditor',
-                tooltip:'The description given as html',
+                tooltip:'The description in html format',
                 maxlength:32768, // 2**15
             },
             {

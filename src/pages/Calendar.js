@@ -241,7 +241,7 @@ export default () => {
   
   // Render the calendar div
   const renderCalendarDiv = () => 
-    <div className='column is-narrow m-0 p-0'>
+    <div className='column is-narrow m-0 p-0' style={{height:'90vh'}}>
       {events?events.length?
         <>
           <OnAtMostPhablet>
@@ -283,12 +283,12 @@ export default () => {
               onSelectEvent={handleSelectEvent}
               dayPropGetter={dayPropGetter}
               eventPropGetter={(ev, start, end, isSelected) => (
-                {style:{...ev.style, height:200}})} 
+                {style:{...ev.style, height:35}})} 
               defaultView={'week'}
               min={moment('08:00', 'hh:mm').toDate()}
               showMultiDayTimes={true}  
               showAllEvents={true}              
-              views={['day', 'week']}
+              views={['week', 'month']}
               view={view} // Include the view prop
               onView={(view) => setView(view)}
               onNavigate={handleNavigate}

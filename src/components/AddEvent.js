@@ -10,6 +10,7 @@ import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircleOutline';
+import SendIcon from '@mui/icons-material/Send';
 import Tooltip from '@mui/material/Tooltip';
 import {serverPost} from '../services/serverPost'
 import {isAndroidOperatingSystem} from '../services/isAndroid'
@@ -81,6 +82,19 @@ const Save = ({onClick}) =>
         />
     </IconButton>
 
+const Send = ({onClick}) =>
+    <IconButton
+    size="large"
+    edge="start"
+    color="inherit"
+    sx={{ mr: 0 }}
+    onClick={onClick}
+    >
+        <SendIcon 
+            id="basic-button"
+        />
+    </IconButton>
+
 
 const SelectTemplate = ({fields, list, name, value, setValue}) => {
     const handleChange = e => {
@@ -109,7 +123,7 @@ const CandidateTable = ({list, setList, deleteRow}) =>
     list.length >0?
     <div className='columns'>
         <div className='column is-9 ml-4'>
-            <h4 style={{marginLeft:0}}>List of candidates for calendar</h4>
+            <h4 style={{marginLeft:0}}>Candidates for calendar</h4>
             <table style={{border:'1px solid lightGrey', margin:0}} >
                 <tbody>
                     {list.map((row, idx) => 
@@ -125,8 +139,8 @@ const CandidateTable = ({list, setList, deleteRow}) =>
                 </tbody>    
             </table>
             <br/>
-            <Tooltip title='Clear the list with candidates'>
-                 <Button variant="outlined" className="button" style={styles.button} onClick={()=>setList([])}>Clear list</Button>
+            <Tooltip title='Empty the list'>
+                 <Button variant="outlined" className="button" style={styles.button} onClick={()=>setList([])}>Empty list</Button>
              </Tooltip>
         </div>    
     </div>    
@@ -185,7 +199,7 @@ export default props => {
         setValue({})
     }
 
-    const submitToCalendar = () => {
+    const addToCalendar = () => {
         const irl = '/addEvents'
         setSharedState({...sharedState, calendarDate:value.startDate})
         serverPost(irl, {tblCalendar, list}, handleReply)
@@ -213,7 +227,7 @@ export default props => {
         }
     }
 
-    const createCalendarList = () => {
+    const  addToCalendarList = () => {
         let dbEntry = changeToDbEntry(adjustValue(value))
         let myList =[dbEntry]
         const compareFunc = (a,b) => moment(a.startDateTime)-moment(b.startDateTime)
@@ -252,36 +266,39 @@ export default props => {
 
     const handleAddToList = e => {
         e.preventDefault()
-        createCalendarList()
+        addToCalendarList()
     }    
 
     const buttons=[
         {
             type:'submit',
-            label:'Add to list',
+            label:'ADD TO LIST',
             style:styles.button,
+            tooltip:<h4 className='title is-5 has-text-white'>Add your event/s to a list. When ready press ADD TO CALENDAR</h4>,
             validate:true,
         },    
         {
             type:'button',
-            label:'Undo',
+            label:"ADD TO CALENDAR",
+            style:(list.length > 0)?styles.button:styles.buttonDisabled,
+            disabled:list.length>0?undefined:true,
+            tooltip:<h1 className='title is-5 has-text-white'>Add the events in the list to the calendar</h1>,
+            onClick:addToCalendar 
+        },        
+        {
+            type:'button',
+            label:'Clear',
             style:styles.button,
+            tooltip:<h1 className='title is-5 has-text-white'>Clear the form</h1>,
             onClick:handleReset
         },    
         {
             type:'button',
             label:'Cancel',
             style:styles.button,
+            tooltip:<h1 className='title is-5 has-text-white'>Cancel the add operation and return to calendar</h1>,
             onClick:handleCancel
         },    
-        {
-            type:'button',
-            label:'Push to calendar',
-            style:(list.length > 0)?styles.button:styles.buttonDisabled,
-            disabled:list.length>0?undefined:true,
-            onClick:submitToCalendar 
-        }        
-
     ]
     return(
         <div style={styles.container}>
@@ -312,7 +329,7 @@ export default props => {
                                 list={list} 
                                 setList={setList}
                                 deleteRow={deleteRow} 
-                                submitToCalendar={submitToCalendar} 
+                                addToCalendar={addToCalendar} 
                                 clearAll={()=>setList([])}
                             />
                         </div>
@@ -320,7 +337,7 @@ export default props => {
                 </>
             :
                 <div style={{margin:'auto', top:300, width:'100vw', textAlign:'center'}}>
-                    Please signin first if you want to add events.<p/>
+                    Please signin befor you try to add events.<p/>
                 </div>
             }
         </div>
