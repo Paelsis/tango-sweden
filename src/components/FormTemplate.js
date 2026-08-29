@@ -40,25 +40,26 @@ const isValid = (fields, value) => {
 
 // FormTemplate.js
 export default props => {
-    const {fields, buttons, value, handleSubmit, setValue} = props
+    const {fields, buttons, value, setValue, handleSubmit, clearIndex} = props
     const handleKeyPress = e => {
         if (e.key === 'Enter' && !!props.handlePressEnter) {
             props.handlePressEnter()
         } 
     }
-
     return(
-        <div>   
+        <>   
+            {/* <div>value={JSON.stringify(value)}</div> */}
             <form onSubmit={handleSubmit}>
                 <div>
                     {props.children}
                     {fields.filter(fld=>!isHidden(fld, value)).map((fld, index) => 
                         <Tooltip 
-                            title={<h4 style={{textAlign:'left' , fontSize:18, fontWeight:700, color:COLORS.WHITE}}>{fld.tooltip}</h4>}
+                            placement='right-start'
+                            title={<h4 style={{textAlign:'center' , fontSize:18, fontWeight:700, color:COLORS.WHITE}}>{fld.tooltip}</h4>}
                             open={fld.tooltip?undefined:false}
                         >    
                             <div>
-                                <FormField key={index} fld={fld} value={value?value:''} setValue={setValue} handleKeyPress={handleKeyPress} />
+                                <FormField key={index} clearIndex={clearIndex} fld={fld} value={value} setValue={setValue} handleKeyPress={handleKeyPress} />
                             </div>
                         </Tooltip>
                     )}
@@ -108,7 +109,7 @@ export default props => {
                     </div>
                 :<h1>No buttons</h1>}    
             </form>
-        </div>
+        </>
     )
 }
 

@@ -14,7 +14,9 @@ import {FORM_FIELDS} from '../services/formFields'
 const styles={
     container:{
         paddingTop:30,
-        display: 'flex',
+        textAlign:'left',
+        maxWidth:1000,
+        margin:'auto'
         /*
         flexDirection:'column',
         alignItems: 'center',
@@ -41,8 +43,6 @@ export default () => {
     const {calendarType, email} = event?event:{}
     const calendarEmail = email
     const fields = calendarType?FORM_FIELDS[calendarType].UPDATE:[]
-
-
 
     useEffect(()=>{
         setValue(event)
@@ -129,12 +129,12 @@ export default () => {
     return (
         <div style={styles.container}>
             {!event?
-                <div style={{textAlign:'center', width:'100vw'}}>
+                <div style={{textAlign:'left', width:'100vw'}}>
                 <h1 style={{color:'red'}}>Update must be called with an event via route</h1>
                 </div>
             :value?    
-                <div className='columns m-2 is-centered is-half'>
-                    <div className="column is-5">
+                <div className='columns p-2 is-centered is-half'>
+                    <div className="column is-half">
                         <FormTemplate 
                             fields={fields} 
                             value={value}

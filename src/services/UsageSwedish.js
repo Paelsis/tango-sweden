@@ -11,14 +11,14 @@ import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
 import PersonAddDisabledIcon from '@mui/icons-material/PersonAddDisabled';
 
 export default () => 
-<div>
+<div style={{textAlign:'left'}}>
     <h1 style={{textAlign:'center', color:'red'}}>Manual för administratörer</h1>
     <h5 style={{textAlign:'center', color:'red'}}>Shift language to english with button to the right</h5>
 
     <h4>Manual tangosweden.se</h4>
     Hemsidan tangosweden.se är öppen för arrangörer i Sverige/Danmark/Norge/Finland som önskar ha en tangokalender för sin ort.
     På förstasidan finns knappar för de regioner och städer som är aktiva i kalendern. 
-    Helsingborg, Göteborg och Danmark har sina egna kalendrar 
+    Göteborg och Danmark har sina egna kalendrar 
     som även dessa nås via knappar på förstasidan.
     <p/>
 
@@ -36,7 +36,7 @@ export default () =>
 
     När man har skapat ett konto med Signup kan man logga in genom att klicka på Signin och ange din 
     email och sitt lösenord. Som inloggad har du tillgång till att lägga till händelser och makera dig som DJ eller Privatlärare.
-        <p/>
+    <p/>
     <h4>Inställningar</h4>
     I menyn uppe till höger finns där en meny option "Settings". Här fyller du i stad och region (Skåne, Västra Götaland, Mitt, Norr, ...).
     För Stockholm skall både stad och region stå som Stockholm. Det finns ingen begränsning på antalet städer. 
@@ -54,8 +54,8 @@ export default () =>
         <li>Klicka på din stads eller regions kalender</li>
         <li>Klicka på <AddIcon /> ikonen ute till höger i kalendern för din stad/region.</li>
         <li>Fyll i formuläret med data för din händelse</li>
-        <li>Klicka på <button>ADD TO LIST</button></li>
-        <li>Klicka på <button>ADD TO CALENDAR</button></li>
+        <li>Klicka på <button>ADD TO EVENT LIST</button></li>
+        <li>Klicka på <button>PUBLISH TO CALENDAR</button></li>
         <li>Efter detta är händelsen inlagd och visas nu i kalendern</li>
     </ol>
     <h5>Varför först skapa en lista ?</h5>
@@ -64,24 +64,24 @@ export default () =>
     för repetitonerna. Datumen kan viefieras innan man lägger till listan till kalendern. 
     Alla händelser i den grupp som listan formar får samma eventId. Om man efterföljande
     vill ändra alla sina händelser med samma titel och beskrivning och plats kan när man editerar händelsen med <EditIcon /> kryssa i 
-    boxen <i>Change multiple events at one time (special case)</i>. När man därefter klockar på update uppdateas alla händelser 
+    boxen <i>Change multiple events at one time (special case)</i>. När man därefter klickar på update uppdateas alla händelser 
     som tillhör gruppen samtidigt. Om man klicka på <DeleteSweepIcon /> tas samtliga händelse i gruppen bort samtidigt. 
     
     <h5>Repeterade händelser (grupp-hantering)</h5>
     Om du önskar lägga in repeterade händelser med en viss frekvens kryssar du i Repeat. Då visas 3 
     nya fält för Varje, enhet och sista repetionsdag. 
     Om du vill att ditt händelse skall repeteras varje vecka fram till 2026-05-31 så sätter du <i>Every</i> till 1, enhet till <i>weeks</i>
-    och <i> Last repeat date </i> till 2026-05-31. Klicka därefter på knappen <button>ADD TO LIST</button>. 
+    och <i> Last repeat date </i> till 2026-05-31. Klicka därefter på knappen <button>ADD TO EVENT LIST</button>. 
     Då visas din grupp/lista med repeterade datum fram till 2026-05-31. 
-    När du är klar med gruppen/listan sänder du den slutligen till kalendern med knappen <button>ADD TO CALENDAR</button>.
+    När du är klar med gruppen/listan sänder du den slutligen till kalendern med knappen <button>PUBLISH TO CALENDAR</button>.
     <p/>
     <h5>Ta bort enstaka händelser från listan</h5>
     Önskar du ta bort en händelse från listan ovan klickar du på minus knappen till höger om händelsen i listan.
     Om du önskar rensa hela listan du på knappen <button>CLEAR LIST</button> under listan. 
     När du är klar med listan skickar du den till kalendern 
-    med knappen <button>ADD TO CALENDAR</button> under formuläret.
+    med knappen <button>PUBLISH TO CALENDAR</button> under formuläret.
     <p/>
-    Samtliga händelser i en list tillhör en och samma grupp. Detta är praktiskt om man senare vill ändrat värden 
+    Samtliga händelser i en lista tillhör en och samma grupp. Detta är praktiskt om man senare vill ändra värden 
     för hela gruppen (<i>Change multiple events at one time (special case)</i>) eller ta bort samtliga händelse i hela gruppen <DeleteSweepIcon/>. 
     <p/>
     <h5>Heldagshändelse</h5>
@@ -93,28 +93,31 @@ export default () =>
 
     <h5>Ändra händelse &nbsp;<EditIcon /></h5>
 
-    Som inloggad kan du ändra din händelse genom att klicka på händelsen i kalendern och därefter klicka på edit knappen <EditIcon />.
-    Då dyker ditt formulär med händelsen upp. Om du önskar ändra en hel grupp av händelsen skall du kryssa i 
-    <i>Change multiple events at one time (special case)</i> överst i formuläret.
+    Som inloggad kan du ändra din händelse genom att klicka på händelsen i kalendern och därefter klicka 
+    på editeringsknappen <EditIcon />.
+    Då får du upp ditt formulär med händelsen. Om du önskar ändra hela listan som du skapade  
+    innan du tryckte knappen <i>PUBLISH TO CALENDAR</i> så skall du kryssa i 
+    <i>Change multiple events at one time (special case)</i> allra överst i formuläret.
     När du är klar med dina nya uppdaterade uppgifter klicka på <button>UPDATE</button> knappen längst ned. 
-    Efter detta återvänder sidan till den vecka i kalendern som du just ändrade.
+    Efter detta återvänder sidan till veckan som innehåller eventet du just ändrade. 
+    Om du uppdaterar en hel lista så återvänder den till datumet för första eventet i listan.
     <p/>
     
     <h5>Kopiera händelse &nbsp;<ContentCopyIcon/></h5>
 
-    Med knappen <ContentCopyIcon/> kan du kopiera data från en existerande händelse in i ett nytt.
+    Med knappen <ContentCopyIcon/> kan du kopiera data från en existerande händelse till en ny händelse.
     Det typiska exemplet är att du har en återkommande milonga eller praktika under hösten 
     som önskar skall fortsätta nästa säsong med samma titel plats och beskrivning.
-    Då behöver du bara fylla i tiderna. Processen beskrivs nedan.
+    Då behöver du bara fylla i de nya tiderna innan du sparar. Processen beskrivs nedan.
     <p/>
     <ol>
     <li>Klickar du på händelsen i kalendern som du önskar kopiera data från.</li> 
     <li>Klicka på kopiera knappen <ContentCopyIcon/></li>  
     <li>I formuläret finns nu data för det gamla eventet men tomma fält för datum och tid.</li>    
-    <li>Fyll i ditt ny datum och din nya tid (samt för upprepade händelser <i>Repeat</i>)</li> 
-    <li>För upprepade händelser kryssa i <i>Repeat</i>)</li> 
-    <li>Click on the button <i>ADD TO LIST</i></li>
-    <li>Click on the button <i>ADD TO CALENDAR</i></li>
+    <li>Fyll i ditt nya datum och din nya tid</li> 
+    <li>För upprepade händelser kryssa i <i>Repeat</i> och fyll i frekvens och slutdatum</li> 
+    <li>Klicka på knappen <i>ADD TO EVENT LIST</i></li>
+    <li>Klicka på knappen <i>PUBLISH TO CALENDAR</i></li>
 
     </ol>
     För att underlätta för dem som glömt kopiera finns där kalender-historik bakåt i tiden. 
@@ -124,12 +127,12 @@ export default () =>
     <h5>Ta bort händelse&nbsp;&nbsp;<DeleteIcon /></h5>
     Som inloggad kan ändra eller ta bort dina händelser.
     <ol>
-        <li>Klicka på händelsen i kalendern.</li>
-        <li>Klicka på <DeleteIcon /></li>
+        <li>Klicka på händelsen i själva kalendern.</li>
+        <li>Klicka på knappen <DeleteIcon /></li>
     </ol>
     Om du önskar ta bort samtliga händelser i en grupp klickar du på <DeleteSweepIcon />.
-    Med en grupp menas hela den lista du skapade med 
-    <i>ADD TO LIST</i> när händlsen/händelserna upprättades.
+    Med en grupp menas hela den lista du skapade med <i>ADD TO EVENT LIST</i> 
+    när händlsen/händelserna upprättades.
     <p/>
 
     <h4>Anmälan till händelse via knapp i kalendern</h4>

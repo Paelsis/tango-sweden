@@ -1,6 +1,5 @@
 
 import React, {useState, useEffect} from 'react';
-import RteEditor from './RteEditor'
 import Tooltip from '@mui/material/Tooltip';
 import {isAndroidOperatingSystem} from '../services/isAndroid'
 

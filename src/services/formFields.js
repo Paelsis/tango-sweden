@@ -1,4 +1,6 @@
 // formFields
+
+import {EDITOR_TYPE, REGIONS} from '../services/const'
 export const FORM_FIELDS = {
     PRIVATE_LESSON:{ // calendarType
         ADD:[
@@ -15,6 +17,18 @@ export const FORM_FIELDS = {
                 label:'Location',
                 type:'text',
                 tooltip: 'Location of the event'
+            },
+            {
+                name:'city',
+                label:'City (overrides default City defined in User Settings)',
+                type:'text',
+                tooltip: 'City of the event (overrides default the city defined in User Settings)'
+            },
+            {
+                name:'region',
+                label:'Region (overrides default Region defined in User Settings)',
+                type:'text',
+                tooltip: 'Region of the event (overrides default region defined in User Settings)'
             },
             {
                 name:'startDate',
@@ -58,8 +72,8 @@ export const FORM_FIELDS = {
                 tooltip: 'If you want to write your Description in html instead of using the editor, check this box'
             },
             {
-                // type:'rte',
-                type:'draft',
+                // ACTIVE editor type is set to QUILL or DRAFT
+                type:EDITOR_TYPE.ACTIVE,
                 label:'Description',
                 name:'description',
                 hiddenIf:'htmlEditor',
@@ -197,7 +211,7 @@ export const FORM_FIELDS = {
             },
             {
                 // type:'rte',
-                type:'draft',
+                type:EDITOR_TYPE.ACTIVE,
                 label:'Description',
                 name:'description',
                 //draftName:'draft_description',
@@ -214,6 +228,7 @@ export const FORM_FIELDS = {
                 notHiddenIf:'htmlEditor',
                 tooltip:'The description in html format',
                 maxlength:32768, // 2**15
+                ref:null,
             },
             {
                 name:'facebookEventLink',
@@ -255,6 +270,19 @@ export const FORM_FIELDS = {
                 type:'text',
                 tooltip: 'Location of the event'
             },
+            {
+                name:'city',
+                label:'City',
+                type:'text',
+                tooltip: 'City of the event (overrides default city defined in User Settings)'
+            },
+            {
+                name:'region',
+                label:'Region (overrides default Region defined in User Settings)',
+                type:'text',
+                tooltip: 'Region of the event (overrides default region defined in User Settings)'
+            },
+
             {
                 name:'title',
                 label:'Title',
@@ -306,7 +334,7 @@ export const FORM_FIELDS = {
             },
             {
                 // type:'rte',
-                type:'draft',
+                type:EDITOR_TYPE.ACTIVE,
                 label:'Description',
                 name:'description',
                 hiddenIf:'htmlEditor',
@@ -403,7 +431,7 @@ export const FORM_FIELDS = {
                 name:'location',
                 label:'Location',
                 type:'text',
-                tooltip: 'Location of the event'
+                tooltip: 'Name of venue and street address'
             },
             {
                 type:'text',
@@ -453,7 +481,7 @@ export const FORM_FIELDS = {
             },
             {
                 // type:'rte',
-                type:'draft',
+                type:EDITOR_TYPE.ACTIVE,
                 label:'Description',
                 name:'description',
                 //draftName:'draft_description',
@@ -517,8 +545,23 @@ export const FORM_FIELDS = {
                 name:'location',
                 label:'Location',
                 type:'text',
-                tooltip: 'Location of the event'
+                tooltip: 'Name of venue and street address'
             },
+            {
+                name:'city',
+                label:'City',
+                type:'text',
+                tooltip: 'City of the event (overrides default the city defined in User Settings)'
+            },
+            {
+                name:'region',
+                label:'Region',
+                label:'Region:',
+                type:'select',
+                selectValues:REGIONS,
+                required:true,
+                tooltip:'Region of the event (overrides default Region defined in User Settings)',
+            },      
             {
                 name:'startDate',
                 label:'Startdate',
@@ -562,7 +605,7 @@ export const FORM_FIELDS = {
             },
             {
                 // type:'rte',
-                type:'draft',
+                type:EDITOR_TYPE.ACTIVE,
                 label:'Description',
                 name:'description',
                 hiddenIf:'htmlEditor',
@@ -707,7 +750,7 @@ export const FORM_FIELDS = {
             },
             {
                 // type:'rte',
-                type:'draft',
+                type:EDITOR_TYPE.ACTIVE,
                 label:'Description',
                 name:'description',
                 //draftName:'draft_description',

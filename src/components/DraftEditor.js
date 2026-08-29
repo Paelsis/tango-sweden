@@ -4,7 +4,6 @@ import { Editor } from 'react-draft-wysiwyg';
 import "draft-js/dist/Draft.css";
 import '@draft-js-plugins/static-toolbar/lib/plugin.css';
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
-import { stateToHTML } from "draft-js-export-html";
 import htmlToDraft from 'html-to-draftjs'
 
 
@@ -78,13 +77,13 @@ export const removeAllDraftVariables = value  => {
 
 
 export default props => {
-    let editorState = props.editorState
-    
+    const {editorState, onEditorStateChange} = props
+
     return (
     <div style={{border:'solid 1px'}}>
         <Editor
             editorState={editorState}
-            onEditorStateChange={props.onEditorStateChange}
+            onEditorStateChange={onEditorStateChange}
             placeholder="The message goes here..."
         />
     </div>

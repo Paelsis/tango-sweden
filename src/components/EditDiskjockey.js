@@ -8,10 +8,11 @@ import Tooltip from '@mui/material/Tooltip';
 import {serverPost} from '../services/serverPost'
 import {serverFetchData} from '../services/serverFetch'
 import { getAuth, onAuthStateChanged} from 'firebase/auth';
-import {REGIONS} from '../services/const'
+import {REGIONS, EDITOR_TYPE} from '../services/const'
 import AddPhotoSingle from '../camera/AddPhotoSingle'
 import { enhanceValueWithDraftVariables } from './DraftEditor'
 const MAX_DESC_LENGTH = 40000
+
 
 const apiBaseUrl = process.env.REACT_APP_API_BASE_URL
 
@@ -104,7 +105,7 @@ const fields = [
     },
     {
         // type:'rte',
-        type:'draft',
+        type:EDITOR_TYPE.ACTIVE,
         label:'Description of DJ',
         name:'description',
         draftName:'draft_description',

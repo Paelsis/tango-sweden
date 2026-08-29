@@ -14,6 +14,7 @@ import Shoe from "./pages/Shoe";
 import Add from "./pages/Add";
 import EditDj from "./pages/EditDj";
 import Djs from "./pages/Djs";
+import Quill from "./pages/Quill"
 import PrivateLessons from "./pages/PrivateLessons";
 import Update from "./pages/Update";
 import Copy from "./pages/Copy";
@@ -101,6 +102,7 @@ export default function App() {
                 <Route path="signin" element={<FirebaseSignin />} />
                 <Route path="signup" element={<FirebaseSignup />} />
                 <Route path="resetPassword" element={<FirebaseResetPassword />} />
+                <Route path="quill" element={<Quill />} />
                 <Route
                     path="*"
                     element={

@@ -123,17 +123,14 @@ export default () => {
   const timeMin = momentStart?momentStart:moment().startOf('day')
   const timeMax = moment().endOf('month').add(24,'months').add(7, 'days')
   moment.locale('sv');
-  const region = sharedState.region.toLowerCase()
-  const city = sharedState.city.toLowerCase()
-  const regionOrCityMatch = [region, city].includes(calendarName.toLowerCase())
   const {user} = useContext(AuthContext)  
   const signinEmail = (user?.email?user.email:undefined)
   const authLevel = sharedState.authLevel
-  const showPlusButton = signinEmail ? ((authLevel === 16) || regionOrCityMatch):false
+  const showPlusButton = signinEmail?true:false
   const calendarDate = sharedState.calendarDate
 
   useEffect(()=>{
-    if (calendarType===CALENDAR_TYPE.REGULAR || !calendarType) { 
+    if ((calendarType===CALENDAR_TYPE.REGULAR && !calendarEmail) || !calendarType) { 
       getEventsFromGoogleCalendar(calendarName, timeMin, timeMax, setEventsGoogleCal) 
     }   
     
@@ -228,75 +225,47 @@ export default () => {
     }
   })
   
-  const style = (calendarName === 'stockholm' || calendarName === 'mitt')?
-      {
-        background:COLORS.LIGHT_YELLOW
-      } 
-    :
-      {
-        background:COLORS.LIGHT_YELLOW
-      }
-
   const handleNavigate =  date=> setSharedState({...sharedState, calendarDate:date})
   
-  // Render the calendar div
-  const renderCalendarDiv = () => 
-    <div className='column is-narrow m-0 p-0' style={{height:'90vh'}}>
-      {events?events.length?
+  return (
+    <div className="columns" style={{background:COLORS.LIGHT_YELLOW, marginTop:0, paddingTop:0, paddingBottom:200}}>
+        {events.length>0?
         <>
-          <OnAtMostPhablet>
-            {agenda?
-              <Calendar 
-                onNavigate={handleNavigate}
-                localizer={localizer}
-                events={events}
-                startAccessor={event => {return new Date(event.start)}}
-                endAccessor={event => {return new Date(event.end)}}
-                onSelectEvent={handleSelectEvent}
-                dayPropGetter={dayPropGetter}
-                eventPropGetter={(ev, start, end, isSelected) => (
-                  {style:{...ev.style, height:30}})} 
-                defaultView={'agenda'}
-                min={moment('08:00', 'hh:mm').toDate()}
-                showMultiDayTimes={true}  
-                showAllEvents={true}              
-                views={['agenda']}
-                messages={defaultMessages}
-                style={style}
-              />
-            :
+        <OnAtMostPhablet>
+          <div className='column pt-0' >
               <CalendarSmall 
                       calendarType={calendarType}
                       events={events?events:[]} 
                       signinEmail={signinEmail}
                       handleSelectEvent={handleSelectEvent} 
               />
-            }
-          </OnAtMostPhablet>
-          <OnAtLeastTablet>
-            <Calendar 
-              date={moment(calendarDate)}
-              localizer={localizer}
-              events={events}
-              startAccessor={(event) => {return new Date(event.start)}}
-              endAccessor={(event) => {return new Date(event.end)}}
-              onSelectEvent={handleSelectEvent}
-              dayPropGetter={dayPropGetter}
-              eventPropGetter={(ev, start, end, isSelected) => (
-                {style:{...ev.style, height:35}})} 
-              defaultView={'week'}
-              min={moment('08:00', 'hh:mm').toDate()}
-              showMultiDayTimes={true}  
-              showAllEvents={true}              
-              views={['week', 'month']}
-              view={view} // Include the view prop
-              onView={(view) => setView(view)}
-              onNavigate={handleNavigate}
-              messages={defaultMessages}
-              style={{...style, height:'100%'}}
-            />
-        </OnAtLeastTablet>  
-
+          </div>   
+        </OnAtMostPhablet>
+        <OnAtLeastTablet>
+            <div className='column m-0 p-0' style={{height:'90vh'}}>
+              <Calendar 
+                date={moment(calendarDate)}
+                localizer={localizer}
+                events={events}
+                startAccessor={(event) => {return new Date(event.start)}}
+                endAccessor={(event) => {return new Date(event.end)}}
+                onSelectEvent={handleSelectEvent}
+                dayPropGetter={dayPropGetter}
+                eventPropGetter={(ev, start, end, isSelected) => (
+                  {style:{...ev.style, height:35}})} 
+                defaultView={'week'}
+                min={moment('10:00', 'hh:mm').toDate()}
+                showMultiDayTimes={true}  
+                showAllEvents={true}              
+                views={['week', 'month']}
+                view={view} // Include the view prop
+                onView={(view) => setView(view)}
+                onNavigate={handleNavigate}
+                messages={defaultMessages}
+                style={{backgroundColor:COLORS.LIGHT_YELLOW, height:'100%'}}
+              />
+            </div>
+        </OnAtLeastTablet>
         <DialogueSlide
           open={open}
           setOpen={setOpen}
@@ -306,43 +275,27 @@ export default () => {
           aria-labelledby="alert-dialog-title"
           aria-describedby="alert-dialog-description"
         />    
-      </>
-    :
-      <div style={{width:'100%', height:'100vh', background:'black'}}>
-        <div style={{position:'absolute', width:'100%', textAlign:'center', top:'40vh', color:COLORS.YELLOW, background:'transparent'}}>
-        <h3>No Events</h3>
-        </div>            
-      </div>              
-    :  
-      <div style={{width:'100%', height:'100vh', background:'black'}}>
-        <div style={{position:'absolute', width:'100%', textAlign:'center', top:'40vh', color:COLORS.RED, background:'transparent'}}>
-        <h3>ERROR: Events does not exist</h3>
-        </div>            
-      </div>  
-    }
-  </div>
 
-  return (
-    <div style={{background:COLORS.LIGHT_YELLOW, marginTop:0, paddingTop:0, paddingBottom:200}} className="columns">
-        <div className='column pt-0' >
-          {renderCalendarDiv()}
-        </div>   
         {showPlusButton?
-          <div className='column is-1'>
-              <p/>
-              <Tooltip title = "Move back to earlier events">
-                  <IconButton onClick={toggleHistory}>
-                    <HistoryIcon />
-                  </IconButton> 
-              </Tooltip>
-              <br/>
-              <Tooltip title = "Add new event to calendar">
-                <IconButton onClick={handleAdd}>
-                  <AddIcon />
+        <div className='column is-1' style={{marginTop:20}}>
+            <Tooltip title = "Show events from past days">
+                <IconButton onClick={toggleHistory}>
+                  <HistoryIcon />
                 </IconButton> 
-              </Tooltip>
-          </div>
-        :null}  
+            </Tooltip>
+            <br/>
+            <Tooltip title = "Add new event to calendar">
+              <IconButton onClick={handleAdd}>
+                <AddIcon />
+              </IconButton> 
+            </Tooltip>
+        </div>
+        :null}
+        </>
+        :
+        <div style={{width:'100vw', height:'100vh', display:'flex', justifyContent:'center', alignItems:'center'}}>
+        <h1>No events</h1>  
+        </div>}
     </div>
   );
 }

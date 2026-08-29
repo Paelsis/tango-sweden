@@ -11,6 +11,8 @@ import Square from "../components/Square"
 import {BUTTON_STYLE, REGIONS, COUNTRIES, DEFAULT_AUTH_LEVEL, STATUSLINE_STYLE, COLORS} from '../services/const'
 import {serverFetchData} from '../services/serverFetch'
 import MyImage from '../camera/MyImage'
+import {EDITOR_TYPE} from '../services/const'
+
 
 const TBL_USER = 'tbl_user'
 
@@ -20,6 +22,7 @@ const styles = {
       color:'green',
       fontSize:18,
       fontWeight:400,
+      textAlign:'left',
     },
     button: color=>({
       color,
@@ -55,18 +58,18 @@ const styles = {
       placeholder:'Please enter your city'
     },
     {
-      type:'radio',
+      type:'select',
       label:'Region:',
       name:'region',
-      radioValues:REGIONS,
+      selectValues:REGIONS,
       required:true,
       tooltip:'Events with same region is show in same calendar for that region',
     },
     {
-      type:'radio',
+      type:'select',
       label:'Country:',
       name:'country',
-      radioValues:COUNTRIES,
+      selectValues:COUNTRIES,
       required:true,
       tooltip:'Events from same country will have button in the color of the country',
     },
@@ -86,9 +89,9 @@ const styles = {
     {
       type:'checkbox',
       label:'Is diskjockey',
+      name:'isDiskjockey',
       tooltip: 'If you are a DJ you will after login be directly redirected to Add/Update DJ page',
       //disabled:true,
-      name:'isDiskjockey',
     },
 ]
 
@@ -123,10 +126,10 @@ const fieldsCAL = [
     placeholder:'Please enter your city'
   },
   {
-    type:'radio',
+    type:'select',
     label:'Region:',
     name:'region',
-    radioValues:REGIONS,
+    selectValues:REGIONS,
     required:true,
     tooltip:'Events with same region is show in same calendar for that region',
   },
@@ -141,13 +144,13 @@ const fieldsCAL = [
   {
     type:'checkbox',
     label:'Is diskjockey',
+    name:'isDiskjockey',
     tooltip: 'If you are a DJ you will after login be directly redirected to Add/Update DJ page',
     //disabled:true,
-    name:'isDiskjockey',
   },
   {
     // type:'rte',
-    type:'draft',
+    type:EDITOR_TYPE.ACTIVE,
     label:'Description of DJ',
     name:'descriptionDJ',
     //draftName:'draft_descriptionDJ',
@@ -158,13 +161,13 @@ const fieldsCAL = [
   {
     type:'checkbox',
     label:'Is private teacher',
+    name:'isPrivateTeacher',
     tooltip: 'If you are a DJ you will after login be directly redirected to Add/Update DJ page',
     //disabled:true,
-    name:'isPrivateTeacher',
   },
   {
     // type:'rte',
-    type:'draft',
+    type:EDITOR_TYPE.ACTIVE,
     label:'Description of private teacher',
     name:'descriptionPT',
     // draftMNdraftName:'draft_descriptionPT',
@@ -175,9 +178,9 @@ const fieldsCAL = [
   {
     type:'checkbox',
     label:'Private',
+    name:'private',
     tooltip: 'If this box is checked, you are the only person who can change your events, i.e. your events are completely private',
     //disabled:true,
-    name:'private',
   },
   /*  
   {
@@ -241,7 +244,7 @@ const fieldsCAL = [
 // MyProfile
 export default () => {
     const [sharedState, setSharedState] = useSharedState()
-    const [value, setValue] = useState(undefined)
+    const [value, setValue] = useState({})
     const subdir = process.env.REACT_APP_IMAGES_USER_DIR // ='user'
     const navigate = useNavigate()
     const {user} = useContext(AuthContext)

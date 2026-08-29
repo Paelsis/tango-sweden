@@ -1,17 +1,12 @@
 
-import React, {useState, useEffect, useRef} from 'react';
-import RteEditor from './RteEditor'
-import {isAndroidOperatingSystem} from '../services/isAndroid'
+import React, {useState, useEffect, useCallback, useRef} from 'react';
 import {defaultDate} from '../services/functions'
 import TextArea from 'react-textarea-autosize';
 import DraftEditor, {emptyEditorState, generateEditorStateFromValue} from './DraftEditor'
 import draftToHtml from 'draftjs-to-html'
 import { convertToRaw } from 'draft-js'
-
-const DRAFT_EDITOR='draft' 
-const DRAFT_PREFIX = 'draft_'
-
-const isAndroid = isAndroidOperatingSystem()
+import {EDITOR_TYPE} from '../services/const'
+import QuillEditor from './QuillEditor';
 
 const styles  = {
     textarea:{
@@ -23,21 +18,28 @@ const styles  = {
 // FormField 
 const FormField = props => {
     const [editorState, setEditorState] = useState(emptyEditorState())
-    const {fld, key, value, setValue, handleKeyPress} = props
+    const {fld, key, value, setValue, handleKeyPress, clearIndex} = props
     const radioValues = fld.radioValues?fld.radioValues:[]
     const selectValues = fld.selectValues?fld.selectValues.map(it=>it.trim()):[]
     const label = fld.label?fld.label:''
-    const draftName = DRAFT_PREFIX + fld.name
     const handleChange = e => {
         setValue({...value, [e.target.name]:e.target.type==='checkbox'?e.target.checked?1:0:e.target.value})
     }    
 
+
+    const setHtml = html => setValue({...value, html})
+
     // Set initial value of editor state when FormField is called first time for this fld.name
     useEffect(()=>{
-        if (fld.type===DRAFT_EDITOR) {
+        if (!fld.name) {
+            alert('No fld.name on fld = ' + JSON.stringify(fld))
+        }    
+        if (fld.type===EDITOR_TYPE.DRAFT) {
             let edState = value[fld.name]?generateEditorStateFromValue(value[fld.name]):emptyEditorState()
             setEditorState(edState)
-        }    
+        } 
+
+
     }, [fld.name])
 
     const handleChangeWithPre = e => {
@@ -47,10 +49,10 @@ const FormField = props => {
             setValue({...value, [e.target.name]:e.target.type==='checkbox'?e.target.checked?1:0:e.target.value})
         }    
     }    
-    const handleChangeRte = (fld, val) => setValue({...value, [fld]:val})
     const handleChangeDate = e => {
         setValue({...value, [e.target.name]:e.target.value < 8?defaultDate():e.target.value});
     }    
+    const handleEditorChange = useCallback(html=>{setValue(value=>({...value, [fld.name]:html}))}, [])
     const required = fld.required?true:false 
     const disabled = fld.disabledFunc?fld.disabledFunc(value):false
     const labelStyle={fontWeight:400, fontSize:16, ...props.labelStyle?props.labelStyle:{}}
@@ -200,42 +202,18 @@ const FormField = props => {
                                 />
                         </p>
                         )    
-                case 'rte':
-                    return(
-                        <p>
-                            <label style={labelStyle}>
-                                    {label}&nbsp;{required?<sup style={supStyle}>*</sup>:null}&nbsp;
-                            </label>    
-                            <br/>
-                            <RteEditor 
-                                        value={value[fld.name]?value[fld.name]:''} 
-                                        name={fld.name} 
-                                        style={{cols:50}} 
-                                        required={required} 
-                                        disabled={disabled}
-                                        onChange={val => handleChangeRte(fld.name, val)} 
-                            />
-                        </p>
-                        )    
-                
-                case DRAFT_EDITOR:
-                        const onEditorStateChange = val => {
-                            const html = draftToHtml(convertToRaw(val.getCurrentContent()))
-                            setEditorState(val)
-                            setValue({...value, [fld.name]:html})
-                        }    
+                case EDITOR_TYPE.QUILL:      
                         return (
                             <p className='content'>
                                 <label style={labelStyle}>
                                         {label}&nbsp;{required?<sup style={supStyle}>*</sup>:null}&nbsp;
                                 </label>    
                                 <br/>
-                                <DraftEditor 
-                                    style={{cols:50}} 
-                                    required={required} 
-                                    disabled={disabled}
-                                    editorState={editorState} 
-                                    onEditorStateChange={onEditorStateChange} 
+                                <QuillEditor 
+                                    key={key}
+                                    html={value[fld.name]}
+                                    clearIndex={clearIndex}
+                                    setHtml={handleEditorChange}
                                 />
                             </p>
                         )    
@@ -317,7 +295,8 @@ const FormField = props => {
                         key={key}
                         type={fld.type}
                         size={40}
-                        name={fld.name} style={valueStyle} 
+                        name={fld.name} 
+                        style={valueStyle} 
                         value={value[fld.name]?value[fld.name]:''} 
                         required={required} 
                         disabled={disabled}
@@ -332,6 +311,7 @@ const FormField = props => {
         }   
 }    
 
+/*
 const FormField1 = props => {
     const {fld, key, value, setValue, handleKeyPress} = props
     const radioValues = fld.radioValues?fld.radioValues.map(it=>it.trim()):[]
@@ -359,6 +339,7 @@ const FormField1 = props => {
     </p>
     )
 }
+*/    
 
 export default FormField
 

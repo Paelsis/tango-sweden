@@ -101,13 +101,27 @@ export const backgroundImages = {
 
 export const REGIONS = 
 [
-  'Skåne',
-  'Stockholm',
-  'Halland',
-  'Västra Götaland',
-  'Sydost',
-  'Mitt',
-  'Norr',
+  "Blekinge",
+  "Dalarna",
+  "Gotland",
+  "Gävleborg",
+  "Halland",
+  "Jämtland Härjedalen",
+  "Jönköpings län",
+  "Kalmar län",
+  "Kronoberg",
+  "Norrbotten",
+  "Skåne",
+  "Stockholm",
+  "Sörmland",
+  "Uppsala län",
+  "Värmland",
+  "Västerbotten",
+  "Västernorrland",
+  "Västmanland",
+  "Västra Götaland",
+  "Örebro län",
+  "Östergötland",
   'Danmark',
   'Norge',
   'Finland',
@@ -178,6 +192,14 @@ export const CALENDAR={
     TBL_REGISTRATION:'tbl_registration_calendar',
   },
 }  
+
+export const EDITOR_TYPE={
+  QUILL:'QUILL',
+  DRAFT:'DRAFT',
+  RTE:'RTE',
+  ACTIVE:'QUILL'
+}
+
 
 export const isProduction = process.env.REACT_APP_ENVIRONMENT==='production'
 export const isDevelopment = process.env.REACT_APP_ENVIRONMENT==='development'

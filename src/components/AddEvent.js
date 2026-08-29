@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useContext} from 'react';
+import React, {useState, useEffect, useRef, useContext} from 'react';
 import { getAuth, onAuthStateChanged} from 'firebase/auth';
 import {AuthContext} from "../login/FirebaseAuth"
 import { useSharedState } from '../store';
@@ -13,7 +13,6 @@ import RemoveCircleIcon from '@mui/icons-material/RemoveCircleOutline';
 import SendIcon from '@mui/icons-material/Send';
 import Tooltip from '@mui/material/Tooltip';
 import {serverPost} from '../services/serverPost'
-import {isAndroidOperatingSystem} from '../services/isAndroid'
 import Square from './Square'
 import {serverFetchData} from '../services/serverFetch';
 import { MAX_LENGTH_DESC, CALENDAR } from '../services/const';
@@ -25,12 +24,13 @@ import { enhanceValueWithDraftVariables} from './DraftEditor'
 
 const apiBaseUrl = process.env.REACT_APP_API_BASE_URL
 
-const isAndroid = isAndroidOperatingSystem()
-
 const styles={
     container:{
         paddingTop:10,
         fontSize:18,
+        maxWidth:1000,
+        margin:'auto',
+        textAlign:'left',
     },
     button:{
         color:'black', 
@@ -96,29 +96,6 @@ const Send = ({onClick}) =>
     </IconButton>
 
 
-const SelectTemplate = ({fields, list, name, value, setValue}) => {
-    const handleChange = e => {
-        // alert(e.target.value + ' ' + JSON.stringify(list))
-        const foundRec = list.find(it => (it.id == e.target.value))
-        const valueWithDraft = enhanceValueWithDraftVariables(fields, foundRec)
-        setValue(valueWithDraft);
-    }
-    return(
-      <select 
-        key={'selectTemplate'}
-        name={'id'} 
-        value={value.id}
-        onChange={handleChange}
-      >
-        <option disables value={""}>Select template</option>
-        {list.map(it => 
-            <option key={it.id} value={it.id}>{it[name]}</option>
-        )}
-      </select>
-    )
-}    
- 
-
 const CandidateTable = ({list, setList, deleteRow}) =>
     list.length >0?
     <div className='columns'>
@@ -150,12 +127,12 @@ const CandidateTable = ({list, setList, deleteRow}) =>
 
 // Component: AddEvent
 export default props => {
+    const [value, setValue] = useState()
     const [sharedState, setSharedState] = useSharedState()
+    const [clearIndex, setClearIndex] = useState(0)
     const calendarType = props?.calendarType?props.calendarType:CALENDAR_TYPE.REGULAR
     const tblCalendar = CALENDAR[calendarType?calendarType:CALENDAR_TYPE.REGULAR].TBL_CALENDAR
     
-    const [value, setValue] = useState()
-    const [templates, setTemplates] = useState([])
     const [list, setList] = useState([])
     const navigate = useNavigate()
     const fields = FORM_FIELDS[calendarType].ADD
@@ -164,22 +141,13 @@ export default props => {
     const signinEmail = user?.email?user.email:null
     const addEmailToPath = (calendarType !== CALENDAR_TYPE.REGULAR) && !!signinEmail 
     const replyPath='/calendar/' + sharedState.region + (calendarType?'/' + calendarType:'') + (addEmailToPath?'/' + signinEmail:'')
-
-
-    const handleFetchTemplate = reply => {
-        if (reply.status === 'OK') {
-            // alert(JSON.stringify(reply.result))
-            setTemplates(reply.result)
-        } 
-   }
-
+  
+    
     useEffect(()=>{
         setList([])
         if (signinEmail) {
-            let url = apiBaseUrl + "/fetchRows?tableName=tbl_template&email=" + signinEmail
-            serverFetchData(url,  handleFetchTemplate)
             moment.locale('sv', {week:{dow : 1}})
-            setValue({...props, calendarType:undefined, id:undefined})
+            setValue({...props, ...sharedState, ...value, calendarType:undefined, description:'', id:undefined})
         }    
     }, [calendarType, signinEmail])
 
@@ -196,7 +164,8 @@ export default props => {
     }
 
     const handleReset = () => {
-        setValue({})
+        setValue({title:'', description:''})
+        setClearIndex(clearIndex++)
     }
 
     const addToCalendar = () => {
@@ -206,13 +175,8 @@ export default props => {
     }
 
     const changeToDbEntry = val => ({
-            /*    
-            city:sharedState?.city?sharedState.city:'Stockholm', 
-            region:sharedState?.region?sharedState.region:'Stockholm', 
-            country:sharedState?.city?sharedState.city:'Sweden', 
-            */
             ...sharedState,
-            ...val,
+            ...val, 
             startDateTime:val.startDate + 'T' + (val.startTime?val.startTime:'00:00'),
             endDateTime:(val.endDate?val.endDate:val.startDate) + 'T' + (val.endTime?val.endTime:'23:59'),
             private:val.private?val.private:sharedState.private?sharedState.private:0,
@@ -228,7 +192,7 @@ export default props => {
     }
 
     const  addToCalendarList = () => {
-        let dbEntry = changeToDbEntry(adjustValue(value))
+        let dbEntry = changeToDbEntry(adjustValue())
         let myList =[dbEntry]
         const compareFunc = (a,b) => moment(a.startDateTime)-moment(b.startDateTime)
 
@@ -272,17 +236,17 @@ export default props => {
     const buttons=[
         {
             type:'submit',
-            label:'ADD TO LIST',
+            label:'ADD TO EVENT LIST',
             style:styles.button,
-            tooltip:<h4 className='title is-5 has-text-white'>Add your event/s to a list. When ready press ADD TO CALENDAR</h4>,
+            tooltip:<h4 className='title is-5 has-text-white'>Add the event to the event list. When list is complete click on SAVE TO CALENDAR.</h4>,
             validate:true,
         },    
         {
             type:'button',
-            label:"ADD TO CALENDAR",
+            label:"PUBLISH TO CALENDAR",
             style:(list.length > 0)?styles.button:styles.buttonDisabled,
             disabled:list.length>0?undefined:true,
-            tooltip:<h1 className='title is-5 has-text-white'>Add the events in the list to the calendar</h1>,
+            tooltip:<h1 className='title is-5 has-text-white'>Publish all the events in the calendar</h1>,
             onClick:addToCalendar 
         },        
         {
@@ -296,7 +260,7 @@ export default props => {
             type:'button',
             label:'Cancel',
             style:styles.button,
-            tooltip:<h1 className='title is-5 has-text-white'>Cancel the add operation and return to calendar</h1>,
+            tooltip:<h1 className='title is-5 has-text-white'>Cancel the operation and return back to the calendar</h1>,
             onClick:handleCancel
         },    
     ]
@@ -304,22 +268,24 @@ export default props => {
         <div style={styles.container}>
             {signinEmail?
                 <>
-                    <div style={{textAlign:'center', width:'100vw'}}>
-                        <h4>
-                            {sharedState?sharedState.region:''}&nbsp;
-                            {sharedState?sharedState.city:''}&nbsp; 
-                            {calendarType===CALENDAR_TYPE.REGULAR?'':calendarType}&nbsp;
-                        </h4>    
-                    </div>    
+                    <div className='columns m-2 is-centered'>
+                        <div className='column is-6'>
+                                <h1 className='title is-4'>
+                                    Add event to calendar
+                                    {calendarType===CALENDAR_TYPE.REGULAR?'':' of type = ' + calendarType}&nbsp;
+                                </h1>
+                        </div>
+                    </div>
                     <div className='columns m-2 is-centered'>
                         {value?
-                            <div className='column is-4'>
+                            <div className='column is-7'>
                                 <FormTemplate 
                                             fields={fields} 
                                             value={value}
                                             setValue={setValue}
                                             setList={setList}
                                             buttons={buttons}
+                                            clearIndex={clearIndex}
                                             handleSubmit={handleAddToList}
                                 />
                             </div>

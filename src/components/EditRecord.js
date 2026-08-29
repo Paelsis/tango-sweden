@@ -74,16 +74,7 @@ const lengthOfType = type => {
 
 
 // EditRecord
-export default ({cols, colObjList, record, setRecord, buttons}) => {
-    const colObjListReduced = colObjList?
-        colObjList.filter(it => cols.find(col => col === it.Field))
-    :
-        cols.map(col=>(
-            {
-                Field:col,
-                Type:'varchar(2000)'
-            }
-        ))
+export default ({colObjList, record, setRecord, buttons}) => {
 
     const handleChange = e => setRecord({...record, [e.target.name]:e.target.value})
     return (
@@ -99,7 +90,7 @@ export default ({cols, colObjList, record, setRecord, buttons}) => {
                 </thead>
 
                 <tbody>
-                    {colObjListReduced.map((col, index)=>
+                    {colObjList.map((col, index)=>
                         <tr style={styles.tr(col.active)}>
                             <th style={styles.th}>
                                 {col.Field}

@@ -12,13 +12,13 @@ import { TbVinyl } from "react-icons/tb";
 
 
 export default () => 
-<div>
+<div style={{textAlign:'left'}}>
     <h1 style={{textAlign:'center', color:'red'}}>Manual for administrators</h1>
     <h5 style={{textAlign:'center', color:'red'}}>Skifta språk till svenska med knappen till höger</h5>
 
     The website tangosweden.se is open to organizers in Sweden/Denmark/Norway/Finland who wish to have a tango calendar for their location.
     On the front page there are buttons for the regions and cities that are active in the calendar. 
-    Helsingborg, Gothenburg and Denmark have their own calendars 
+    Gothenburg and Denmark have their own calendars 
     which are also accessed via buttons on the front page.
     <p/>
 
@@ -51,8 +51,8 @@ export default () =>
         <li>Click on your city or region's calendar</li>
         <li>Click on the <AddIcon /> icon on the right side of the calendar.</li>
         <li>Fill in the form for the event</li>
-        <li>Click on <button>ADD TO LIST</button></li>
-        <li>Click on <button>ADD TO CALENDAR</button></li>
+        <li>Click on <button>ADD TO EVENT LIST</button></li>
+        <li>Click on <button>PUBLISH TO CALENDAR</button></li>
         <li>After this, the event is added and now appears in the calendar</li>
         </ol>
 
@@ -60,15 +60,15 @@ export default () =>
         If you want to add repeated events with a certain frequency, check Repeat. This will display 3
         new fields for Every, unit and last repeat date.
         If you want your event to repeat every week until 2026-05-31, set <i>Every</i> to 1, unit to <i>weeks</i>
-        and <i>Last repeat date</i> to 2026-05-31. Then click the <button>ADD TO LIST</button> button.
+        and <i>Last repeat date</i> to 2026-05-31. Then click the <button>ADD TO EVENT LIST</button> button.
         Your group/list with repeated dates until 2026-05-31 will then be displayed.
-        When you are finished with the group/list, finally send it to the calendar with the <button>ADD TO CALENDAR</button> button.
+        When you are finished with the group/list, finally send it to the calendar with the <button>PUBLISH TO CALENDAR</button> button.
         <p/>
     <h5>Remove individual events from the list</h5>
         If you wish to remove an event from the list above, click the minus button to the right of the event in the list.
         If you wish to clear the entire list, click the <button>CLEAR LIST</button> button below the list.
         When you are finished with the list, send it to the calendar
-        using the <button>ADD TO CALENDAR</button> button below the form.
+        using the <button>PUBLISH TO CALENDAR</button> button below the form.
         <p/>
         All events in a list belong to the same group. This is practical if you later want to change the values ​​
         for the entire group (Change all events in group) or remove all events in the entire group (span with dash).
@@ -100,8 +100,8 @@ export default () =>
     <li>The form now contains pre-filled data with empty fields for date and time.</li>
     <li>Fill in your dates and times</li>
     <li>For repeated events use <i>Repeat</i> and its 3 fields)</li>
-    <li>Click on the button <i>ADD TO LIST</i></li>
-    <li>Click on the button <i>ADD TO CALENDAR</i></li>
+    <li>Click on the button <i>ADD TO EVENT LIST</i></li>
+    <li>Click on the button <i>PUBLISH TO CALENDAR</i></li>
     </ol>
     To make it easier for those who forgot to copy, there is a calendar history going back in time.
     Events before today's date are displayed if you click on <i class="fa fa-history"></i>
@@ -114,8 +114,8 @@ export default () =>
     <li>Click on <DeleteIcon /></li>
     </ol>
     If you wish to delete all events in a group, click on <DeleteSweepIcon />.
-    A group means the entire list you created with
-    <i>ADD TO LIST</i> when the event/events were created.
+    A group means the entire list you created with <i>ADD TO EVENT LIST</i> 
+    when the event/events were created.
     <p/>    
     
     <h4>Event registration via calendar button</h4>

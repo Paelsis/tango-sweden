@@ -277,18 +277,6 @@ export const getEventsFromGoogleCalendar = (calendarName, timeMin, timeMax, hand
       events => handleResult(events.filter(ev=>ev.location.includes('Lund'))),
     )
   } 
-    /*      
-  } else if (calendarName === 'stockholm' || calendarName === 'mitt') {
-      staticStyleId = 'STOCKHOLM'
-      getEventsFromGoogleCal(
-        calendarId_STO,
-        apiKey_TS,
-        timeMin.format('YYYY-MM-DD') + 'T00:00:00Z', 
-        timeMax.format('YYYY-MM-DD') + 'T23:59:00Z',
-        'SV',
-        events => handleResult(events),
-      )
-  */          
    
 }
 

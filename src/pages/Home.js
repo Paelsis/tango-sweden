@@ -228,9 +228,6 @@ const Home = () => {
         case 'göteborg': 
             navigate('/got')
             break;
-        case 'halmstad': 
-            navigate('/halmstad')
-            break;
         default:
             navigate('/calendar/' + city)
             break;

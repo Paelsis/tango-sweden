@@ -11,7 +11,6 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { Tooltip, IconButton, Button} from '@mui/material';
 import { cyan, red } from '@mui/material/colors';
 import { STATUS_STYLE } from '../services/constant';
-import ReactRte from 'react-rte';
 import EditRecord from './EditRecord'
 import {serverFetchData} from '../services/serverFetch'
 
@@ -114,8 +113,8 @@ const _RenderView = ({list, colObjList, buttons, handleAdd, search, setSearch, f
                 return (asc?1:-1)
             }
     }    
-    const keys = colObjList?colObjList.map(it=>it.Field):Object.keys(list[0])
-    const filterFunc = key => key=='id'?false:true 
+    const viewColumnsFilter = it => it.Field!=='id' && viewColumns?viewColumns.includes(it.Field):true
+    const colsObjListView = colObjList.filter(viewColumnsFilter)
     
     const clearFilter = () => {
         setSearch({})
@@ -134,9 +133,9 @@ const _RenderView = ({list, colObjList, buttons, handleAdd, search, setSearch, f
         <thead>
             <tr>
                 <th colSpan={2} />
-                {keys.filter(filterFunc).map(colName=>
-                    <Tooltip title={handleComment(colName)}>  
-                        <HeaderValue list={list} fld={colName?colName:'No name'} handleClick={()=>handleClick(colName)} comment={handleComment(colName)}/>
+                {colsObjListView(it=>
+                    <Tooltip title={handleComment(it.Field)}>  
+                        <HeaderValue list={list} fld={it.Field} handleClick={()=>handleClick(it.Field)} comment={handleComment(it.Field)}/>
                     </Tooltip>
                 )}    
             </tr>
@@ -152,8 +151,8 @@ const _RenderView = ({list, colObjList, buttons, handleAdd, search, setSearch, f
                         <CancelIcon />
                     </IconButton> 
                 </th>}
-                {keys.filter(filterFunc).map(colName=>
-                    <SearchValue fld={colName} search={search} setSearch={setSearch} />
+                {colsObjListView.filter(filterFunc).map(it=>
+                    <SearchValue fld={it.Field} search={search} setSearch={setSearch} />
                 )}
             </tr>
             :null}
@@ -170,20 +169,20 @@ const _RenderView = ({list, colObjList, buttons, handleAdd, search, setSearch, f
                             </Tooltip>
                         </td>
                     )}    
-                    {keys.filter(filterFunc).map(key=>
+                    {colsObjListView.filter(filterFunc).map(it=>
                         <td style={styles.td}>
-                            <div dangerouslySetInnerHTML={{__html: row[key]}} />
+                            <div dangerouslySetInnerHTML={{__html: row[it.Field]}} />
                         </td>
                     )}       
                 </tr>     
             )}      
-                <tr style={styles.tr(false)}>
-                    <td colSpan = {keys.length + 2} style={styles.td} >
-                        <IconButton>
-                            <AddIcon onClick={()=>handleAdd({})} />
-                        </IconButton>
-                    </td>                
-                </tr>       
+            <tr style={styles.tr(false)}>
+                <td colSpan = {colsObjListView.length + 2} style={styles.td} >
+                    <IconButton>
+                        <AddIcon onClick={()=>handleAdd({})} />
+                    </IconButton>
+                </td>                
+            </tr>       
 
             </tbody>    
     </table>
@@ -191,7 +190,7 @@ const _RenderView = ({list, colObjList, buttons, handleAdd, search, setSearch, f
 }    
 
 // EditTable (columnsFilterFunc removes columns you do not want to edit)
-export default ({tableName, columnsFilterFunc}) => {
+export default ({tableName, viewColumns, editColumns}) => {
     const [record, setRecord] = useState()
     const [search, setSearch] = useState({})
     const [list, setList] = useState()
@@ -212,11 +211,7 @@ export default ({tableName, columnsFilterFunc}) => {
         const data = reply?reply.data?reply.data:reply:FAILED_REPLY
         if (data.status === 'OK' || data.status==='true') {
             if (data.result.length > 0) {
-                if (columnsFilterFunc) {
-                    setColObjList(data.result.filter(columnsFilterFunc))
-                } else {
-                    setColObjList(data.result)
-                }    
+                setColObjList(data.result.filter(it=>editColumns?editColumns.includes(it.Field):true))
             } else {
                 alert('List of colObjList ha 0 length')
             }
@@ -393,14 +388,14 @@ export default ({tableName, columnsFilterFunc}) => {
             onClick:row=>handleDelete(row.id)
         },
     ]
-
-    const colsEdit = record?Object.keys(record):undefined
+    const editColumnsFilter = it => it.Field!=='id' && editColumns?editColumns.includes(it.Field):true
+    const colObjListEdit = colObjList.filter(editColumnsFilter)
   
     return(
         <div style={styles.root}>
             {record?
                 <>
-                   <EditRecord cols={colsEdit} colObjList={colObjList} record={record} setRecord={setRecord} buttons={buttonsEdit} />
+                   <EditRecord colObjList={colObjListEdit} record={record} setRecord={setRecord} buttons={buttonsEdit} />
                 </>
             :list?list.length > 0?
                 <>

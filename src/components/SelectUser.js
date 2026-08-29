@@ -3,13 +3,7 @@ import { useSharedState } from '../store';
 import { Navigate, useNavigate } from 'react-router-dom'
 import firebaseApp from '../services/firebaseApp'
 import { getAuth, onAuthStateChanged} from 'firebase/auth'
-import FormTemplate from './FormTemplate'
 import {serverFetchData} from '../services/serverFetch'
-import Add from './AddEvent'
-import {serverPost} from "../services/serverPost"
-import Square from "./Square"
-import { ADMINISTRATORS } from "../services/const";
-
 // SelectUser
 export default ({email}) => {
     const [users, setUsers] = useState()
