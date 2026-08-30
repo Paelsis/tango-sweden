@@ -174,22 +174,25 @@ export const CALENDAR_TYPE={
 
 export const CALENDAR={
   PRIVATE_LESSON:{ // calendarType
-    TBL_CALENDAR:'tbl_calendar_PRIVATE_LESSON',
-    TBL_REGISTRATION:'tbl_registration_PRIVATE_LESSON',
+    TBL_CALENDAR:'tbl_calendar_private_lesson',
+    TBL_REGISTRATION:'tbl_registration_private_lesson',
     EVENT_DEFAULT:{
-      maxLimit:1, // Max number of allowed registrations
+      maxLimit:1, // Max number of allowed registrations for private lesson on a certain time
     }
   }, 
   DISKJOCKEY:{ // calendarType
     TBL_CALENDAR:'tbl_calendar_dj',
     TBL_REGISTRATION:'tbl_registration_dj',
     EVENT_DEFAULT:{
-      maxLimit:1, // Max number of allowed registrations
+      maxLimit:1, // Default max number of allowed registrations for booking a DJ at a certain time
     }
   }, 
   REGULAR:{ // calendarType
     TBL_CALENDAR:'tbl_calendar',
     TBL_REGISTRATION:'tbl_registration_calendar',
+    EVENT_DEFAULT:{
+      maxLimit:30, // Default max number of allowed registrations
+    }
   },
 }  
 
@@ -203,4 +206,4 @@ export const EDITOR_TYPE={
 
 export const isProduction = process.env.REACT_APP_ENVIRONMENT==='production'
 export const isDevelopment = process.env.REACT_APP_ENVIRONMENT==='development'
-export const isPL = process.env.REACT_APP_ENVIRONMENT==='pl'
+export const isPL = process.env.REACT_APP_ENVIRONMENT==='pl'  // private lesson

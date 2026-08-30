@@ -187,7 +187,7 @@ export default ({colsView, colsEdit, colObjList, tableName, originalList, setOri
             onClick:deleteRecord
         }
     ]
-    const allCols = list?Object.keys(list[0]):[]
+    const allCols = list?list.length !==0?Object.keys(list[0]):[]:[]
     
     return(
     list?

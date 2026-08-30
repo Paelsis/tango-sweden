@@ -47,6 +47,6 @@ export default ({eventIdExtended, tblRegistration}) => {
       list&&colObjList?
         <ViewTable tableName={tblRegistration} colObjList={colObjList} originalList={list} setOriginalList={setList} list={list} setList={setList} colsView={colsView} colsEdit={colsEdit} />
       :
-        <h1>No registrations found</h1>
+        <h1>No registrations found for eventIdExtended = {eventIdExtended} and tblRegistration = {tblRegistration}</h1>
   )
 }

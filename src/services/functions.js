@@ -1,4 +1,3 @@
-import { generateEditorStateFromValue, emptyEditorState } from '../components/DraftEditor'
 import { makeStyles } from '@mui/styles';
 
 export const labelSwedish = name => {

@@ -103,7 +103,7 @@ export default props => {
         borderWidth:ev.borderWidth,
         borderColor:ev.borderColor,
         backgroundImage:ev.backgroundImage,
-        useRegistrationButton:ev.useRegistrationButton,
+        useRegistrationButton:ev.useRegistrationButton==1?true:false,
         maxLimit:ev.maxLimit,
         email:ev.email,
         calendarType,
@@ -144,7 +144,7 @@ export default props => {
           borderColor:ev.borderColor,
           borderWidth:ev.borderWidth,
           backgroundImage:ev.backgroundImage,
-          useRegistrationButton:ev.useRegistrationButton,
+          useRegistrationButton:ev.useRegistrationButton==1?true:false,
           maxLimit:ev.maxLimit,
           calendarType,
         }

@@ -10,7 +10,6 @@ import {serverFetchData} from '../services/serverFetch'
 import { getAuth, onAuthStateChanged} from 'firebase/auth';
 import {REGIONS, EDITOR_TYPE} from '../services/const'
 import AddPhotoSingle from '../camera/AddPhotoSingle'
-import { enhanceValueWithDraftVariables } from './DraftEditor'
 const MAX_DESC_LENGTH = 40000
 
 
@@ -139,12 +138,12 @@ const Func = () => {
 
         if (reply?reply.status === 'OK':false) {
             if (reply.result) {
-                setValue(enhanceValueWithDraftVariables(fields, reply.result))
+                setValue(reply.result)
             } else {
                 console.log('[EditDj.js] No current info about DJ') 
             }    
         } else {
-            setValue(enhanceValueWithDraftVariables(fields, undefined))
+            setValue({})
             console.log('Currently no info regarding DJ')
         }
     }

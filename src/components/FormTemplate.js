@@ -38,7 +38,7 @@ const isValid = (fields, value) => {
 }    
 
 
-// FormTemplate.js
+// FormTemplate
 export default props => {
     const {fields, buttons, value, setValue, handleSubmit, clearIndex} = props
     const handleKeyPress = e => {

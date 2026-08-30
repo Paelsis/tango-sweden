@@ -2,15 +2,12 @@ import React, {useState, useEffect} from 'react';
 import { useSharedState } from '../store.js';
 import { useNavigate, useLocation } from 'react-router-dom';
 import FormTemplate from '../components/FormTemplate.js';
-import Button from '@mui/material/Button';
 import moment from 'moment'
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircleOutline';
-import Tooltip from '@mui/material/Tooltip';
 import {serverPost, replaceRow} from '../services/serverPost.js'
-import { getAuth, onAuthStateChanged} from 'firebase/auth';
 import { BUTTON_STYLE } from '../services/const.js';
 import {serverFetchData} from '../services/serverFetch.js'
 import {MAX_LIMIT_UNSET, CALENDAR, CALENDAR_TYPE} from '../services/const.js'
@@ -71,15 +68,14 @@ const Save = ({onClick}) =>
 const fields = [
     {
         type:'radio',
-        label:'Dance role:',
-        name:'role',
+        label:'Dance role',
+        name:'danceRole',
         radioValues:
         [
             {label:'FOLLOWER', value:'FOLLOWER'},
             {label:'LEADER', value:'LEADER'},
             {label:'BOTH', value:'BOTH'},
         ],
-        tooltip:'Dance role can be leader, follower or both',
         required:true,
     },
     {
@@ -155,7 +151,7 @@ export default () => {
     const {calendarType, eventIdExtended, ava, maxLimit, title, dateRangeTime, organizerEmail} = event
     const [sharedState, setSharedState] = useSharedState()
     const forceReloadCount = sharedState.forceReloadCount?sharedState.forceReloadCount:0
-    const [value, setValue] = useState()
+    const [value, setValue] = useState({})
     const [mailSubject, setMailSubject] = useState()
     const [mailBody, setMailBody] = useState()
     const [list, setList] = useState([])
@@ -304,7 +300,7 @@ export default () => {
                     <h1 className='title is-3'>No space left</h1>
                 :    
                     <div className='columns m-2 is-centered'>
-                        <div className='column is-6 is-narrow'>
+                        <div className='column is-5'>
                             <h3 className='title is-3'>Registration for {title?title:'No title'} ava = {event.ava}</h3>
                             <h4 className='title is-4'>{dateRangeTime?dateRangeTime:'No date info'}</h4>
                             {maxLimit === MAX_LIMIT_UNSET?

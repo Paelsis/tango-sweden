@@ -2,9 +2,6 @@
 import React, {useState, useEffect, useCallback, useRef} from 'react';
 import {defaultDate} from '../services/functions'
 import TextArea from 'react-textarea-autosize';
-import DraftEditor, {emptyEditorState, generateEditorStateFromValue} from './DraftEditor'
-import draftToHtml from 'draftjs-to-html'
-import { convertToRaw } from 'draft-js'
 import {EDITOR_TYPE} from '../services/const'
 import QuillEditor from './QuillEditor';
 
@@ -16,31 +13,15 @@ const styles  = {
 }
 
 // FormField 
-const FormField = props => {
-    const [editorState, setEditorState] = useState(emptyEditorState())
+export default props => {
     const {fld, key, value, setValue, handleKeyPress, clearIndex} = props
-    const radioValues = fld.radioValues?fld.radioValues:[]
     const selectValues = fld.selectValues?fld.selectValues.map(it=>it.trim()):[]
     const label = fld.label?fld.label:''
     const handleChange = e => {
         setValue({...value, [e.target.name]:e.target.type==='checkbox'?e.target.checked?1:0:e.target.value})
     }    
 
-
     const setHtml = html => setValue({...value, html})
-
-    // Set initial value of editor state when FormField is called first time for this fld.name
-    useEffect(()=>{
-        if (!fld.name) {
-            alert('No fld.name on fld = ' + JSON.stringify(fld))
-        }    
-        if (fld.type===EDITOR_TYPE.DRAFT) {
-            let edState = value[fld.name]?generateEditorStateFromValue(value[fld.name]):emptyEditorState()
-            setEditorState(edState)
-        } 
-
-
-    }, [fld.name])
 
     const handleChangeWithPre = e => {
         if (fld.preSetValue) {
@@ -106,27 +87,28 @@ const FormField = props => {
                     </p> 
                 )
             case 'radio':
+                const radioValues = fld.radioValues?fld.radioValues:undefined
                 return(
                     <p>
                         <label style={labelStyle}>
                                 {label}&nbsp;{required?<sup style={supStyle}>*</sup>:null}&nbsp;
                         </label>    
                         <br/>
-                        {radioValues.map((it, idx) =>
+                        {radioValues?radioValues.map((it, idx) =>
                             <label>
                                 <input 
-                                    key={(it.value?it.value:it) + idx}
                                     type={fld.type}
-                                    value={it.value?it.value:it} 
+                                    key={idx}
+                                    value={value?it.value?it.value:it:undefined} 
                                     name={fld.name} 
                                     required={required}
                                     disabled={disabled}
-                                    checked={value[fld.name]?(value[fld.name] === (it.value?it.value:it)):undefined}
+                                    checked={value?value[fld.name]?(value[fld.name] === (it.value?it.value:it)):undefined:undefined}
                                     onChange={handleChangeWithPre}
                                 />
                                 &nbsp;<span>{it.label?it.label:it}</span>&nbsp;
                             </label>
-                        )}
+                        ):null}
                     </p> 
                 )
                 case 'select':
@@ -311,44 +293,3 @@ const FormField = props => {
         }   
 }    
 
-/*
-const FormField1 = props => {
-    const {fld, key, value, setValue, handleKeyPress} = props
-    const radioValues = fld.radioValues?fld.radioValues.map(it=>it.trim()):[]
-    const selectValues = fld.selectValues?fld.selectValues.map(it=>it.trim()):[]
-    const label = fld.label?fld.label:'No label'
-    const handleChange = e => {
-        setValue({...value, [e.target.name]:e.target.type==='checkbox'?e.target.checked?1:0:e.target.value})
-    }    
-    const handleChangeRte = (fld, val) => setValue({...value, [fld]:val})
-    const handleChangeDate = e => {
-        setValue({...value, [e.target.name]:e.target.value < 8?defaultDate():e.target.value});
-    }    
-    const required = fld.required?true:false 
-    const disabled = fld.disabledFunc?fld.disabledFunc(value):false
-    const labelStyle={fontWeight:700, ...props.labelStyle?props.labelStyle:{}}
-    const supStyle = {color:'red', fontWeight:700, ...props.subStyle?props.subStyle:{}}
-    const valueStyle = props.valueStyle?props.valueStyle:{}
-
-    return(
-    <p>
-        <h1 style={supStyle}>Before</h1>
-        {JSON.stringify(props)}    
-        <h1>After</h1>
-        <p/>
-    </p>
-    )
-}
-*/    
-
-export default FormField
-
-/*
-export const RenderField1 = ({fld, value, setValue}) => {
-    const handleChange = e => setValue({...value, [e.target.name]:e.target.type==='checkbox'?e.target.checked:e.target.value})
-    return(    
-        <input {...fld} type={fld.type} size={40} value={value[fld.name]?value[fld.name]:''} name={fld.name} style={style} required={fld.required} onChange={handleChange} />
-    )
-}
-
-*/

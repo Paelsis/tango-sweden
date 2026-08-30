@@ -13,14 +13,10 @@ import RemoveCircleIcon from '@mui/icons-material/RemoveCircleOutline';
 import SendIcon from '@mui/icons-material/Send';
 import Tooltip from '@mui/material/Tooltip';
 import {serverPost} from '../services/serverPost'
-import Square from './Square'
-import {serverFetchData} from '../services/serverFetch';
 import { MAX_LENGTH_DESC, CALENDAR } from '../services/const';
 import {FORM_FIELDS} from '../services/formFields'
 import {CALENDAR_TYPE} from '../services/const'
 
-
-import { enhanceValueWithDraftVariables} from './DraftEditor'
 
 const apiBaseUrl = process.env.REACT_APP_API_BASE_URL
 
@@ -140,27 +136,36 @@ export default props => {
     const {user} = useContext(AuthContext)
     const signinEmail = user?.email?user.email:null
     const addEmailToPath = (calendarType !== CALENDAR_TYPE.REGULAR) && !!signinEmail 
-    const replyPath='/calendar/' + sharedState.region + (calendarType?'/' + calendarType:'') + (addEmailToPath?'/' + signinEmail:'')
   
     
     useEffect(()=>{
         setList([])
         if (signinEmail) {
             moment.locale('sv', {week:{dow : 1}})
-            setValue({...props, ...sharedState, ...value, calendarType:undefined, description:'', id:undefined})
+            setValue({...props, ...sharedState, ...value, calendarType:undefined, description:'', id:undefined, region:undefined})
         }    
     }, [calendarType, signinEmail])
 
     const deleteRow = index => setList(list.filter((it, idx)=>idx !== index))  
     const handleReply = reply => {
         if (reply.status==='OK') {
-            navigate(replyPath)
+            if (value.region || value.city) {
+                const replyPath='/calendar/' + (value.region?value.region:value.city) + (calendarType?'/' + calendarType:'') + (addEmailToPath?'/' + signinEmail:'')
+                navigate(replyPath)
+            } else {
+                alert('[AddEvent] ERROR: Could not return to region or city for ' + tblCalendar + ' calendarType=' + calendarType)
+            }    
         } else {
-            alert('[AddEvent] ERROR: Failed to add event to table ' + tblCalendar)
+            alert('[AddEvent.handleReply] ERROR: Failed to add event to table ' + tblCalendar)
         }
     }
     const handleCancel = ()  => {
-        navigate(replyPath)
+        if (value.region || value.city) {
+            const replyPath='/calendar/' + (value.region?value.region:value.city) + (calendarType?'/' + calendarType:'') + (addEmailToPath?'/' + signinEmail:'')
+            navigate(replyPath)
+        } else {
+            alert('[AddEvent.handleCancel] ERROR: Could not return to region or city for ' + tblCalendar + ' calendarType=' + calendarType)
+        }    
     }
 
     const handleReset = () => {

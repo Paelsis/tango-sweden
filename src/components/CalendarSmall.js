@@ -131,7 +131,7 @@ export default props => {
         const organizerEmail = event.email
         const title=event.title
         const dateRangeTime=event.dateRangeTime
-        const useRegistrationButton = event.useRegistrationButton
+        const useRegistrationButton = event.useRegistrationButton==1?true:false
         const trStyle = event.style
         //const forcedSmallFonts= ['milonga', 'practica', 'pratika'].find(it  => event.title.toLowerCase().includes(it)) && event.durationHours >12
         const forceSmallFonts = event.forceSmallFonts
@@ -177,12 +177,12 @@ export default props => {
                         <td style={styles.tdDateTime} onClick={()=>handleSelectEvent(event)}>  
                             <small>{timeRange}</small>
                         </td>
-                        <td style={styles.td} colSpan={useRegistrationButton==1?2:2} onClick={()=>handleSelectEvent(event)}>  
+                        <td style={styles.td} colSpan={useRegistrationButton?2:2} onClick={()=>handleSelectEvent(event)}>  
                             <small>{event.title}</small>
                         </td>
                     </>
                 }
-                {useRegistrationButton==1?
+                {useRegistrationButton?
                     <td style={styles.td}>  
                         {event.cnt < event.maxLimit?
                                 <IconButton 

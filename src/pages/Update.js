@@ -9,7 +9,6 @@ import {serverPost} from '../services/serverPost'
 import { BUTTON_STYLE, MAX_LENGTH_DESC, CALENDAR, CALENDAR_TYPE } from '../services/const';
 import Square from '../components/Square'
 import {FORM_FIELDS} from '../services/formFields'
-// import { generateEditorStateFromValue, emptyEditorState } from '../components/DraftEditor'
 
 const styles={
     container:{
