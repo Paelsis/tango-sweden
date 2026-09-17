@@ -1,183 +1,115 @@
-import React, {Component} from 'react'
-import axios from 'axios'
-import Tooltip from '@mui/material/Tooltip';
-
+import { useState, useRef } from 'react';
+import axios from 'axios';
 import IconButton from '@mui/material/IconButton';
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
-import SaveIcon from '@mui/icons-material/Save';
-import CancelIcon from '@mui/icons-material/Cancel';
-import {STATUSLINE_STYLE} from '../services/const'
 
-const apiBaseUrl = process.env.REACT_APP_API_BASE_URL
+const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
 
-const styles={
-  preview: {
-    padding:1, 
-    border:2, 
-    borderStyle: 'dotted',
-    borderColor:'red'
+const handleUpload = async (url, formData) => {
+  try {
+    const response = await axios.post(url, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    console.log('Success:', response.data);
+    return true;
+  } catch (error) {
+    // Visar det exakta felet från backend om det finns
+    const errorMsg = error.response?.data?.message || error.response?.data || error.message;
+    alert('[AddPhotoSingle]: SEVERE ERROR error: ' + errorMsg);
+    return false;
   }
-}
+};
 
-// AddPhotoSingle
-class AddPhotoSingle extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      newFileNames:[],
-    };
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
-  handleReset() {
-    this.setState({newFileNames:[]});
-  }  
+const AddPhotoSingle = (props) => {
+  const [newFileNames, setNewFileNames] = useState([]);
+  const fileInputRef = useRef(null);
 
-  oldExtension(filename) {
-    return filename.split('.').pop()
-  }
+  const getExtension = (filename) => {
+    return filename.split('.').pop();
+  };
 
-  buildFileName(filename, ext) {
-    return filename + '.' + ext
-  }
+  const buildFileName = (filename, ext) => {
+    return filename + '.' + ext;
+  };
 
-  handleSubmit(event) {
-    event.preventDefault();
-    if (event.target.files.length > 0) {
-      const formData = new FormData()
-      //formData.append('rootdir', this.props.rootdir?this.props.rootdir:'')
-      if (this.props.subdir) {
-        formData.append('subdir', this.props.subdir?this.props.subdir:'')
-      }
+  const uploadFiles = async (files) => {
+    if (!files || files.length === 0) return;
+
+    const formData = new FormData();
+    
+    if (props.subdir) formData.append('subdir', props.subdir);
+    if (props.remove) formData.append('remove', props.remove);
+
+    // Skapa en temporär array för att hålla koll på de nya namnen under denna rendering
+    const updatedNames = [];
+
+    for (let i = 0; i < files.length; i++) {
+      let selectedFile = files[i];
+      let newFileName = '';
       
-      if (this.props.remove) {
-        formData.append('remove', this.props.remove?this.props.remove:'')
-      }
+      if (props.filename) {
+        const newExt = getExtension(selectedFile.name);
+        newFileName = buildFileName(props.filename, newExt);
+      } else {  
+        // Säkra upp så vi tar filens originalnamn om inget annat finns i state än
+        newFileName = newFileNames[i] || selectedFile.name;
+      }   
+      
+      updatedNames.push(newFileName);
+      formData.append('newfile_arr[]', selectedFile, newFileName);
+    } 
 
-      alert('Submitting image to disk ...')
+    // Uppdatera state EN gång efter loopen för att undvika multipla omrenderingar mitt i processen
+    setNewFileNames(updatedNames);
 
-      // console.log(Object.fromEntries(formData))
-      for(let i=0; i < event.target.files.length; i++) {
-        let selectedFile = event.target.files[i]
-        let newFileName = ''
-        if (this.props.filename) {
-          // Enforce filename with old extension
-          const oldExt = this.oldExtension(event.target.files[i].name)
-          newFileName = this.buildFileName(this.props.filename, oldExt)
-        } else {  
-          newFileName = this.state.newFileNames[i]
-        }   
-
-        formData.append('newfile_arr[]', selectedFile, newFileName)
-      } 
-      // alert(JSON.stringify(Object.fromEntries(formData)))
-      console.log('formData', Object.fromEntries(formData))
-      const url = apiBaseUrl + '/postImages'
-      console.log('[AddPhotoSingle]:Posting image to disk with axios ...')
-      axios.post(url, formData,
-          {
-              onUploadProgress: progressEvent => {console.log(progressEvent.loaded / progressEvent.total); }
-          }
-      ).then(response => {
-          const data = response.data?response.data:response
-          const status = data.status?data.status:'NO STATUS'
-          if (data) {
-            if (status ==='OK') {
-              const fname = response.data.result.find(it=>this.props.matching?it.fname.includes(this.props.matching):true).fname
-              if (fname) {
-                this.props.setUrlImage(fname)
-              } else {
-                alert('[AddPhotoSingle]: ERROR: No fname returned from axios.post')
-              } 
-            } else {
-              alert('[AddPhotoSingle]:' + status + ': Posting image failed with axios.post')
-            }
-          } else {
-              alert('[AddPhotoSingle]: No data returned from axios.post for url ' + url)
-          }
-      }).catch(e => {
-          const message = e.getMessage()?e.getMessage():'No message'
-          alert('[AddPhotoSingle]: SEVERER ERROR: Failed to post url:' + url + ' message:' + message)
-      });
+    // Om föräldern vill ha namnet på den uppladdade bilden (t.ex. den första i listan)
+    if (props.setProfileImage && updatedNames.length > 0) {
+      props.setProfileImage(updatedNames[0]);
     }
-  }
 
-  handleChange(e) {
+    const url = apiBaseUrl + '/postImages';
+    await handleUpload(url, formData);
+
+    // Nollställ inputfaltet så att samma fil kan väljas igen om och om öppnas
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleChange = (e) => {
     e.preventDefault();
-    for(let i = 0; i < e.target.files.length; i++) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        // When loaded submit to disk
-        this.handleSubmit(e)
-      }
-      reader.readAsDataURL(e.target.files[i])
-    }  
-  }
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      uploadFiles(files);
+    }
+  };
 
-  handleFileNameChange (e, ix) {
-    // 1. Make a shallow copy of the items
-    this.setState({
-      newFileNames: [...this.state.newFileNames.slice(0,ix), e.target.value, ...this.state.newFileNames.slice(ix+1)]
-    })
-  }
+  return (
+    <div>
+      <input 
+        type="file" 
+        name="newfile"
+        accept="image/*, application/pdf" 
+        onChange={handleChange} 
+        style={{ display: 'none' }}
+        ref={fileInputRef} 
+        // Lägg till multiple om du faktiskt loopar igenom flera filer i din kod
+        multiple={props.multiple || false} 
+      />
+      <IconButton
+        type="button"
+        size="medium"
+        edge="start"
+        color="inherit"
+        sx={{ mr: 0 }}
+        onClick={() => fileInputRef.current && fileInputRef.current.click()}
+      >
+        <AddAPhotoIcon fontSize="inherit" />
+      </IconButton>
+    </div>
+  );
+};
 
-  renderForm() {    
-    return(
-      <form className='columns is-centered' onSubmit={this.handleSubmit}>
-          <h1>{this.props.subdir}</h1>
-          <IconButton
-            //className='column is-narrow'
-            type='submit'
-            size="small"
-            edge="start"
-            color="inherit"
-            sx={{ mr: 0 }}
-          >
-          <p/>  
-            <SaveIcon display='none' />
-          </IconButton>
-          <IconButton
-            //className='column is-narrow'
-            type='button'
-            size="small"
-            edge="start"
-            color="inherit"
-            sx={{ mr: 0 }}
-            onClick={()=>this.setState({newFileNames:[]})}
-          >
-            <CancelIcon  />                              
-          </IconButton>
-      </form>
-    )
-  }
-  render() {
-    return (
-      <div>
-          <div>
-            <input 
-              type="file" 
-              name="newfile"
-              accept="image/*, application/pdf" 
-              onChange={this.handleChange} 
-              style={{display:'none'}}
-              ref={fileInput => this.fileInput = fileInput} 
-            />
-            <IconButton
-              //className='column is-narrow'
-              type='button'
-              size="medium"
-              edge="start"
-              color="inherit"
-              sx={{ mr: 0 }}
-              onClick={()=>this.fileInput.click()}
-            >
-              <AddAPhotoIcon fontSize="inherit" />
-            </IconButton>
-          </div>
-      </div>
-    )
-  }
-}
-
-export default props => <AddPhotoSingle {...props}/>
-  
+export default AddPhotoSingle;

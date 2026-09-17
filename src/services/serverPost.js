@@ -30,10 +30,21 @@ export const serverPost = (irl, indata, handleReply) => {
             alert(message)
         } 
     })
-    .catch(e => {
-        const message = '[serverPost] Fatal error in reply from axios post from from url:' 
-        + url + '\nindata:' + JSON.stringify(indata) + '\nerror:' + JSON.stringify(e?e.message?e.message:e:'No message')
-        alert(message)
+    .catch(error => {
+        console.log("[serverPost] Fatal error in reply from axios post");
+        
+        // 💡 LÖSNINGEN: Titta om det finns ett svar från din PHP Custom Error Handler
+        if (error.response && error.response.data) {
+            const phpError = error.response.data;
+            
+            const message = "Error message from PHP:" + phpError.message  
+            + "\nFile:" +  phpError.file.replace(/^.*[\\/]/, '')
+            + "\nLine number:" +  phpError.line
+            alert(message)
+        } else {
+            // Om det var ett rent nätverksfel utan svar från PHP
+            console.error("Systemfel:", error.message);
+        }
     });
 }
 

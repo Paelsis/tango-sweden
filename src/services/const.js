@@ -127,12 +127,14 @@ export const REGIONS =
   'Finland',
 ] 
 
+
 export const COUNTRIES = 
 [
   'Sverige',
   'Danmark',
   'Norge',
   'Finland',
+  'Tyskland',
 ] 
 
 
@@ -196,13 +198,7 @@ export const CALENDAR={
   },
 }  
 
-export const EDITOR_TYPE={
-  QUILL:'QUILL',
-  DRAFT:'DRAFT',
-  RTE:'RTE',
-  ACTIVE:'QUILL'
-}
-
+export const QUILL_EDITOR='QUILL_EDITOR'
 
 export const isProduction = process.env.REACT_APP_ENVIRONMENT==='production'
 export const isDevelopment = process.env.REACT_APP_ENVIRONMENT==='development'

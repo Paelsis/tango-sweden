@@ -8,7 +8,9 @@ import Tooltip from '@mui/material/Tooltip';
 import {serverPost} from '../services/serverPost'
 import {serverFetchData} from '../services/serverFetch'
 import { getAuth, onAuthStateChanged} from 'firebase/auth';
-import {REGIONS, EDITOR_TYPE} from '../services/const'
+import {REGIONS, QUILL_EDITOR} from '../services/const'
+import {REGIONS_BY_COUNTRY, DEFAULT_COUNTRY} from '../services/regionsByCountry'
+
 import AddPhotoSingle from '../camera/AddPhotoSingle'
 const MAX_DESC_LENGTH = 40000
 
@@ -65,7 +67,7 @@ const fields = [
     },
     {
         type:'text',
-        label:'City of DJ:',
+        label:'City:',
         name:'city',
         required:true,
         tooltip:'Events with same city is show in same calendar for that city',
@@ -74,10 +76,11 @@ const fields = [
     },
     {
         type:'select',
-        label:'Region of DJ:',
+        label:'Region',
         name:'region',
         radioValues:REGIONS,
         selectValues:REGIONS,
+        selectValuesFunc:country=>REGIONS_BY_COUNTRY[country?country:DEFAULT_COUNTRY],
         required:true,
         tooltip:'Events with same region is show in same calendar for that region',
         maxlength:80,
@@ -92,7 +95,7 @@ const fields = [
     {
         type:'comment',
         label:'Image of DJ',
-        name:'urlImage',
+        name:'profileImage',
         maxlength:100,
     },
     {
@@ -104,7 +107,7 @@ const fields = [
     },
     {
         // type:'rte',
-        type:EDITOR_TYPE.ACTIVE,
+        type:QUILL_EDITOR,
         label:'Description of DJ',
         name:'description',
         draftName:'draft_description',
@@ -129,7 +132,6 @@ const Func = () => {
     const navigate = useNavigate()
     const {user} = useContext(AuthContext)
     const signinEmail = user?user.email?user.email:undefined:undefined
-
     const subdir = process.env.REACT_APP_IMAGES_USER_DIR
 
 
@@ -193,19 +195,19 @@ const Func = () => {
         }   
     }
 
-    const handleSaveImage = (urlImage, result) => {
+    const handleSaveImage = (profileImage, result) => {
         if (result.status === 'OK') {
             const row = result.list.find(it=>it.email === signinEmail)
             if (row) {
-                console.log('Image ' + urlImage + ' saved to disk')  
+                console.log('Image ' + profileImage + ' saved to disk')  
                 setTimeout(()=>{
-                    URL.revokeObjectURL(urlImage)
+                    URL.revokeObjectURL(profileImage)
                     window.location.reload(false);
                 }, 
                 2000);
         
             } else {
-                setValue({...row, urlImage:undefined})
+                setValue({...row, profileImage:undefined})
                 console.log('[EditDisckjockey] Image not found in list')  
             }
           } else {
@@ -217,14 +219,14 @@ const Func = () => {
   
     }
 
-    const setUrlImage = fname => {
+    const setProfileImage = fname => {
         if (fname) {
-            const urlImage = apiBaseUrl + '/' + subdir + '/' + fname
+            const profileImage = apiBaseUrl + subdir + '/' + fname
             const active = value.active == 1?1:0
-            const data = {...value, active, email:signinEmail, urlImage, html:undefined, draft_description:undefined, creaTimestamp:undefined, updTimestamp:undefined}
+            const data = {...value, active, email:signinEmail, profileImage, html:undefined, draft_description:undefined, creaTimestamp:undefined, updTimestamp:undefined}
             const record = {table:'tbl_dj', data, fetchRows:true}
-            setValue({...value, urlImage})
-            serverPost('/replaceRow', record, result=>handleSaveImage(urlImage, result))
+            setValue({...value, profileImage})
+            serverPost('/replaceRow', record, result=>handleSaveImage(profileImage, result))
         } else {
             alert("ERROR: Image not loaded")
         }
@@ -266,15 +268,16 @@ const Func = () => {
                         </div>
                         <div className='column is-4'>
 
-                            <img src={value.urlImage?value.urlImage:''} alt={'No photo (Fill in data before uploading photo'}/>
+                            <img src={value.profileImage?value.profileImage:''} alt={'Missing image:' + value.profileImage}/>
                             {signinEmail?<AddPhotoSingle 
                                 remove={true}
                                 filename={signinEmail} 
                                 matching={signinEmail} 
                                 subdir={subdir}
                                 list={list} 
-                                setUrlImage={setUrlImage} />
+                                setProfileImage={setProfileImage} />
                             :null}  
+                            <p/>
                         </div> 
                     </div>    
                 </>

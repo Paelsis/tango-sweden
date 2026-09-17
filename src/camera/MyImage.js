@@ -1,4 +1,5 @@
 import React, {useEffect, useRef, useReducer, useState} from "react"
+import {getSrc} from '../services/functions'
 import {replaceRow} from "../services/serverPost"
 import AddPhotoSingle from '../camera/AddPhotoSingle'
 
@@ -6,54 +7,50 @@ const apiBaseUrl = process.env.REACT_APP_API_BASE_URL
 
 // MyImage
 export default ({tableName, email, subdir, sharedState, setSharedState}) => {
-    const [src, setSrc] = useState() 
+    const time=new Date();
     const randomNumberInRange = (min, max) => {
         return Math.floor(Math.random()
             * (max - min + 1)) + min;
     };
 
-    useEffect(()=>{
-        const time=new Date();
-        const lclSrc = sharedState?.urlImage?sharedState.urlImage:undefined
-        if (lclSrc) {
-            setSrc(lclSrc + '?time=' + time)
-        }    
-    }, [sharedState])
+    const filename = sharedState?sharedState.profileImageNow?sharedState.profileImageNow:sharedState.profileImage?sharedState.profileImage:null:null
+    const src = getSrc(filename)
     
-    const handleSaveImage = (urlImage, reply) => {
+    const handleSaveImage = (profileImage, reply) => {
         const data = reply.data?reply.data:reply
         const status = data.status
         if (status === 'OK') {
-            alert('Successful upload of ' + urlImage)
-            setSharedState({...sharedState, urlImage})
+            const profileImageNow = profileImage + '?' + Date.now()
+            setSharedState({...sharedState, profileImage, profileImageNow})
         } else {
             const message = data.message?data.message:'No message'
             if (data.message) {
               alert(data.message) 
             } else {
-              alert('[handleSaveImage]: ' + status +': Failed to save image ' + urlImage)  
+              alert('[handleSaveImage]: ' + status +': Failed to save image ' + profileImage)  
             }
         }
     }
 
-    const setUrlImage = fname => {
+    const setProfileImage = fname => {
         
-        const urlImage = apiBaseUrl + '/images/' + subdir + '/' + fname
+        //const profileImage = apiBaseUrl + subdir + '/' + fname
+        const profileImage = fname
         if (fname) {
             const active = sharedState.active == 1?1:0
-            setSharedState({...sharedState, urlImage})
+            // alert('profileImage:' + profileImage)
+            setSharedState({...sharedState, profileImage})
 
             const data = {...sharedState, 
                 active, 
                 email, 
-                urlImage, 
+                profileImage, 
                 html:undefined, 
-                draft_description:undefined, 
                 creaTimestamp:undefined, 
                 updTimestamp:undefined,
                 fetchRows:true
             }
-            replaceRow(tableName, data, reply=>handleSaveImage(urlImage, reply))
+            replaceRow(tableName, data, reply=>handleSaveImage(profileImage, reply))
         } else {
             alert("ERROR: Image not loaded")
         }
@@ -69,9 +66,9 @@ export default ({tableName, email, subdir, sharedState, setSharedState}) => {
                             filename={email} 
                             matching={email} 
                             subdir={subdir}
-                            setUrlImage={setUrlImage}
+                            setProfileImage={setProfileImage}
                     />
-                    <small>{sharedState?.urlImage?sharedState.urlImage:'No url image'}</small>
+                    <small>{sharedState?.profileImage?sharedState.profileImage:'No src:' + src }</small>
                 </>
             :null}
         </>              

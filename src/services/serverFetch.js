@@ -36,13 +36,15 @@ export const serverFetchDataResult =(irl, handleResult) => {
                 alertMessage(url, data, 'serverFetchDataResult')
             }    
         } else {    
-            const result = data.result?data.result:'No result'
             const message = '[serverFetchDataResult] No data in reply from call to url:' + url  
             alert(message)
         } 
-    }).catch(e => {
-        const message = '[serverFetchDataResult] Fatal error in reply from url:' + url + 
-        '\nmessage:' + (e.message?e.message:JSON.stringify(e))
+    }).catch(error => {
+        const phpError = error.response.data;
+        
+        const message = "[serverFetchDataResult] Error message from PHP:" + phpError.message  
+        + "\nFile:" +  phpError.file.replace(/^.*[\\/]/, '')
+        + "\nLine number:" +  phpError.line
         alert(message)
     });
 }
@@ -68,9 +70,12 @@ export const serverFetchData = (irl, handleReply) => {
             const message = '[serverFetchData]: No data in reply from url:' + url
             alert(message)
         } 
-    }).catch(e => {
-        const message = '[serverFetchData] Fatal error in reply from url:' + url + 
-        '\nmessage:' + (e.message?e.message:JSON.stringify(e))
+    }).catch(error => {
+        const phpError = error.response.data;
+        
+        const message = "[serverFetchDate] Error message from PHP:" + phpError.message  
+        + "\nFile:" +  phpError.file.replace(/^.*[\\/]/, '')
+        + "\nLine number:" +  phpError.line
         alert(message)
     });
 }

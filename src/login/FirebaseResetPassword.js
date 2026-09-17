@@ -57,10 +57,10 @@ const FirebaseResetPassword = () =>  {
   return(
     <div style={styles.container}>
       {mailSent?
-        <h4 style={{color:DEFAULT_COLOR}}>Check for a mail that contains a link to reset your password</h4>
+        <h5 style={{color:DEFAULT_COLOR}}>Check for an E-mail (also in spam mailbox) for a link to reset your password</h5>
       :
         <div style={{color:DEFAULT_COLOR}}>
-          <h4 style={{color:DEFAULT_COLOR}}>Please send me an email with a link to reset my password</h4>
+          <h5 style={{color:DEFAULT_COLOR}}>Please send me an email with a link to reset my password</h5>
           <form onSubmit={handleSubmit}>
               <label>
                 <input name='email' style={styles.input} type='email' placeholder='Please enter your email' onChange={handleChange} />

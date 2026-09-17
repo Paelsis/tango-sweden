@@ -15,6 +15,7 @@ import {MAX_LIMIT_UNSET, CALENDAR, CALENDAR_TYPE} from '../services/const.js'
 const styles={
     container:{
         paddingTop:30,
+        maxWidth:'99vw'
         /*
         display: 'flex',
         flexDirection:'column',
@@ -139,6 +140,7 @@ const fields = [
     {
         // type:'rte',
         type:'TextArea',
+        size:40,
         label:'Message to organizer',
         name:'message',
     },
@@ -186,11 +188,11 @@ export default () => {
 
     const handleMailReply = reply => {
         if (reply.status === 'OK') {
-            alert('Check your mailbox for a confirmation mail')
+            alert('Registration successful.\nPlease check your mailbox (and spam mailbox) for a confirmation mail')
             setButtonStyle(BUTTON_STYLE.DEFAULT) 
             navigate(-1)
         } else if (reply.status === 'ERROR') {
-            alert('Message: ' + reply.message?reply.message:'No message')
+            alert('Message: ' + reply.message?reply.message:'ERROR: There was an error in your resitration but with no further message')
             setButtonStyle(BUTTON_STYLE.DEFAULT) 
         } else {   
             alert('ERROR:Failed to send reply mail')
@@ -217,7 +219,7 @@ export default () => {
                     setButtonStyle(BUTTON_STYLE.DEFAULT) 
                     setMailSubject(reply.mailSubject)
                     setMailBody(reply.mailBody)
-                    alert("OK: Your registration was successful but no mail sent since you are on DEV-system\n(customerEmail=" + value.email + " organizerEmail=" + organizerEmail + ")")
+                    alert("Registration SUCCESSFUL\n\nNo mail was sent on DEV-system\ncustomerEmail=" + value.email + "\norganizerEmail=" + organizerEmail)
                     navigate(-1)
                 }
             }, 2000);
@@ -299,14 +301,14 @@ export default () => {
                 ava <=0?
                     <h1 className='title is-3'>No space left</h1>
                 :    
-                    <div className='columns m-2 is-centered'>
+                    <div className='columns m-1 is-centered'>
                         <div className='column is-5'>
-                            <h3 className='title is-3'>Registration for {title?title:'No title'} ava = {event.ava}</h3>
-                            <h4 className='title is-4'>{dateRangeTime?dateRangeTime:'No date info'}</h4>
+                            <h4 className='title is-4'>Registration for {title?title:'No title'}</h4>
+                            <h5 className='title is-5'>{dateRangeTime?dateRangeTime:'No date info'}</h5>
                             {maxLimit === MAX_LIMIT_UNSET?
                                 null
                             :    
-                                <h5 className='title is-6'>Available at this event:{ava}</h5>
+                                <h6 className='title is-6'>Spots available:{ava}</h6>
                             }    
                             <FormTemplate 
                                         fields={fields} 

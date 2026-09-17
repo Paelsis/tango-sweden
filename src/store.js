@@ -3,11 +3,8 @@ import {CALENDAR_TYPE} from './services/const'
 const initialState = {
   authLevel:4,
   city:'Stockholm',
-  region:'Mitt',
+  region:'Stockholm',
   country:'Sverige',
-  color:'orange',
-  backgroundColorLight:'grey',
-  backgroundColorDark:'black',
   calendarType:CALENDAR_TYPE.REGULAR
 };
 

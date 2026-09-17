@@ -6,19 +6,17 @@ import { useNavigate, useParams } from 'react-router-dom';
 import FormTemplate from './FormTemplate';
 import Button from '@mui/material/Button';
 import moment from 'moment'
-import IconButton from '@mui/material/IconButton';
-import DeleteIcon from '@mui/icons-material/Delete';
-import SaveIcon from '@mui/icons-material/Save';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircleOutline';
-import SendIcon from '@mui/icons-material/Send';
 import Tooltip from '@mui/material/Tooltip';
 import {serverPost} from '../services/serverPost'
-import { MAX_LENGTH_DESC, CALENDAR } from '../services/const';
-import {FORM_FIELDS} from '../services/formFields'
-import {CALENDAR_TYPE} from '../services/const'
-
-
-const apiBaseUrl = process.env.REACT_APP_API_BASE_URL
+import {MAX_LENGTH_DESC, 
+    CALENDAR, 
+    CALENDAR_TYPE, 
+    QUILL_EDITOR, 
+    COUNTRIES, 
+    REGIONS, 
+} from '../services/const'
+import {REGIONS_BY_COUNTRY, DEFAULT_COUNTRY} from '../services/regionsByCountry'
 
 const styles={
     container:{
@@ -37,60 +35,497 @@ const styles={
         borderColor:'grey',
     }
 }    
-  
 
-const DeleteButton = ({onClick}) =>
-    <IconButton
-    size="small"
-    edge="start"
-    color="inherit"
-    sx={{ mr: 0 }}
-    onClick={onClick}
-    >
-        <DeleteIcon 
-            id="basic-button"
-        />
-    </IconButton>
-
-const RemoveCircle = ({onClick}) =>
-    <IconButton
-    size="small"
-    edge="start"
-    color="inherit"
-    sx={{ mr: 0 }}
-    onClick={onClick}
-    >
-        <RemoveCircleIcon 
-            id="basic-button"
-        />
-    </IconButton>
-
-const Save = ({onClick}) =>
-    <IconButton
-    size="large"
-    edge="start"
-    color="inherit"
-    sx={{ mr: 0 }}
-    onClick={onClick}
-    >
-        <SaveIcon 
-            id="basic-button"
-        />
-    </IconButton>
-
-const Send = ({onClick}) =>
-    <IconButton
-    size="large"
-    edge="start"
-    color="inherit"
-    sx={{ mr: 0 }}
-    onClick={onClick}
-    >
-        <SendIcon 
-            id="basic-button"
-        />
-    </IconButton>
-
+const FORM_FIELDS = {
+    PRIVATE_LESSON:[
+        {
+            name:'title',
+            label:'Title',
+            type:'text',
+            required:true,
+            tooltip:'The event title shown in the calendar',
+    
+        },
+        {
+            name:'location',
+            label:'Location',
+            type:'text',
+            tooltip: 'Location of the event'
+        },
+        {
+            type:'select',
+            label:'Country (default value):',
+            name:'country',
+            selectValues:Object.keys(REGIONS_BY_COUNTRY),
+            required:true,
+            tooltip:'Events from same country will have button in the color of the country',
+        },
+        {
+            type:'select',
+            label:'Region (default value):',
+            name:'region',
+            selectValues:REGIONS_BY_COUNTRY.Sweden,
+            selectValuesFunc:value=>REGIONS_BY_COUNTRY[value.country]??REGIONS_BY_COUNTRY.Sweden,
+            required:true,
+            tooltip:'Events with same region is show in same calendar for that region',
+        },
+        {
+            name:'city',
+            label:'City (overrides default City)',
+            type:'text',
+            tooltip: 'City of the event (overrides default the city defined in User Settings)'
+        },
+        {
+            name:'startDate',
+            label:'Startdate',
+            type:'date',
+            tooltip: 'Start date of the event',
+            required:true
+        },
+        {
+            name:'multipleDays',
+            label:'Event ends on another day',
+            type:'checkbox',
+            tooltip: 'Check this box if the event ends on another day'
+        },
+        {
+            name:'endDate',
+            label:'Enddate',
+            type:'date',
+            notHiddenIf:'multipleDays',
+            required:true,
+            tooltip: 'End date of the event. Only required if event ends on other day than it starts',
+        },
+        {
+            name:'startTime',
+            label:'Starttime',
+            tooltip:'Starttime of the event (for full day events set to 00:00)',
+            type:'time',
+            required:true
+        },
+        {
+            type:'time',
+            label:'Endtime',
+            name:'endTime',
+            tooltip:'Endtime of the event (for full day events set to 23:59)',
+            required:true
+        },
+        {
+            type:'checkbox',
+            label:'HTML-editor',
+            name:'htmlEditor',
+            tooltip: 'If you want to write your Description in html instead of using the editor, check this box'
+        },
+        {
+            // ACTIVE editor type is set to QUILL or DRAFT
+            type:QUILL_EDITOR,
+            label:'Description',
+            name:'description',
+            hiddenIf:'htmlEditor',
+            tooltip:'The description shown when clicking on event in calendar',
+            required:true,
+            maxlength:32768, // 2**15
+        },
+        {
+            type:'textarea',
+            label:'Description',
+            name:'description',
+            required:false,
+            notHiddenIf:'htmlEditor',
+            tooltip:'The description in html format',
+            maxlength:32768, // 2**15
+        },
+        {
+            type:'checkbox',
+            label:'Repeat',
+            name:'repeat',
+            tooltip: 'Check this box if you want to repeat the event with a certain frequency'
+        },
+        {
+            type:'number',
+            label:'Every',
+            name:'offset',
+            style:{width:40},
+            notHiddenIf:'repeat',
+            min:1, 
+            max:31,
+            required:true,
+            tooltip: 'The number of days/weeks/months between repeated events'
+        },
+        {
+            type:'radio',
+            label:'Days, Weeks, Moths',
+            name:'unit',
+            radioValues:['days', 'weeks', 'months'],
+            notHiddenIf:'repeat',
+            required:true,
+            tooltip: 'The unit of the field \"Every\" right above' 
+        },
+        {
+            type:'number',
+            label:'Repeat number of times',
+            style:{width:40},
+            name:'numberOfTimes',
+            notHiddenIf:'repeat',
+            min:2, 
+            max:52,
+            tooltip: 'Repeat the event this number of times (Ex: 20 means 20 repeated events with an offset given in units specified above)'
+        },
+        {
+            type:'checkbox',
+            label:'Use registration button',
+            name:'useRegistrationButton',
+            tooltip:'If you want a registration button and save registrations for the event',
+        },    
+        {
+            type:'email',
+            label:'E-mail of responsible organizer',
+            name:'email',
+            tooltip:'E-mail that will recieve the confirmation mails from the registrations',
+            notHiddenIf:'useRegistrationButton',
+        },    
+        {
+            type:'number',
+            label:'Maximum number of registrants',
+            style:{width:40},
+            name:'maxLimit',
+            min:1, 
+            max:500,
+            notHiddenIf:'useRegistrationButton',
+            tooltip: 'Maximum number of registrants for this event. Defaults to 1 for private lessons.'
+        },
+    ],
+    DISKJOCKEY:[
+        {
+            name:'location',
+            label:'Location',
+            type:'text',
+            tooltip: 'Location of the event'
+        },
+        {
+            name:'country',
+            label:'Country',
+            type:'select',
+            selectValues:COUNTRIES,
+            tooltip: 'Country of the event (overrides default city defined in User Settings)'
+        },
+        {
+            name:'region',
+            label:'Region',
+            type:'select',
+            selectValues:REGIONS,
+            selectValuesFunc:country=>REGIONS_BY_COUNTRY[country?country:DEFAULT_COUNTRY],
+            tooltip:'Region of the event (overrides default Region defined in User Settings)',
+        },      
+        {
+            name:'city',
+            label:'City',
+            type:'text',
+            tooltip: 'City of the event (overrides default city defined in User Settings)'
+        },
+        {
+            name:'title',
+            label:'Title',
+            type:'text',
+            required:true,
+            tooltip:'The event title shown in the calendar',
+    
+        },
+        {
+            name:'startDate',
+            label:'Startdate',
+            type:'date',
+            tooltip: 'Start date of the event',
+            required:true
+        },
+        {
+            name:'multipleDays',
+            label:'Event ends on another day',
+            type:'checkbox',
+            tooltip: 'Check this box if the event ends on another day'
+        },
+        {
+            name:'endDate',
+            label:'Enddate',
+            type:'date',
+            notHiddenIf:'multipleDays',
+            required:true,
+            tooltip: 'End date of the event. Only required if event ends on other day than it starts',
+        },
+        {
+            name:'startTime',
+            label:'Starttime',
+            tooltip:'Endtime of the event (for full day events set to 00:00)',
+            type:'time',
+            required:true
+        },
+        {
+            type:'time',
+            label:'Endtime',
+            name:'endTime',
+            tooltip:'Endtime of the event (for full day events set to 23:59)',
+            required:true
+        },
+        {
+            type:'checkbox',
+            label:'HTML-editor',
+            name:'htmlEditor',
+            tooltip: 'If you want to write your Description in html instead of using the editor, check this box'
+        },
+        {
+            // type:'rte',
+            type:QUILL_EDITOR,
+            label:'Description',
+            name:'description',
+            hiddenIf:'htmlEditor',
+            tooltip:'The description shown when clicking on event in calendar',
+            required:true,
+            maxlength:32768, // 2**15
+        },
+        {
+            type:'textarea',
+            label:'Description',
+            name:'description',
+            required:false,
+            notHiddenIf:'htmlEditor',
+            tooltip:'The description in html format',
+            maxlength:32768, // 2**15
+        },
+        {
+            name:'facebookEventLink',
+            type:'text',
+            style:{width:120},
+            width:20,
+            label:'Facebook event link (https-address)',
+            tooltip:'The https-link to the facebook event (Ex: https://fb.me/e/1OwKAA8Lm)',
+            maxLength:200,
+        },
+        {
+            type:'checkbox',
+            label:'Repeat',
+            name:'repeat',
+            tooltip: 'Check this box if you want to repeat the event with a certain frequency'
+        },
+        {
+            type:'number',
+            label:'Every',
+            name:'offset',
+            style:{width:40},
+            notHiddenIf:'repeat',
+            min:1, 
+            max:31,
+            required:true,
+            tooltip: 'The number of days/weeks/months between repeated events'
+        },
+        {
+            type:'radio',
+            label:'Days, Weeks, Moths',
+            name:'unit',
+            radioValues:['days', 'weeks', 'months'],
+            notHiddenIf:'repeat',
+            required:true,
+            tooltip: 'The unit of the field \"Every\" right above' 
+        },
+        {
+            type:'number',
+            label:'Repeat number of times',
+            style:{width:40},
+            name:'numberOfTimes',
+            notHiddenIf:'repeat',
+            min:2, 
+            max:52,
+            tooltip: 'Repeat the event this number of times (Ex: 20 means 20 repeated events with an offset given in units specified above)'
+        },
+        {
+            type:'checkbox',
+            label:'Use registration button',
+            name:'useRegistrationButton',
+            tooltip:'If you want a registration button and save registrations for the event',
+        },    
+        {
+            type:'email',
+            label:'E-mail of respoinsible organizer',
+            name:'email',
+            tooltip:'E-mail that will recieve the confirmation mails from the registrations',
+            notHiddenIf:'useRegistrationButton',
+        },    
+        {
+            type:'number',
+            label:'Maximum number of registrants',
+            style:{width:40},
+            name:'maxLimit',
+            min:1, 
+            max:500,
+            notHiddenIf:'useRegistrationButton',
+            tooltip: 'Maximum number of registrants for this event. Registration not possible when max is reached.'
+        },
+    ],
+    REGULAR:[
+        {
+            name:'title',
+            label:'Title',
+            type:'text',
+            required:true,
+            tooltip:'The event title shown in the calendar',
+    
+        },
+        {
+            name:'location',
+            label:'Location',
+            type:'text',
+            tooltip: 'Name of venue and street address'
+        },
+        {
+            type:'select',
+            label:'Country (default value):',
+            name:'country',
+            selectValues:Object.keys(REGIONS_BY_COUNTRY),
+            required:true,
+            tooltip:'Events from same country will have button in the color of the country',
+        },
+        {
+            type:'select',
+            label:'Region (default value):',
+            name:'region',
+            selectValues:REGIONS_BY_COUNTRY.Sweden,
+            selectValuesFunc:value=>REGIONS_BY_COUNTRY[value.country]??REGIONS_BY_COUNTRY.Sweden,
+            required:true,
+            tooltip:'Events with same region is show in same calendar for that region',
+        },
+        {
+            name:'city',
+            label:'City',
+            type:'text',
+            tooltip: 'City of the event (overrides default the city defined in User Settings)'
+        },
+        {
+            name:'startDate',
+            label:'Startdate',
+            type:'date',
+            tooltip: 'Start date of the event',
+            required:true
+        },
+        {
+            name:'multipleDays',
+            label:'Event ends on another day',
+            type:'checkbox',
+            tooltip: 'Check this box if the event ends on another day'
+        },
+        {
+            name:'endDate',
+            label:'Enddate',
+            type:'date',
+            notHiddenIf:'multipleDays',
+            required:true,
+            tooltip: 'End date of the event. Only required if event ends on other day than it starts',
+        },
+        {
+            name:'startTime',
+            label:'Starttime',
+            tooltip:'Endtime of the event (for full day events set to 00:00)',
+            type:'time',
+            required:true
+        },
+        {
+            type:'time',
+            label:'Endtime',
+            name:'endTime',
+            tooltip:'Endtime of the event (for full day events set to 23:59)',
+            required:true
+        },
+        {
+            type:'checkbox',
+            label:'HTML-editor',
+            name:'htmlEditor',
+            tooltip: 'Use html-editor to edit the text'
+        },
+        {
+            // type:'rte',
+            type:QUILL_EDITOR,
+            label:'Description',
+            name:'description',
+            hiddenIf:'htmlEditor',
+            tooltip:'The description shown when clicking on event in calendar',
+            required:true,
+            maxlength:32768, // 2**15
+        },
+        {
+            type:'textarea',
+            label:'Description',
+            name:'description',
+            required:false,
+            notHiddenIf:'htmlEditor',
+            tooltip:'The description in html format',
+            maxlength:32768, // 2**15
+        },
+        {
+            name:'facebookEventLink',
+            type:'text',
+            style:{width:120},
+            width:20,
+            label:'Facebook event link (https-address)',
+            tooltip:'The https-link to the facebook event (Ex: https://fb.me/e/1OwKAA8Lm)',
+            maxLength:200,
+        },
+        {
+            type:'checkbox',
+            label:'Repeat',
+            name:'repeat',
+            tooltip: 'Check this box if you want to repeat the event with a certain frequency'
+        },
+        {
+            type:'number',
+            label:'Every',
+            name:'offset',
+            style:{width:40},
+            notHiddenIf:'repeat',
+            min:1, 
+            max:31,
+            required:true,
+            tooltip: 'Example: A value of 2 in Every means \"Every 2 <unit>\" (where unit=days/months/weeks)'
+        },
+        {
+            type:'radio',
+            label:'Days, Weeks, Moths',
+            name:'unit',
+            radioValues:['days', 'weeks', 'months'],
+            notHiddenIf:'repeat',
+            required:true,
+            tooltip: 'Example: Unit of field Every.'
+        },
+        {
+            name:'lastRepeatDate',
+            label:'Last repeat date',
+            type:'date',
+            tooltip: 'After this date the repeat is stopped',
+            notHiddenIf:'repeat',
+            required:true
+        },
+        {
+            type:'checkbox',
+            label:'Use registration button',
+            name:'useRegistrationButton',
+            tooltip:'If you want a registration button and save registrations for the event',
+        },    
+        {
+            type:'email',
+            label:'E-mail of respoinsible organizer',
+            name:'email',
+            tooltip:'E-mail that will recieve the confirmation mails from the registrations',
+            notHiddenIf:'useRegistrationButton',
+        },    
+        {
+            type:'number',
+            label:'Maximum number of registrants',
+            style:{width:40},
+            name:'maxLimit',
+            min:1, 
+            max:500,
+            notHiddenIf:'useRegistrationButton',
+            tooltip: 'Maximum number of registrants for this event. Registration not possible when max is reached.'
+        },
+    ]
+}
 
 const CandidateTable = ({list, setList, deleteRow}) =>
     list.length >0?
@@ -118,8 +553,6 @@ const CandidateTable = ({list, setList, deleteRow}) =>
         </div>    
     </div>    
 :null
-                    
- 
 
 // Component: AddEvent
 export default props => {
@@ -131,7 +564,7 @@ export default props => {
     
     const [list, setList] = useState([])
     const navigate = useNavigate()
-    const fields = FORM_FIELDS[calendarType].ADD
+    const fields = FORM_FIELDS[calendarType]
     
     const {user} = useContext(AuthContext)
     const signinEmail = user?.email?user.email:null
@@ -145,6 +578,10 @@ export default props => {
             setValue({...props, ...sharedState, ...value, calendarType:undefined, description:'', id:undefined, region:undefined})
         }    
     }, [calendarType, signinEmail])
+
+    useEffect (()=>{
+        setValue({...value, country:sharedState.country, region:sharedState.region, city:sharedState.city})
+    }, [sharedState.country, sharedState.region, sharedState.city])
 
     const deleteRow = index => setList(list.filter((it, idx)=>idx !== index))  
     const handleReply = reply => {
@@ -273,16 +710,22 @@ export default props => {
         <div style={styles.container}>
             {signinEmail?
                 <>
-                    <div className='columns m-2 is-centered'>
-                        <div className='column is-6'>
-                                <h1 className='title is-4'>
-                                    Add event to calendar
-                                    {calendarType===CALENDAR_TYPE.REGULAR?'':' of type = ' + calendarType}&nbsp;
-                                </h1>
+                    {calendarType!==CALENDAR_TYPE.REGULAR?
+                        <div className='columns m-2 is-centered'>
+                            <div className='column is-full'>
+                                    <>
+                                    <h5 className='title is-4' style={{color:'teal'}}>
+                                        Add hours available for registration of calendar type = {calendarType}
+                                    </h5>
+                                    <h6 className='title is-5' style={{color:'teal'}}>
+                                        Owner of this table is E-mail {signinEmail}
+                                    </h6>
+                                    </>
+                            </div>
                         </div>
-                    </div>
+                    :null}
                     <div className='columns m-2 is-centered'>
-                        {value?
+                        {sharedState?value?
                             <div className='column is-7'>
                                 <FormTemplate 
                                             fields={fields} 
@@ -294,7 +737,7 @@ export default props => {
                                             handleSubmit={handleAddToList}
                                 />
                             </div>
-                        :null}
+                        :null:null}
                         <div className='column is-4'>
                             <CandidateTable 
                                 list={list} 

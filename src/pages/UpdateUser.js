@@ -7,7 +7,7 @@ import {search} from '../services/search'
 import SearchTemplate from '../components/SearchTemplate'
 import FormTemplate from '../components/FormTemplate'
 import EditTable from '../components/EditTableUser'
-import {EDITOR_TYPE} from '../services/const'
+import {QUILL_EDITOR} from '../services/const'
 
 
 const styles = {
@@ -86,7 +86,7 @@ const formFields = [
     },
     {
         // type:'rte',
-        type:EDITOR_TYPE.ACTIVE,
+        type:QUILL_EDITOR,
         label:'Description of DJ',
         name:'description',
         // draftName:'draft_description',

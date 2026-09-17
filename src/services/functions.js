@@ -1,4 +1,6 @@
 import { makeStyles } from '@mui/styles';
+const apiBaseUrl = process.env.REACT_APP_API_BASE_URL
+
 
 export const labelSwedish = name => {
     switch (name.toLowerCase()) {
@@ -63,8 +65,7 @@ export const useStyles = makeStyles({
     },
 });
 
-
-
+export const getSrc = profileImage => apiBaseUrl + '/images/user/' + (profileImage?profileImage.substring(profileImage.lastIndexOf('/') + 1) + '?' + Date.now():'UNDEFINED')
 
 export const uniqueList = list => {return([...new Set(list)])}
 

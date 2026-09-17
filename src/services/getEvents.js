@@ -83,26 +83,10 @@ const _createEvent = props => {
   const styleKeyActive = cityUpperCase?cityUpperCase:guessStyleKey?guessStyleKey:'DEFAULT'
   const staticStyle = findStaticStyle(styleKeyActive)
   const isToday = mnow.isSame(mstart, 'day')?true:false
-  const background = "linear-gradient(to bottom right, " + backgroundColorLight + ", " + backgroundColorDark + ")"
-  const border = ongoing?'2px dotted':'0px'
-  const opacity = (hasEventEnded || (ava <= 0))?0.4:1.0
-  const style = staticStyle?{...staticStyle, border, opacity}
-  :backgroundImage?
-      {
-        color,
-        backgroundImage:`url(${apiBaseUrl + backgroundImage})`, // Note images is stored in SLIM4 public dir
-        backgroundPosition: 'center center',   
-        backgroundRepeat:'auto', 
-        backgroundSize:'cover', 
-        backgroundColor:backgroundColorLight, 
-        opacity,
-        border
-      }
-  :  
-      {color, background, borderStyle:border?undefined:borderStyle, borderWidth:border?undefined:borderWidth, borderColor, border, opacity}
+  const opacity = hasEventEnded?0.5:1.0
+  const style = staticStyle
 
-  
-    const reply = {
+  const reply = {
         ...props,
         email,    
         mstart,
@@ -120,6 +104,7 @@ const _createEvent = props => {
         calendar:mstart.calendar(),
         location:location?location:'',
         // weekNumber: mstart.isoWeek(),
+        opacity,
         style,
         /* Registration props */
         maxRegistrants : Number(maxInd?maxInd:maxPar?(maxPar*2):500),
@@ -178,9 +163,6 @@ const _getEventsFromGoogleCalendar = (calendarId, apiKey, timeMin, timeMax, lang
         // create array to push events into
         const events = []
         let event={}
-        let moreThan24Hours = undefined
-        let mstartLastBig =moment('2000-01-01')
-        let insertArr = []
         // in practice, this block should be wrapped in a try/catch block, 
         // because as with any external API, we can't be sure if the data will be what we expect
         moment.locale(CULTURE(language))
@@ -212,7 +194,7 @@ const _getEventsFromGoogleCalendar = (calendarId, apiKey, timeMin, timeMax, lang
           }
           */
 
-          event = _createEvent({start, end, title, description, location, eventId, id, email:'daniel@tangokompaniet.com', hideLocationAndTime:false, useRegistrationButton:false, guessStyleKey, language})
+          event = _createEvent({start, end, title, description, location, eventId, id, email:'paelsis@hotmail.com', hideLocationAndTime:0, useRegistrationButton:0, guessStyleKey, language})
 
 
           event = _forceSmallFonts(event)
@@ -301,7 +283,7 @@ export function getEventsFromTable (irl, timeMin, timeMax, language, handleReply
         events.push(event)
       })
     } else {
-      const message = '[getEventsFromTable]:serverFetchDate did not retunr status OK'
+      const message = '[getEventsFromTable]:serverFetchDate did not retur status OK'
       alert(message)
       console.log(message)
     } 

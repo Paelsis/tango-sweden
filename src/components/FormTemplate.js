@@ -48,18 +48,17 @@ export default props => {
     }
     return(
         <>   
-            {/* <div>value={JSON.stringify(value)}</div> */}
             <form onSubmit={handleSubmit}>
                 <div>
                     {props.children}
-                    {fields.filter(fld=>!isHidden(fld, value)).map((fld, index) => 
+                    {fields.filter(fld=>!isHidden(fld, value)).map((fld) => 
                         <Tooltip 
-                            placement='right-start'
-                            title={<h4 style={{textAlign:'center' , fontSize:18, fontWeight:700, color:COLORS.WHITE}}>{fld.tooltip}</h4>}
+                            placement='bottom'
+                            title={fld.tooltip?<h4 style={{textAlign:'center' , fontSize:16, fontWeight:700, color:COLORS.WHITE}}>{fld.tooltip}</h4>:''}
                             open={fld.tooltip?undefined:false}
                         >    
                             <div>
-                                <FormField key={index} clearIndex={clearIndex} fld={fld} value={value} setValue={setValue} handleKeyPress={handleKeyPress} />
+                                <FormField key={fld} clearIndex={clearIndex} fld={fld} value={value} setValue={setValue} handleKeyPress={handleKeyPress} />
                             </div>
                         </Tooltip>
                     )}
@@ -74,7 +73,7 @@ export default props => {
                     <div style={{paddingTop:20, paddingBottom:20}}>
                         {buttons.map(button =>
                             <Tooltip 
-                                title={<h2>{button.tooltip}</h2>} 
+                                title={button.tooltip?<div style={{fontSize:16}}>{button.tooltip}</div>:''} 
                                 enterDelay={500} 
                                 open={button.tooltip?undefined:false}
                             >

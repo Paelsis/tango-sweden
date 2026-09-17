@@ -9,8 +9,8 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
-import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
-import PersonAddDisabledIcon from '@mui/icons-material/PersonAddDisabled';
+import PersonAddAlt1RoundedIcon from '@mui/icons-material/PersonAddAlt1Rounded';
+import PersonAddDisabledRoundedIcon from '@mui/icons-material/PersonAddDisabled';
 import {CALENDAR_TYPE} from '../services/const'
 import CloseIcon from '@mui/icons-material/Close';
 import Dialog from '@mui/material/Dialog';
@@ -61,7 +61,7 @@ export default props => {
   const forceReloadCount = sharedState.forceReloadCount?sharedState.forceReloadCount:0
   const navigate = useNavigate();
   const handleClose = () => setOpen(false)
-  const eventId = event.eventId?event.eventId:'Missing'
+  const eventId = event.eventId??'Missing'
   const eventIdExtended = event.eventId + event.startDate
   const organizerEmail = event.email
   const maxLimit = event.maxLimit?event.maxLimit:MAX_LIMIT_UNSET
@@ -71,7 +71,7 @@ export default props => {
   const tblRegistration = CALENDAR[calendarType].TBL_REGISTRATION
   const ava = event.ava
   const {user} = useContext(AuthContext)
-  const signinEmail = user?user.email?user.email:undefined:undefined
+  const signinEmail = user?.email?user.email:undefined
 
   const handleUpdate = e => {
     e.preventDefault(); 
@@ -97,13 +97,7 @@ export default props => {
         facebookEventLink:ev.facebookEventLink,
         facebookEventId:ev.facebookEventId,
         color:ev.color,
-        backgroundColorLight:ev.backgroundColorLight,
-        backgroundColorDark:ev.backgroundColorDark,
-        borderStyle:ev.borderStyle,
-        borderWidth:ev.borderWidth,
-        borderColor:ev.borderColor,
-        backgroundImage:ev.backgroundImage,
-        useRegistrationButton:ev.useRegistrationButton==1?true:false,
+        useRegistrationButton:ev.useRegistrationButton==1?1:0,
         maxLimit:ev.maxLimit,
         email:ev.email,
         calendarType,
@@ -138,13 +132,6 @@ export default props => {
           hideLocationAndTime:ev.hideLocationAndTime==1?1:0, 
           useRegistrationButton:ev.useRegistrationButton==1?1:0,
           color:ev.color,
-          backgroundColorLight:ev.backgroundColorLight,
-          backgroundColorDark:ev.backgroundColorDark,
-          borderStyle:ev.borderStyle,
-          borderColor:ev.borderColor,
-          borderWidth:ev.borderWidth,
-          backgroundImage:ev.backgroundImage,
-          useRegistrationButton:ev.useRegistrationButton==1?true:false,
           maxLimit:ev.maxLimit,
           calendarType,
         }
@@ -184,20 +171,22 @@ export default props => {
       navigate('/listRegistration', {state:{eventIdExtended, tblRegistration}})
   }
 
-    const handleRegistration = e => {
-        // alert('[DialogSlide] eventIdExtended = ' + eventIdExtended)
-        if (!organizerEmail) {
+    const handleRegistration = () => {
+        if (event.ava <= 0) {
+          alert('No slots available')
+        } else if (!organizerEmail) {
           alert('No organizerEmail')
-        }
-        navigate('/registration', {state:{calendarType, eventIdExtended, maxLimit, ava, title, organizerEmail, dateRangeTime}})
+        } else {
+          navigate('/registration', {state:{calendarType, eventIdExtended, maxLimit, ava, title, organizerEmail, dateRangeTime}})
+        }  
     }
 
   const authLevel = sharedState.authLevel
   const privateEvent = event.private==1?true:false
+  const useRegistrationButton = event.useRegistrationButton==1?true:false
  
   // You are authorized if you own event or (authLevel is 8 and not private) or authLevel=16
   const authorized = (signinEmail === event.email) || (authLevel === 16) || ((authLevel === 8) && !privateEvent)
-
   const linkToFacebook=event.facebookEventLink?event.facebookEventLink:event.facebookEventId?"https://www.facebook.com/events/" + event.facebookEventId:undefined
   return (
     <div style={{maxWidth:'100%'}}>
@@ -222,98 +211,88 @@ export default props => {
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            {event.useRegistrationButton?
-                <>
-                {event.ava > 0? 
-                  <Tooltip title='Click here to register'>
-                    <IconButton variant="outlined" onClick={()=>handleRegistration(event)}>
-                      <AppRegistrationIcon />
-                    </IconButton>
-                  </Tooltip>
-                :
-                  <Tooltip title='Fully booked'>
-                    <IconButton variant="outlined">
-                      <PersonAddDisabledIcon />
-                    </IconButton>
-                  </Tooltip>
-                }
-                </>
-            :
-              null
-            }       
-            {authorized===true? 
-               <>
-                <IconButton
-                  size="small"
-                  edge="start"
-                  color="inherit"
-                  sx={{ mr: 0 }}
-                  onClick={handleUpdate}
-                >
-                  <Tooltip title='Update this event'>
-                    <EditIcon />
-                  </Tooltip>          
-                </IconButton>
-                <IconButton
-                  size="small"
-                  edge="start"
-                  color="inherit"
-                  sx={{ mr: 0 }}
-                  onClick={handleCopy}
-                >
-                  <Tooltip title='Copy this event to new dates and times'>
-                  <ContentCopyIcon />
-                  </Tooltip>
-                </IconButton>
-                <IconButton
-                  size="small"
-                  edge="start"
-                  color="inherit"
-                  sx={{ mr: 0 }}
-                  onClick={e=>handleDeleteSingle(e, event)}
-                >
-                  <Tooltip title='Delete this event'>
-                    <DeleteIcon />
-                  </Tooltip>
-                </IconButton>
-                <IconButton
-                  size="small"
-                  edge="start"
-                  color="inherit"
-                  sx={{ mr: 0 }}
-                  onClick={e=>handleDeleteAll(e, event)}
-                >
-                  <Tooltip title='Delete all repeated events when repeat checkbox was marked in Add'>
-                    <DeleteSweepIcon />
-                  </Tooltip>
-                </IconButton>
-                <IconButton
+          {authorized===true? 
+            <>
+              <IconButton
+                size="small"
+                edge="start"
+                color="inherit"
+                sx={{ mr: 0 }}
+                onClick={handleUpdate}
+              >
+                <Tooltip title='Update this event'>
+                  <EditIcon />
+                </Tooltip>          
+              </IconButton>
+              <IconButton
+                size="small"
+                edge="start"
+                color="inherit"
+                sx={{ mr: 0 }}
+                onClick={handleCopy}
+              >
+                <Tooltip title='Copy this event to new dates and times'>
+                <ContentCopyIcon />
+                </Tooltip>
+              </IconButton>
+              <IconButton
+                size="small"
+                edge="start"
+                color="inherit"
+                sx={{ mr: 0 }}
+                onClick={e=>handleDeleteSingle(e, event)}
+              >
+                <Tooltip title='Delete this event'>
+                  <DeleteIcon />
+                </Tooltip>
+              </IconButton>
+              <IconButton
+                size="small"
+                edge="start"
+                color="inherit"
+                sx={{ mr: 0 }}
+                onClick={e=>handleDeleteAll(e, event)}
+              >
+                <Tooltip title='Delete all repeated events when repeat checkbox was marked in Add'>
+                  <DeleteSweepIcon />
+                </Tooltip>
+              </IconButton>
+              {useRegistrationButton?
+              <IconButton
                   size="small"
                   edge="start"
                   color="inherit"
                   sx={{ mr: 0 }}
                   onClick={handleListRegistrations}
-                >
-                  <Tooltip title='list all registrations'>
-                  <PeopleAltIcon />
-                  </Tooltip>
-                </IconButton>
-                </>
-            :null
-            }   
-            <IconButton
-              size="small"
-              edge="start"
-              color="inherit"
-              sx={{ mr: 0 }}
-              onClick={handleClose}
-            >
-              <Tooltip title='Close this window'>
-              <CloseIcon />
-              </Tooltip>
-            </IconButton>
-          </DialogActions>
-        </Dialog>
+              >
+                <Tooltip title='list all registrations'>
+                <PeopleAltIcon />
+                </Tooltip>
+              </IconButton>
+              :null}
+            </> // authorized
+            :useRegistrationButton?
+            <>
+                <Tooltip title={<h3 className='title is-3'>{event.ava >0?'Click here to register':'No slots available'}</h3>}>
+                  <IconButton variant="outlined" onClick={handleRegistration}>
+                    {event.ava > 0?<PersonAddAlt1RoundedIcon />:<PersonAddDisabledRoundedIcon />}
+                  </IconButton>
+                </Tooltip>
+            </>
+            :null}
+          <IconButton
+            size="small"
+            edge="start"
+            color="inherit"
+            sx={{ mr: 0 }}
+            onClick={handleClose}
+          >
+            <Tooltip title='Close this window'>
+            <CloseIcon />
+            </Tooltip>
+          </IconButton>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 

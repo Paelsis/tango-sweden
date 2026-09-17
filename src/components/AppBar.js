@@ -40,26 +40,28 @@ export default () => {
     setAnchorEl(null);
   };
 
-  const handleResultUser = data => {
-    //alert('AppBar 0:' + JSON.stringify(result?result:'No result'))
-    if (data.status === 'OK') {
-      if (data.message) {
-        alert(data.message)
-      }
-      // getUser returns an sharedState object in data.result 
-      const obj = data.result;
-      setSharedState({...sharedState, ...obj})
-    } else {
-      setSharedState({...sharedState, authLevel:4, productLevel:1, city:'Ankeborg', region:'Skåne', userName:'Kalle Anka'}) 
-      navigate('/myProfile')
-    }
-  }
   
   useEffect(()=>{
-     if (signinEmail?true:false) {
-       const irl = '/getUser?email=' +  user.email
-       serverFetchData(irl,  data=>handleResultUser(data))
-     } 
+    if (signinEmail?true:false) {
+
+      const handleResultUser = data => {
+        //alert('AppBar 0:' + JSON.stringify(result?result:'No result'))
+        if (data.status === 'OK') {
+          if (data.message) {
+            alert(data.message)
+          }
+          // getUser returns an sharedState object in data.result 
+          const result = data.result;
+          setSharedState({...sharedState, ...result})
+        } else {
+          setSharedState({...sharedState, authLevel:4, productLevel:1, city:'Ankeborg', region:'Skåne', userName:'Kalle Anka'}) 
+          navigate('/myProfile')
+        } 
+      }
+      
+      const irl = '/getUser?email=' +  user.email
+      serverFetchData(irl,  data=>handleResultUser(data))
+    } 
   }, [signinEmail])
 
   const handleNavigate = route =>  navigate(route)

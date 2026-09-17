@@ -9,8 +9,8 @@ import {CALENDAR_TYPE} from '../services/const'
 //import moment from 'moment';
 import moment from 'moment-with-locales-es6'
 import {IconButton} from '@mui/material';
-import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
-import PersonAddDisabledIcon from '@mui/icons-material/PersonAddDisabled';
+import PersonAddAlt1RoundedIcon from '@mui/icons-material/PersonAddAlt1Rounded';
+import PersonAddDisabledRoundedIcon from '@mui/icons-material/PersonAddDisabled';
 const language = 'SV'
 
 const CULTURE = (language) => language==='SV'?'sv':language==='ES'?'es':'en'
@@ -54,7 +54,7 @@ const TEXTS = {
     }
 }
 
-const calcTr = ev => {
+const styleTr = ev => {
     const {style, durationHours} = ev
     const length = ev.title.trim().length
     const border = 'none'
@@ -87,7 +87,7 @@ let styles = {
     tbody: {
         cellPadding:1,
     },
-    tr: ev => calcTr(ev),
+    tr: ev => styleTr(ev),
     verticalCenter:{
         margin: 0,
         position: 'absolute',
@@ -120,7 +120,6 @@ export default props => {
     const renderEvent = event => {
         const mstart = event.mstart
         const mend = event.mend
-        const ava = event.ava
         const maxLimit = event.maxLimit?event.maxLimit:MAX_LIMIT_UNSET // Max number of registrations
         let weekday = mstart.format('dddd')
         let weekdayEnd = mend.format('dddd')
@@ -131,16 +130,21 @@ export default props => {
         const organizerEmail = event.email
         const title=event.title
         const dateRangeTime=event.dateRangeTime
-        const useRegistrationButton = event.useRegistrationButton==1?true:false
+        const useRegistrationButton = event.useRegistrationButton==1?1:0
         const trStyle = event.style
         //const forcedSmallFonts= ['milonga', 'practica', 'pratika'].find(it  => event.title.toLowerCase().includes(it)) && event.durationHours >12
         const forceSmallFonts = event.forceSmallFonts
         const authorized = signinEmail === organizerEmail
 
-        const goToRegistration = () => {
+        const handleRegistration = () => {
+            const ava = event.ava
             const eventIdExtended = event.eventId + event.startDate
-            // alert('[CalendarSmall] eventIdExtended = ' + eventIdExtended)
-            navigate('/registration', {state:{calendarType, eventIdExtended, maxLimit, ava, title, organizerEmail, dateRangeTime}})
+            //alert('[CalendarSmall] eventIdExtended = ' + eventIdExtended)
+            if (ava <= 0) {
+                alert('No slots left on this event')
+            } else {
+                navigate('/registration', {state:{calendarType, eventIdExtended, maxLimit, ava, title, organizerEmail, dateRangeTime}})
+            }    
         }
 
         const listRegistration = () => {
@@ -149,15 +153,6 @@ export default props => {
             navigate('/listRegistration', {state:{eventIdExtended, tblRegistration}})
         }    
 
-        const handleClickButton = () => {
-            if (calendarType === CALENDAR.REGULAR || !calendarType) {
-              goToRegistration(event); 
-            } else if (authorized) {
-              listRegistration(event)
-            } else {  
-              goToRegistration(event)
-            }
-        }
 
         return(
 
@@ -184,27 +179,13 @@ export default props => {
                 }
                 {useRegistrationButton?
                     <td style={styles.td}>  
-                        {event.cnt < event.maxLimit?
-                                <IconButton 
-                                    key={event.productId} 
-                                    className="button" 
-                                    style={{backgroundColor:'transparent', color:trStyle.color, borderColor:trStyle.color, padding:1, fontSize:'small'}}
-                                    varant='outlined'
-                                    handleClick = {handleClickButton}
-                                >
-                                    <AppRegistrationIcon />
-                                </IconButton>
-                            :           
-                                <Tooltip title='Fully booked'>
-                                    <IconButton 
-                                        variant="outlined"
-                                        style={{backgroundColor:'transparent', color:trStyle.color, borderColor:trStyle.color, padding:1, fontSize:'small'}}
-                                        handleClick = {handleClickButton}
-                                        >
-                                        <PersonAddDisabledIcon />
-                                    </IconButton>
-                                </Tooltip>                  
-                        }
+                        <IconButton 
+                            key={event.productId} 
+                            style={{backgroundColor:'transparent', color:trStyle.color, padding:1, fontSize:'small'}}
+                            onClick = {handleRegistration}
+                        >
+                            {event.cnt < event.maxLimit?<PersonAddAlt1RoundedIcon />:<PersonAddDisabledRoundedIcon />}    
+                        </IconButton>
                     </td>
                 :<td style={styles.td} />}    
             </tr>

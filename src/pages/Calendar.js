@@ -10,7 +10,6 @@ import {
   globalizeLocalizer,
   move,
   Views,
-  Navigate,
   components,
 } from 'react-big-calendar'
 
@@ -98,6 +97,21 @@ const ListData = ({list}) => {
   )
 }
 
+const _AddColumn = ({toggleHistory, handleAdd}) => 
+    <div style={{marginTop:20}}>
+        <Tooltip title = "Show events from past days">
+            <IconButton onClick={toggleHistory}>
+              <HistoryIcon />
+            </IconButton> 
+        </Tooltip>
+        <br/>
+        <Tooltip title = "Add new event to calendar">
+          <IconButton onClick={handleAdd}>
+            <AddIcon />
+          </IconButton> 
+        </Tooltip>
+    </div>
+
 export default () => {
   const params = useParams()
   const calendarType = params?.calendarType?params.calendarType:CALENDAR_TYPE.REGULAR
@@ -153,7 +167,9 @@ export default () => {
   const toggleHistory = () => setMomentStart(momentStart?undefined:moment().startOf('month').add(-2,'months').add(-7, 'days'))
 
   const handleAdd = () =>{
-    navigate('/add/' + (calendarType?calendarType:CALENDAR_TYPE.REGULAR))
+    calendarType?
+      navigate('/add/' + (calendarType?calendarType:CALENDAR_TYPE.REGULAR))
+    :alert('calendarType not defined')  
   }  
 
   const dayPropGetter = useCallback(
@@ -198,20 +214,8 @@ export default () => {
       alert('This event is owned by ' +  ev.email + ' and you signed in as ' + signinEmail + '\nYou will therfore not be able to modify the event !')
     } 
     */   
-    if (isDefaultCalendar) {
-        setEvent(ev); 
-        setOpen(true)
-    } else {
-        // If the event belongs to the logged in email
-        if (isAllowed) {
-          setEvent(ev); 
-          setOpen(true)
-        } else {  
-          if (!signinEmail) {
-            goToRegistration(ev)
-          }
-        }
-    }  
+    setEvent(ev); 
+    setOpen(true)
   }
   
   let previousDateRange = ''
@@ -231,71 +235,69 @@ export default () => {
     <div className="columns" style={{background:COLORS.LIGHT_YELLOW, marginTop:0, paddingTop:0, paddingBottom:200}}>
         {events.length>0?
         <>
-        <OnAtMostPhablet>
-          <div className='column pt-0' >
-              <CalendarSmall 
-                      calendarType={calendarType}
-                      events={events?events:[]} 
-                      signinEmail={signinEmail}
-                      handleSelectEvent={handleSelectEvent} 
-              />
-          </div>   
-        </OnAtMostPhablet>
-        <OnAtLeastTablet>
-            <div className='column m-0 p-0' style={{height:'90vh'}}>
-              <Calendar 
-                date={moment(calendarDate)}
-                localizer={localizer}
-                events={events}
-                startAccessor={(event) => {return new Date(event.start)}}
-                endAccessor={(event) => {return new Date(event.end)}}
-                onSelectEvent={handleSelectEvent}
-                dayPropGetter={dayPropGetter}
-                eventPropGetter={(ev, start, end, isSelected) => (
-                  {style:{...ev.style, height:35}})} 
-                defaultView={'week'}
-                min={moment('10:00', 'hh:mm').toDate()}
-                showMultiDayTimes={true}  
-                showAllEvents={true}              
-                views={['week', 'month']}
-                view={view} // Include the view prop
-                onView={(view) => setView(view)}
-                onNavigate={handleNavigate}
-                messages={defaultMessages}
-                style={{backgroundColor:COLORS.LIGHT_YELLOW, height:'100%'}}
-              />
-            </div>
-        </OnAtLeastTablet>
-        <DialogueSlide
-          open={open}
-          setOpen={setOpen}
-          event={event}
-          calendarType={calendarType}
-          signinEmail={signinEmail}
-          aria-labelledby="alert-dialog-title"
-          aria-describedby="alert-dialog-description"
-        />    
+          <OnAtMostPhablet>
+            <div className='column pt-0' >
+                <CalendarSmall 
+                        calendarType={calendarType}
+                        events={events?events:[]} 
+                        signinEmail={signinEmail}
+                        handleSelectEvent={handleSelectEvent} 
+                />
+            </div>   
+          </OnAtMostPhablet>
+          <OnAtLeastTablet>
+              <div className='column m-0 p-0' style={{height:'90vh'}}>
+                <Calendar 
+                  date={moment(calendarDate)}
+                  localizer={localizer}
+                  events={events}
+                  startAccessor={(event) => {return new Date(event.start)}}
+                  endAccessor={(event) => {return new Date(event.end)}}
+                  onSelectEvent={handleSelectEvent}
+                  dayPropGetter={dayPropGetter}
+                  eventPropGetter={(ev, start, end, isSelected) => (
+                    {style:{...ev.style, height:35}})} 
+                  defaultView={'week'}
+                  min={moment('10:00', 'hh:mm').toDate()}
+                  showMultiDayTimes={true}  
+                  showAllEvents={true}              
+                  views={['week', 'month']}
+                  view={view} // Include the view prop
+                  onView={(view) => setView(view)}
+                  onNavigate={handleNavigate}
+                  messages={defaultMessages}
+                  style={{backgroundColor:COLORS.LIGHT_YELLOW, height:'100%'}}
+                />
+              </div>
+          </OnAtLeastTablet>
+          <DialogueSlide
+            open={open}
+            setOpen={setOpen}
+            event={event}
+            calendarType={calendarType}
+            signinEmail={signinEmail}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+          />    
 
-        {showPlusButton?
-        <div className='column is-1' style={{marginTop:20}}>
-            <Tooltip title = "Show events from past days">
-                <IconButton onClick={toggleHistory}>
-                  <HistoryIcon />
-                </IconButton> 
-            </Tooltip>
-            <br/>
-            <Tooltip title = "Add new event to calendar">
-              <IconButton onClick={handleAdd}>
-                <AddIcon />
-              </IconButton> 
-            </Tooltip>
-        </div>
-        :null}
+          {showPlusButton?
+            <div className='column is-1' style={{marginTop:20}}>
+                <_AddColumn toggleHistory={toggleHistory} handleAdd={handleAdd} />
+            </div>
+          :null}
         </>
-        :
-        <div style={{width:'100vw', height:'100vh', display:'flex', justifyContent:'center', alignItems:'center'}}>
-        <h1>No events</h1>  
-        </div>}
+      :
+        <div className='columns'>
+          <div className='column' style={{width:'100vw', height:'100vh', display:'flex', justifyContent:'center', alignItems:'center'}}>
+            <h1>No events</h1>  
+          </div>
+          {showPlusButton?
+            <div className='column is-1' style={{marginTop:20}}>
+                <_AddColumn toggleHistory={toggleHistory} handleAdd={handleAdd} />
+            </div>
+          :null}
+        </div>
+        }
     </div>
   );
 }

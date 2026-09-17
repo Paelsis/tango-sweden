@@ -76,8 +76,8 @@ const styles = {
 
 const viewUsersForRegion = (region, users, selectedUser, setSelectedUser, navigate) => {
     const subdir = 'images/users'
-    const src = selectedUser?.urlImage?selectedUser.urlImage.includes('http')?selectedUser.urlImage:(apiBaseUrl + '/' + subdir + '/' + selectedUser.urlImage):undefined
-    const alt = selectedUser?.urlImage?('File ' + selectedUser.urlImage + ' not found'):'No image'
+    const src = selectedUser?.profileImage?selectedUser.profileImage.includes('http')?selectedUser.profileImage:(apiBaseUrl + '/' + subdir + '/' + selectedUser.profileImage):undefined
+    const alt = selectedUser?.profileImage?('File ' + src + ' not found'):'No image'
     const calendarType = 'PRIVATE_LESSON'
     const description = selectedUser?.descriptionPT?selectedUser.descriptionPT:selectedUser?.description?selectedUser.description:''
     const tblRegistration = CALENDAR[calendarType].TBL_REGISTRATION
@@ -88,15 +88,6 @@ const viewUsersForRegion = (region, users, selectedUser, setSelectedUser, naviga
             navigate('/calendar/' + region + '/' + calendarType  + '/' + email)
         } else {
             alert('[PrivateLesson]:No email given for selected user')
-        }   
-    }
-    const addToCalendar = () => {
-        if (selectedUser?.email?selectedUser.email:undefined) {
-            const link = '/add/' + calendarType
-            alert(link)
-            navigate(link)
-        } else {
-            alert('[viewUsersForRegion]: WARNING: No selected user')
         }   
     }
     return(

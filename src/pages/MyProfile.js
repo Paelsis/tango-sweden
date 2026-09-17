@@ -1,7 +1,7 @@
 import React, {useEffect, useContext, useState} from "react"
 import { useSharedState } from '../store';
 import {AuthContext} from "../login/FirebaseAuth"
-import { Navigate, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import firebaseApp from '../services/firebaseApp'
 import { getAuth, onAuthStateChanged} from 'firebase/auth'
 import FormTemplate from '../components/FormTemplate'
@@ -9,9 +9,10 @@ import SelectUser from '../components/SelectUser'
 import {replaceRow} from "../services/serverPost"
 import Square from "../components/Square"
 import {BUTTON_STYLE, REGIONS, COUNTRIES, DEFAULT_AUTH_LEVEL, STATUSLINE_STYLE, COLORS} from '../services/const'
+import {REGIONS_BY_COUNTRY, DEFAULT_COUNTRY} from '../services/regionsByCountry'
 import {serverFetchData} from '../services/serverFetch'
 import MyImage from '../camera/MyImage'
-import {EDITOR_TYPE} from '../services/const'
+import {QUILL_EDITOR} from '../services/const'
 
 
 const TBL_USER = 'tbl_user'
@@ -59,19 +60,20 @@ const styles = {
     },
     {
       type:'select',
-      label:'Region:',
-      name:'region',
-      selectValues:REGIONS,
+      label:'Country (default value):',
+      name:'country',
+      selectValues:Object.keys(REGIONS_BY_COUNTRY),
       required:true,
-      tooltip:'Events with same region is show in same calendar for that region',
+      tooltip:'Events from same country will have button in the color of the country',
     },
     {
       type:'select',
-      label:'Country:',
-      name:'country',
-      selectValues:COUNTRIES,
+      label:'Region (default value):',
+      name:'region',
+      selectValues:REGIONS_BY_COUNTRY.Sweden,
+      selectValuesFunc:value=>REGIONS_BY_COUNTRY[value.country]??REGIONS_BY_COUNTRY.Sweden,
       required:true,
-      tooltip:'Events from same country will have button in the color of the country',
+      tooltip:'Events with same region is show in same calendar for that region',
     },
     {
         type:'text',
@@ -100,7 +102,7 @@ const fieldsCAL = [
       type:'text',
       label:'Name (first and last)',
       name:'name',
-      required:'true', 
+      required:true, 
       tooltip:'First and last name of the logged in user',
       placeholder:'Please enter your name'
   },
@@ -118,28 +120,29 @@ const fieldsCAL = [
     tooltip:'Phone number of the user',
   },
   {
-    type:'text',
-    label:'City:',
-    name:'city',
+    type:'select',
+    label:'Country (default value):',
+    name:'country',
+    selectValues:Object.keys(REGIONS_BY_COUNTRY),
     required:true,
-    tooltip:'Events with same city is show in same calendar for that city',
-    placeholder:'Please enter your city'
+    tooltip:'Events from same country will have button in the color of the country',
   },
   {
     type:'select',
-    label:'Region:',
+    label:'Region (default value):',
     name:'region',
-    selectValues:REGIONS,
+    selectValues:REGIONS_BY_COUNTRY.Sweden,
+    selectValuesFunc:value=>REGIONS_BY_COUNTRY[value.country]??REGIONS_BY_COUNTRY.Sweden,
     required:true,
     tooltip:'Events with same region is show in same calendar for that region',
   },
   {
-    type:'radio',
-    label:'Country:',
-    name:'country',
-    radioValues:COUNTRIES,
+    type:'text',
+    label:'City (default value):',
+    name:'city',
     required:true,
-    tooltip:'Events from same country will have button in the color of the country',
+    tooltip:'Events with same city is show in same calendar for that city',
+    placeholder:'Please enter your city'
   },
   {
     type:'checkbox',
@@ -149,11 +152,9 @@ const fieldsCAL = [
     //disabled:true,
   },
   {
-    // type:'rte',
-    type:EDITOR_TYPE.ACTIVE,
+    type:QUILL_EDITOR,
     label:'Description of DJ',
     name:'descriptionDJ',
-    //draftName:'draft_descriptionDJ',
     required:false,
     notHiddenIf:'isDiskjockey',
     maxlength:5000,
@@ -166,14 +167,12 @@ const fieldsCAL = [
     //disabled:true,
   },
   {
-    // type:'rte',
-    type:EDITOR_TYPE.ACTIVE,
+    type:QUILL_EDITOR,
     label:'Description of private teacher',
     name:'descriptionPT',
-    // draftMNdraftName:'draft_descriptionPT',
     required:false,
     notHiddenIf:'isPrivateTeacher',
-    maxlength:200,
+    maxlength:5000,
   },
   {
     type:'checkbox',
@@ -245,73 +244,83 @@ const fieldsCAL = [
 export default () => {
     const [sharedState, setSharedState] = useSharedState()
     const [value, setValue] = useState({})
-    const subdir = process.env.REACT_APP_IMAGES_USER_DIR // ='user'
+    const subdir = process.env.REACT_APP_IMAGES_USER_DIR 
     const navigate = useNavigate()
-    const {user} = useContext(AuthContext)
-    const signinEmail = user?.email?user.email:null
+    const {user} = useContext(AuthContext)  
+    const signinEmail = user?.email?user.email:undefined
+
     
     useEffect(()=>{
-      const handleReply = data => {
-        if (data.status === 'OK') {
-          setValue(data.result)
-          if (data.message) {
-              console.log('Message:' + data.message)
-          }
+      if (signinEmail?true:false) {
+
+        const handleResult = data => {
+          //alert('AppBar 0:' + JSON.stringify(result?result:'No result'))
+          if (data.status === 'OK') {
+            if (data.message) {
+              alert(data.message)
+            }
+            // getUser returns an sharedState object in data.result 
+            const result = data.result;
+            setValue({...value, ...result})
+          } else {
+            setValue({...sharedState, authLevel:4, productLevel:1, country:'Sweden', city:'Ankeborg', region:'Skåne', userName:'Kalle Anka'}) 
+            navigate('/myProfile')
+          } 
+        }
+        if (signinEmail) {
+          const irl = '/getUser?email=' +  signinEmail
+          serverFetchData(irl,  handleResult)
         } else {
-          alert('ERROR: Failed to fetch user')
+          alert('[MyProfile] ERROR: No email')
         }  
-      }
-      const irl = '/getUser?email=' +  signinEmail
-      serverFetchData(irl,  data=>handleReply(data))
+      } 
+
     }, [signinEmail])
-  
 
-    const handleSubmit = e => {
-        e.preventDefault()
-
-        const handleReplaceReply = reply => {
+    const handleReplaceReply = reply => {
           const data = reply.data?reply.data:reply
+          
           if (data.status === 'OK') {
             const rec = data?.list?data.list.find(it=>it.email === signinEmail):undefined
             if (rec?.name?rec.name:undefined) {
-                setSharedState({authLevel:sharedState.authLevel})
+                setSharedState({...sharedState, country:value.country, region:value.region, city:value.city})
                 // navigate(-1)
-                alert('You saved the profile successfully for user ' + (rec?.name?rec.name:'<Name undefined>'))
-            }  
-            alert('You saved the profile successfully for user ' + (value?.name?value.name:'<Name undefined>'))
+            } else {
+                setSharedState({...sharedState, country:'Sverige', region:'Stockholm', city:'Stockholm', authLevel:4})
+            }    
+            alert('Successful save of profile')
           } else {
-            alert('ERROR: Failed to save the profile')
+            alert('ERROR: Failed to save the profile for data:' + JSON.stringify(data))
           }
-        }
+    }
 
-        if (!!signinEmail) {
-          const backgroundImage = sharedState.backgroundImage?sharedState.backgroundImage:null
-          const borderStyle = sharedState.hasBorder?sharedState.borderStyle:'none'
+
+    const handleSubmit = e => {
+        e.preventDefault()
+        if (!signinEmail) {
+            navigate('/signin')
+        } else {
           let record = {...sharedState, 
               ...value, 
               email:signinEmail, 
-              backgroundImage,  
-              borderStyle, 
               creaTimestamp:undefined, 
               updTimestamp:undefined, 
+              profileImage:sharedState.profileImage?sharedState.profileImage:'UNDEFINED',
               authLevel:sharedState.authLevel,
               fetchRows:true,   
           }
-          //alert('Data:' + JSON.stringify(record))
           replaceRow(TBL_USER, record, reply=>handleReplaceReply(reply))
-        } else {
-          alert('Error: Dont save data since system cannot find any valid login email address')
-        }         
+        }   
     }
 
     const buttons=[
       {
-          type:'submit',
-          label:'Save',
-          style:BUTTON_STYLE.DEFAULT,
-          variant:'outlined',
-          color:'grey',
-          tooltip:'Save your profile',
+        type:'submit',
+        label:'Save',
+        style:BUTTON_STYLE.DEFAULT,
+        variant:'outlined',
+        color:'grey',
+        tooltip:'Save your profile',
       },    
       {
         type:'button',
@@ -327,37 +336,22 @@ export default () => {
     return(  
       <div style={styles.container}>
           <>
-            <h4 style={{color:'green', textAlign:'center'}}>Please choose your city, region and enter your name and save</h4>
-              {/*JSON.stringify(allUsers)*/}
-              {sharedState.authLevel >=4?   
-                <div className='columns m-4 is-centered'>
-                  <div className='column is-4'>
-                    <FormTemplate 
-                      fields={fieldsCAL} 
-                      value={value}
-                      setValue={setValue}
-                      buttons={buttons}
-                      handleSubmit={handleSubmit}
-                    />
-                  </div>
-                  <div className='column is-2'>
-                    <SelectUser email={signinEmail} sharedState={sharedState} setSharedState={setSharedState} /> 
-                    <MyImage tableName={TBL_USER} email={signinEmail} subdir={subdir} sharedState={sharedState} setSharedState={setSharedState} />
-                  </div>
+            <h4 style={{color:'green', textAlign:'center'}}>Please chose your city, region and enter your name and save</h4>
+            <div className='columns m-4 is-centered'>
+              <div className='column is-4'>
+                <FormTemplate 
+                  fields={fieldsCAL} 
+                  value={value}
+                  setValue={setValue}
+                  buttons={buttons}
+                  handleSubmit={handleSubmit}
+                />
+              </div>
+                <div className='column is-2'>
+                  {sharedState.authLevel >=4?<SelectUser email={signinEmail} sharedState={sharedState} setSharedState={setSharedState} />:null}
+                  <MyImage tableName={TBL_USER} email={signinEmail} subdir={subdir} sharedState={sharedState} setSharedState={setSharedState} />
                 </div>
-              :
-                <div className='columns m-4 is-centered'>
-                  <div className='column is-4'>
-                    <FormTemplate 
-                      fields={fieldsDJ} 
-                      value={value}
-                      setValue={setValue}
-                      buttons={buttons} 
-                      handleSubmit={handleSubmit}
-                    />
-                  </div>  
-                </div>  
-              }              
+            </div>              
           </>
     </div>
   )  

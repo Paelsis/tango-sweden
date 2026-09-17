@@ -2,8 +2,9 @@
 import React, {useState, useEffect, useCallback, useRef} from 'react';
 import {defaultDate} from '../services/functions'
 import TextArea from 'react-textarea-autosize';
-import {EDITOR_TYPE} from '../services/const'
+import {QUILL_EDITOR} from '../services/const'
 import QuillEditor from './QuillEditor';
+import { DEFAULT_COUNTRY, REGIONS_BY_COUNTRY } from '../services/regionsByCountry';
 
 const styles  = {
     textarea:{
@@ -15,7 +16,6 @@ const styles  = {
 // FormField 
 export default props => {
     const {fld, key, value, setValue, handleKeyPress, clearIndex} = props
-    const selectValues = fld.selectValues?fld.selectValues.map(it=>it.trim()):[]
     const label = fld.label?fld.label:''
     const handleChange = e => {
         setValue({...value, [e.target.name]:e.target.type==='checkbox'?e.target.checked?1:0:e.target.value})
@@ -33,7 +33,7 @@ export default props => {
     const handleChangeDate = e => {
         setValue({...value, [e.target.name]:e.target.value < 8?defaultDate():e.target.value});
     }    
-    const handleEditorChange = useCallback(html=>{setValue(value=>({...value, [fld.name]:html}))}, [])
+    const handleEditorChange = useCallback(html=>{setValue({...value, [fld.name]:html})}, [])
     const required = fld.required?true:false 
     const disabled = fld.disabledFunc?fld.disabledFunc(value):false
     const labelStyle={fontWeight:400, fontSize:16, ...props.labelStyle?props.labelStyle:{}}
@@ -112,6 +112,7 @@ export default props => {
                     </p> 
                 )
                 case 'select':
+                    const selectValues=fld.selectValuesFunc?fld.selectValuesFunc(value):fld.selectValues?fld.selectValues:[]
                     return(
                             <p>      
                             <label style={labelStyle}>
@@ -121,12 +122,13 @@ export default props => {
                             <select 
                                 key={key}
                                 name={fld.name} 
-                                value={value[fld.name]?value[fld.name]:''} 
+                                value={value[fld.name]?value[fld.name]:''}
+                                defaultValue={''}
                                 required={required} 
                                 disabled={disabled}
                                 onChange={handleChange}
                             >
-                                <option selected disabled value={""}>Välj</option>
+                                <option selected disabled>Choose region</option>
                                 {selectValues.map(val => <option value={val}>{val}</option>)}
                             </select>
                         </p>
@@ -146,7 +148,7 @@ export default props => {
                             style={styles.textarea}
                             key={key}
                             rows={fld.rows?fld.rows:5} 
-                            cols={fld.cols?fld.cols:40} 
+                            cols={fld.cols?fld.cols:35} 
                             maxlength={fld.maxlength}
                             name={fld.name} 
                             value={value[fld.name]?value[fld.name]:''} 
@@ -171,7 +173,7 @@ export default props => {
                                 value={value[fld.name]?value[fld.name]:''} 
                                 variant="default"
                                 borderRadius="medium"
-                                cols={fld.cols?fld.cols:40} 
+                                cols={fld.cols?fld.cols:35} 
                                 minRows={fld.minRows?fld.minRows:5}
                                 maxRows={fld.maxRows?fld.maxRows:400}
                                 maxlength={fld.maxlength}
@@ -184,7 +186,7 @@ export default props => {
                                 />
                         </p>
                         )    
-                case EDITOR_TYPE.QUILL:      
+                case QUILL_EDITOR:      
                         return (
                             <p className='content'>
                                 <label style={labelStyle}>
@@ -195,7 +197,7 @@ export default props => {
                                     key={key}
                                     html={value[fld.name]}
                                     clearIndex={clearIndex}
-                                    setHtml={handleEditorChange}
+                                    setHtml={html=>setValue(prevValue => ({...prevValue,[fld.name]: html}))}
                                 />
                             </p>
                         )    

@@ -6,6 +6,7 @@ import {Button, IconButton, Tooltip} from '@mui/material';
 import {serverFetchData} from '../services/serverFetch'
 import { COLORS, REGIONS, CALENDAR} from '../services/const'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import { getSrc } from '../services/functions';
 import AddIcon from '@mui/icons-material/Add';
 // import './Djs.css';
 
@@ -76,27 +77,18 @@ const styles = {
 }
 
 const viewUsersForRegion = (region, users, selectedUser, setSelectedUser, navigate) => {
-    const subdir = 'images/users'
-    const src = selectedUser?.urlImage?selectedUser.urlImage.includes('http')?selectedUser.urlImage:(apiBaseUrl + '/' + subdir + '/' + selectedUser.urlImage):undefined
-    const alt = selectedUser?.urlImage?('File ' + selectedUser.urlImage + ' not found'):'No image'
+    const profileImage = selectedUser?.profileImage?selectedUser.profileImage:undefined
+    const src = getSrc(profileImage)+ '?' + Date.now()
     const calendarType = 'DISKJOCKEY'
     const description = selectedUser?.descriptionDJ?selectedUser.descriptionDJ:selectedUser?.description?selectedUser.description:''
     const email = selectedUser?.email?selectedUser.email:'No email'
-    
+    const alt = 'Profile iImage not found (' + src + ' is missing)'
+        
     const goToCalendar = () => {
         if (selectedUser?.email?selectedUser.email:undefined) {
             navigate('/calendar/' + region + '/' + calendarType  + '/' + email)
         } else {
             alert('[PrivateLesson]:No email given for selected user')
-        }   
-    }
-    const addToCalendar = () => {
-        if (selectedUser?.email?selectedUser.email:undefined) {
-            const link = '/add/' + calendarType
-            alert(link)
-            navigate(link)
-        } else {
-            alert('[viewUsersForRegion]: WARNING: No selected user')
         }   
     }
     return(
@@ -143,7 +135,9 @@ const viewUsersForRegion = (region, users, selectedUser, setSelectedUser, naviga
                     </div>
                 </div>
                 <div className="column is-3" style={{textAlign:'left', paddingTop:40}}>
-                    <img src={src} alt={alt} />
+                    <img src={src} alt={src} />
+                    <p/>
+                    {/*<small style={{fontSize:8}}>{src}</small>*/}
                 </div>
             </div>    
         :null}
@@ -151,7 +145,7 @@ const viewUsersForRegion = (region, users, selectedUser, setSelectedUser, naviga
 )}
 
 
-// PrivateLesson
+// DJs
 export default () => {
     const [region, setRegion] = useState([])
     const [users, setUsers] = useState([])

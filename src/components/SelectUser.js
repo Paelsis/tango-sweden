@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from "react"
 import { useSharedState } from '../store';
-import { Navigate, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import firebaseApp from '../services/firebaseApp'
 import { getAuth, onAuthStateChanged} from 'firebase/auth'
 import {serverFetchData} from '../services/serverFetch'
